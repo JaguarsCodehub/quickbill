@@ -79,18 +79,20 @@ const LoginForm: React.FC = () => {
                     `Welcome, ${response.data.Tag1}`
                 );
 
-                const { CompanyID, CompanyName, Tag5 } = response.data;
+                const { CompanyID, CompanyName, Tag5, UserID } = response.data;
                 await AsyncStorage.multiSet([
                     ['CompanyID', CompanyID.toString()],
                     ['CompanyName', CompanyName],
                     ['Tag5', Tag5],
+                    ['UserID', UserID.toString()],
                 ]);
 
                 console.log('Data was added to AsyncStorage');
                 showToastWithGravityAndOffset('Welcome !');
                 // setUsername('');
                 // setPassword('');
-                console.log("Data:", response.data)
+                // console.log("Data:", response.data)
+                router.push('/(user)')
             } else {
                 throw new Error(response.data.msg || 'Login failed');
             }
@@ -123,7 +125,7 @@ const LoginForm: React.FC = () => {
     return (
         <View style={styles.container}>
             <View style={styles.card}>
-                <Text style={styles.title}>Watchman Login</Text>
+                <Text style={styles.title}>Login</Text>
                 <TextInput
                     style={[
                         styles.input,
