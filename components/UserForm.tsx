@@ -64,7 +64,7 @@ const LoginForm: React.FC = () => {
 
 
             const response = await axios.post(
-                `http://192.168.1.10:3000/login`,
+                `http://192.168.1.9:3000/login`,
                 {
                     username,
                     password,
@@ -89,9 +89,8 @@ const LoginForm: React.FC = () => {
 
                 console.log('Data was added to AsyncStorage');
                 showToastWithGravityAndOffset('Welcome !');
-                // setUsername('');
-                // setPassword('');
-                // console.log("Data:", response.data)
+                setUsername('');
+                setPassword('');
                 router.push('/(user)')
             } else {
                 throw new Error(response.data.msg || 'Login failed');

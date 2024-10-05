@@ -65,11 +65,11 @@ const User = () => {
                     groupCode: '000000023'
                 }),
             });
-
+            console.log(response)
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-
+            setFormData({ name: '', groupName: 'Sundry Debtors (Customers)', contactName: '', address1: '', address2: '', city: '', postalCode: '', state: '', country: '', gstNo: '' })
             const result = await response.json();
             Alert.alert('Success', `Customer added successfully. ID: ${result.customerId}, Code: ${result.code}`);
         } catch (error) {
@@ -81,7 +81,7 @@ const User = () => {
     // Sample group names, replace with your actual options
     const groupNames = [
         'Sundry Debtors (Customers)',
-        'Sundry Creditors (Suppliers)',
+        // 'Sundry Creditors (Suppliers)',
     ];
 
     return (
@@ -89,7 +89,7 @@ const User = () => {
             <Stack.Screen options={{ headerShown: false }} />
             <View style={styles.header}>
                 <Text style={styles.title}>New Account</Text>
-                <Ionicons name="person-add" size={24} color="#1E90FF" />
+                <Ionicons name="person-add" size={24} color="#000000" />
             </View>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.formContainer}>
@@ -129,11 +129,11 @@ const User = () => {
                 <View style={styles.asyncDataContainer}>
                     <Text style={styles.asyncDataTitle}>Current Session</Text>
                     <View style={styles.asyncDataRow}>
-                        <Ionicons name="business" size={20} color="#4169E1" />
+                        <Ionicons name="business" size={20} color="#000000" />
                         <Text style={styles.asyncDataText}>{asyncStorageData.CompanyName}</Text>
                     </View>
                     <View style={styles.asyncDataRow}>
-                        <Ionicons name="person" size={20} color="#4169E1" />
+                        <Ionicons name="person" size={20} color="#000000" />
                         <Text style={styles.asyncDataText}>User ID: {asyncStorageData.UserID}</Text>
                     </View>
                 </View>
@@ -145,7 +145,7 @@ const User = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFF',
+        backgroundColor: '#F5F5F5',
         marginTop: 50,
     },
     header: {
@@ -153,14 +153,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 20,
-        // backgroundColor: '#FFFFFF',
-        // borderBottomWidth: 1,
-        // borderBottomColor: '#E0E0E0',
+        backgroundColor: '#FFFFFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#000000',
     },
     title: {
         fontSize: 24,
         fontWeight: '700',
-        color: '#333333',
+        color: '#000000',
     },
     scrollContent: {
         padding: 20,
@@ -183,27 +183,22 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#333333',
+        color: '#000000',
         marginBottom: 8,
     },
     input: {
         backgroundColor: '#FFFFFF',
         borderRadius: 4,
-        borderColor: '#CCCCCC',
-        borderWidth: 1,
+        // borderColor: '#000000',
+        // borderWidth: 1,
         padding: 12,
         fontSize: 16,
-        color: '#333333',
-        // shadowColor: '#000',
-        // shadowOffset: { width: 0, height: 1 },
-        // shadowOpacity: 0.1,
-        // shadowRadius: 1,
-        // elevation: 2,
+        color: '#000000',
     },
     pickerContainer: {
         backgroundColor: '#FFFFFF',
         borderRadius: 4,
-        borderColor: '#CCCCCC',
+        borderColor: '#000000',
         borderWidth: 1,
         overflow: 'hidden',
         shadowColor: '#000',
@@ -217,8 +212,8 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     submitButton: {
-        backgroundColor: '#007AFF',
-        borderRadius: 4,
+        backgroundColor: '#000000',
+        borderRadius: 10,
         padding: 16,
         flexDirection: 'row',
         justifyContent: 'center',
@@ -241,6 +236,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 8,
         padding: 20,
+        borderColor: '#000000',
+        borderWidth: 1,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -250,7 +247,7 @@ const styles = StyleSheet.create({
     asyncDataTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#333333',
+        color: '#000000',
         marginBottom: 15,
     },
     asyncDataRow: {
@@ -260,7 +257,7 @@ const styles = StyleSheet.create({
     },
     asyncDataText: {
         fontSize: 16,
-        color: '#555555',
+        color: '#000000',
         marginLeft: 15,
     },
 });
