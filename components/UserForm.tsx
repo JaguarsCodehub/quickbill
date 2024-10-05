@@ -124,7 +124,7 @@ const LoginForm: React.FC = () => {
     return (
         <View style={styles.container}>
             <View style={styles.card}>
-                <Text style={styles.title}>Login</Text>
+                <Text style={styles.title}>Enter your Credentials</Text>
                 <TextInput
                     style={[
                         styles.input,
@@ -133,6 +133,7 @@ const LoginForm: React.FC = () => {
                     placeholder='Enter Your Username'
                     value={username}
                     onChangeText={setUsername}
+                    placeholderTextColor="#999"
                 />
                 {errors.userId && <Text style={styles.errorText}>{errors.userId}</Text>}
 
@@ -144,6 +145,7 @@ const LoginForm: React.FC = () => {
                     placeholder='Enter your Password'
                     value={password}
                     onChangeText={setPassword}
+                    placeholderTextColor="#999"
                     secureTextEntry
                 />
                 {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}

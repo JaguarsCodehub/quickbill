@@ -47,7 +47,7 @@ const User = () => {
 
     const handleSubmit = async () => {
         try {
-            const response = await fetch('http://192.168.1.10:3000/addCustomer', {
+            const response = await fetch('http://192.168.1.9:3000/addCustomer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -78,6 +78,7 @@ const User = () => {
         }
     };
 
+
     // Sample group names, replace with your actual options
     const groupNames = [
         'Sundry Debtors (Customers)',
@@ -88,7 +89,7 @@ const User = () => {
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
             <View style={styles.header}>
-                <Text style={styles.title}>New Account</Text>
+                <Text style={styles.title}>New Customer Account</Text>
                 <Ionicons name="person-add" size={24} color="#000000" />
             </View>
             <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -122,7 +123,7 @@ const User = () => {
                 </View>
 
                 <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                    <Text style={styles.submitButtonText}>Create Account</Text>
+                    <Text style={styles.submitButtonText}>Create Customer Account</Text>
                     <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
 
