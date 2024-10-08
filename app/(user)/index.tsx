@@ -27,6 +27,8 @@ const User = () => {
     });
 
     useEffect(() => {
+
+
         const fetchAsyncStorageData = async () => {
             try {
                 const keys = ['CompanyID', 'CompanyName', 'Tag5', 'UserID'];
@@ -85,6 +87,15 @@ const User = () => {
         // 'Sundry Creditors (Suppliers)',
     ];
 
+    // Add this array of states
+    const states = [
+        'ANDHRA PRADESH', 'ARUNACHAL PRADESH', 'ASSAM', 'BIHAR', 'CHHATTISGARH',
+        'GOA', 'GUJARAT', 'HARYANA', 'HIMACHAL PRADESH', 'JHARKHAND', 'KARNATAKA',
+        'KERALA', 'MADHYA PRADESH', 'MAHARASHTRA', 'MANIPUR', 'MEGHALAYA', 'MIZORAM',
+        'NAGALAND', 'ODISHA', 'PUNJAB', 'RAJASTHAN', 'SIKKIM', 'TAMIL NADU', 'TELANGANA',
+        'TRIPURA', 'UTTAR PRADESH', 'UTTARAKHAND', 'WEST BENGAL'
+    ];
+
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
@@ -106,6 +117,19 @@ const User = () => {
                                     >
                                         {groupNames.map((groupName) => (
                                             <Picker.Item key={groupName} label={groupName} value={groupName} />
+                                        ))}
+                                    </Picker>
+                                </View>
+                            ) : key === 'state' ? (
+                                <View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={value}
+                                        onValueChange={(itemValue) => handleInputChange(key, itemValue)}
+                                        style={styles.picker}
+                                    >
+                                        <Picker.Item label="Select a state" value="" />
+                                        {states.map((state) => (
+                                            <Picker.Item key={state} label={state} value={state} />
                                         ))}
                                     </Picker>
                                 </View>
