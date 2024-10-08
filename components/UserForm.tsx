@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -9,18 +9,42 @@ import {
     Platform,
     ToastAndroid,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingScreen from './LoadingScreen';
 
-
-const LoginForm: React.FC = () => {
+const UserForm: React.FC = () => {
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [year, setYear] = useState<string>('');
+    const [year, setYear] = useState<string>('23042403'); // Default to current year
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<{ userId?: string; password?: string }>({});
+
+    useEffect(() => {
+        const fetchAsyncStorageData = async () => {
+            try {
+                const selectedYear = await AsyncStorage.getItem('SelectedYear');
+                if (selectedYear) {
+                    setYear(selectedYear);
+                }
+            } catch (error) {
+                console.error('Error fetching year from AsyncStorage:', error);
+            }
+        };
+
+        fetchAsyncStorageData();
+    }, []);
+
+    const handleYearChange = async (selectedYear: string) => {
+        setYear(selectedYear);
+        try {
+            await AsyncStorage.setItem('SelectedYear', selectedYear);
+        } catch (error) {
+            console.error('Error saving year to AsyncStorage:', error);
+        }
+    };
 
     const showToastWithGravityAndOffset = (msg: string) => {
         ToastAndroid.showWithGravityAndOffset(
@@ -61,8 +85,6 @@ const LoginForm: React.FC = () => {
 
         setLoading(true);
         try {
-
-
             const response = await axios.post(
                 `http://192.168.1.9:3000/login`,
                 {
@@ -115,8 +137,6 @@ const LoginForm: React.FC = () => {
         }
     };
 
-
-
     if (loading) {
         return <LoadingScreen />;
     }
@@ -151,6 +171,20 @@ const LoginForm: React.FC = () => {
                 {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
                 <Text style={styles.label}>Select Year</Text>
+                <View style={styles.pickerContainer}>
+                    <Picker
+                        selectedValue={year}
+                        style={styles.picker}
+                        onValueChange={handleYearChange}
+                    >
+                        <Picker.Item label='01 APR 2018 - 31 MAR 2019' value='18041903' />
+                        <Picker.Item label='01 APR 2019 - 31 MAR 2020' value='19042003' />
+                        <Picker.Item label='01 APR 2020 - 31 MAR 2021' value='20042103' />
+                        <Picker.Item label='01 APR 2022 - 31 MAR 2023' value='22042303' />
+                        <Picker.Item label='01 APR 2023 - 31 MAR 2024' value='23042403' />
+                        <Picker.Item label='01 APR 2024 - 31 MAR 2025' value='24042503' />
+                    </Picker>
+                </View>
 
                 <TouchableOpacity style={styles.button} onPress={handleLogin}>
                     <Text style={styles.buttonText}>Login</Text>
@@ -204,10 +238,15 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     picker: {
-        height: 50,
+        height: 40,
         width: '100%',
+    },
+    pickerContainer: {
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
         marginBottom: 20,
-        backgroundColor: '#f1f1f1',
+        overflow: 'hidden',
     },
     button: {
         backgroundColor: 'black',
@@ -222,4 +261,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default LoginForm;
+export default UserForm;

@@ -27,8 +27,6 @@ const User = () => {
     });
 
     useEffect(() => {
-
-
         const fetchAsyncStorageData = async () => {
             try {
                 const keys = ['CompanyID', 'CompanyName', 'Tag5', 'UserID'];
@@ -47,36 +45,7 @@ const User = () => {
         setFormData(prevData => ({ ...prevData, [field]: value }));
     };
 
-    const validateInputs = () => {
-        const errors = [];
-
-        if (!formData.name.trim()) errors.push("Name is required");
-        if (!formData.contactName.trim()) errors.push("Contact Name is required");
-        if (!formData.address1.trim()) errors.push("Address Line 1 is required");
-        if (!formData.city.trim()) errors.push("City is required");
-        if (!formData.postalCode.trim()) errors.push("Postal Code is required");
-        if (!formData.state) errors.push("State is required");
-        if (!formData.country.trim()) errors.push("Country is required");
-
-        // GST number validation
-        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-        if (formData.gstNo.trim()) {
-            if (!gstRegex.test(formData.gstNo.trim())) {
-                errors.push("Invalid GST Number format");
-            }
-        }
-
-        return errors;
-    };
-
     const handleSubmit = async () => {
-        const validationErrors = validateInputs();
-
-        if (validationErrors.length > 0) {
-            Alert.alert('Validation Error', validationErrors.join('\n'));
-            return;
-        }
-
         try {
             const response = await fetch('http://192.168.1.9:3000/addCustomer', {
                 method: 'POST',
@@ -116,15 +85,6 @@ const User = () => {
         // 'Sundry Creditors (Suppliers)',
     ];
 
-    // Add this array of states
-    const states = [
-        'ANDHRA PRADESH', 'ARUNACHAL PRADESH', 'ASSAM', 'BIHAR', 'CHHATTISGARH',
-        'GOA', 'GUJARAT', 'HARYANA', 'HIMACHAL PRADESH', 'JHARKHAND', 'KARNATAKA',
-        'KERALA', 'MADHYA PRADESH', 'MAHARASHTRA', 'MANIPUR', 'MEGHALAYA', 'MIZORAM',
-        'NAGALAND', 'ODISHA', 'PUNJAB', 'RAJASTHAN', 'SIKKIM', 'TAMIL NADU', 'TELANGANA',
-        'TRIPURA', 'UTTAR PRADESH', 'UTTARAKHAND', 'WEST BENGAL'
-    ];
-
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
@@ -146,19 +106,6 @@ const User = () => {
                                     >
                                         {groupNames.map((groupName) => (
                                             <Picker.Item key={groupName} label={groupName} value={groupName} />
-                                        ))}
-                                    </Picker>
-                                </View>
-                            ) : key === 'state' ? (
-                                <View style={styles.pickerContainer}>
-                                    <Picker
-                                        selectedValue={value}
-                                        onValueChange={(itemValue) => handleInputChange(key, itemValue)}
-                                        style={styles.picker}
-                                    >
-                                        <Picker.Item label="Select a state" value="" />
-                                        {states.map((state) => (
-                                            <Picker.Item key={state} label={state} value={state} />
                                         ))}
                                     </Picker>
                                 </View>
