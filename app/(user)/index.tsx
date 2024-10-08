@@ -47,7 +47,33 @@ const User = () => {
         setFormData(prevData => ({ ...prevData, [field]: value }));
     };
 
+    const validateInputs = () => {
+        const errors = [];
+
+        if (!formData.name.trim()) errors.push("Name is required");
+        if (!formData.contactName.trim()) errors.push("Contact Name is required");
+        if (!formData.address1.trim()) errors.push("Address Line 1 is required");
+        if (!formData.city.trim()) errors.push("City is required");
+        if (!formData.postalCode.trim()) errors.push("Postal Code is required");
+        if (!formData.state) errors.push("State is required");
+        if (!formData.country.trim()) errors.push("Country is required");
+
+        // Basic GST number validation (assuming it should be 15 characters)
+        if (formData.gstNo.trim() && formData.gstNo.trim().length !== 15) {
+            errors.push("GST Number should be 15 characters long");
+        }
+
+        return errors;
+    };
+
     const handleSubmit = async () => {
+        const validationErrors = validateInputs();
+
+        if (validationErrors.length > 0) {
+            Alert.alert('Validation Error', validationErrors.join('\n'));
+            return;
+        }
+
         try {
             const response = await fetch('http://192.168.1.9:3000/addCustomer', {
                 method: 'POST',
