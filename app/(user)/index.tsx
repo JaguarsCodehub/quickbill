@@ -58,9 +58,12 @@ const User = () => {
         if (!formData.state) errors.push("State is required");
         if (!formData.country.trim()) errors.push("Country is required");
 
-        // Basic GST number validation (assuming it should be 15 characters)
-        if (formData.gstNo.trim() && formData.gstNo.trim().length !== 15) {
-            errors.push("GST Number should be 15 characters long");
+        // GST number validation
+        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+        if (formData.gstNo.trim()) {
+            if (!gstRegex.test(formData.gstNo.trim())) {
+                errors.push("Invalid GST Number format");
+            }
         }
 
         return errors;
