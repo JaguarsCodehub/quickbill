@@ -92,6 +92,8 @@ const CreateOrder = () => {
     const [nextSerial, setNextSerial] = useState<string>('');
     const [currentDate, setCurrentDate] = useState<string>('');
     const [quantity, setQuantity] = useState<string>('1');
+    const [rate, setRate] = useState<string>('');
+    const [value, setValue] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
@@ -151,11 +153,11 @@ const CreateOrder = () => {
         if (!selectedItem) return null;
 
         const qty = parseFloat(quantity) || 0;
-        const rate = parseFloat(selectedItem.SalRate.toString()) || 0;
-        const value = qty * rate;
+        const itemRate = parseFloat(rate) || parseFloat(selectedItem.SalRate.toString()) || 0;
+        const itemValue = parseFloat(value) || (qty * itemRate);
         const discPercent = 0; // You may want to add a state for this
-        const discAmount = (value * discPercent) / 100;
-        const taxable = value - discAmount;
+        const discAmount = (itemValue * discPercent) / 100;
+        const taxable = itemValue - discAmount;
         const taxRate = 0.18; // Assuming 18% tax, you may want to fetch this from the server
         const taxAmount = taxable * taxRate;
         const totalAmount = taxable + taxAmount;
@@ -163,8 +165,8 @@ const CreateOrder = () => {
         return {
             HSN: selectedItem.HSNCode || 'N/A',
             Qty: qty.toFixed(2),
-            Rate: rate.toFixed(2),
-            Value: value.toFixed(2),
+            Rate: itemRate.toFixed(2),
+            Value: itemValue.toFixed(2),
             'Disc(%)': discPercent.toFixed(2),
             Taxable: taxable.toFixed(2),
             TaxCode: selectedItem.TaxCode || 'N/A',
@@ -174,6 +176,25 @@ const CreateOrder = () => {
     };
 
     const itemValues = calculateItemValues();
+
+    const updateRate = (newRate: string) => {
+        setRate(newRate);
+        if (selectedItem) {
+            const qty = parseFloat(quantity) || 0;
+            const itemRate = parseFloat(newRate) || 0;
+            setValue((qty * itemRate).toFixed(2));
+        }
+    };
+
+    const updateValue = (newValue: string) => {
+        setValue(newValue);
+        if (selectedItem) {
+            const qty = parseFloat(quantity) || 0;
+            if (qty !== 0) {
+                setRate((parseFloat(newValue) / qty).toFixed(2));
+            }
+        }
+    };
 
     if (isLoading) {
         return (
@@ -232,7 +253,11 @@ const CreateOrder = () => {
                     <Text style={styles.sectionTitle}>Item</Text>
                     <SearchablePicker
                         items={items}
-                        onSelect={setSelectedItem}
+                        onSelect={(item) => {
+                            setSelectedItem(item);
+                            setRate(item.SalRate.toString());
+                            setValue((parseFloat(quantity) * item.SalRate).toFixed(2));
+                        }}
                         placeholder="Search items..."
                         labelKey="ItemName"
                         valueKey="ItemCode"
@@ -242,15 +267,41 @@ const CreateOrder = () => {
                         <View style={styles.itemDetails}>
                             <Text style={styles.itemName}>{selectedItem.ItemName}</Text>
                             <Text style={styles.itemCode}>Code: {selectedItem.ItemCode}</Text>
-                            <View style={styles.quantityContainer}>
-                                <Ionicons name="remove-circle-outline" size={24} color="#007AFF" onPress={() => setQuantity((prev) => (parseInt(prev) - 1).toString())} />
-                                <TextInput
-                                    style={styles.quantityInput}
-                                    value={quantity}
-                                    onChangeText={setQuantity}
-                                    keyboardType="numeric"
-                                />
-                                <Ionicons name="add-circle-outline" size={24} color="#007AFF" onPress={() => setQuantity((prev) => (parseInt(prev) + 1).toString())} />
+                            <View style={styles.inputRow}>
+                                <View style={styles.boxinputContainer}>
+                                    <Text style={styles.inputLabel}>Quantity</Text>
+                                    <View style={styles.quantityContainer}>
+                                        <Ionicons name="remove-circle-outline" size={24} color="#007AFF" onPress={() => setQuantity((prev) => (Math.max(1, parseInt(prev) - 1)).toString())} />
+                                        <TextInput
+                                            style={styles.quantityInput}
+                                            value={quantity}
+                                            onChangeText={(text) => {
+                                                setQuantity(text);
+                                                setValue((parseFloat(text) * parseFloat(rate)).toFixed(2));
+                                            }}
+                                            keyboardType="numeric"
+                                        />
+                                        <Ionicons name="add-circle-outline" size={24} color="#007AFF" onPress={() => setQuantity((prev) => (parseInt(prev) + 1).toString())} />
+                                    </View>
+                                </View>
+                                <View style={styles.boxinputContainer}>
+                                    <Text style={styles.inputLabel}>Rate</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        value={rate}
+                                        onChangeText={updateRate}
+                                        keyboardType="numeric"
+                                    />
+                                </View>
+                                <View style={styles.boxinputContainer}>
+                                    <Text style={styles.inputLabel}>Value</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        value={value}
+                                        onChangeText={updateValue}
+                                        keyboardType="numeric"
+                                    />
+                                </View>
                             </View>
                             {itemValues && (
                                 <View style={styles.itemValuesContainer}>
@@ -389,20 +440,42 @@ const styles = StyleSheet.create({
         color: '#8E8E93',
         marginTop: 4,
     },
-    quantityContainer: {
+    inputRow: {
         flexDirection: 'row',
-        alignItems: 'center',
+        justifyContent: 'space-between',
         marginTop: 12,
     },
-    quantityInput: {
-        width: 50,
+    boxinputContainer: {
+        flex: 1,
+        marginHorizontal: 4,
+    },
+    inputLabel: {
+        fontSize: 14,
+        color: '#8E8E93',
+        marginBottom: 4,
+    },
+    input: {
         height: 40,
         borderWidth: 1,
         borderColor: '#E5E5EA',
         borderRadius: 8,
+        paddingHorizontal: 8,
+        fontSize: 16,
+    },
+    quantityContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#E5E5EA',
+        borderRadius: 8,
+        paddingHorizontal: 8,
+    },
+    quantityInput: {
+        height: 40,
+        width: 40,
         textAlign: 'center',
         fontSize: 16,
-        marginHorizontal: 12,
     },
     itemValuesContainer: {
         marginTop: 16,
