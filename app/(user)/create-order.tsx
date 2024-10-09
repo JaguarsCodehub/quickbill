@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -88,17 +88,28 @@ const CreateOrder = () => {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [items, setItems] = useState<Item[]>([]);
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
     const [nextSerial, setNextSerial] = useState<string>('');
     const [currentDate, setCurrentDate] = useState<string>('');
-    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
     const [quantity, setQuantity] = useState<string>('1');
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        fetchCustomers();
-        fetchItems();
-        setCurrentDate(new Date().toISOString().split('T')[0]); // Set current date
+        fetchData();
     }, []);
 
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            await Promise.all([fetchCustomers(), fetchItems()]);
+            setCurrentDate(new Date().toISOString().split('T')[0]);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // You might want to show an error message to the user here
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const fetchCustomers = async () => {
         try {
@@ -111,6 +122,7 @@ const CreateOrder = () => {
             setCustomers(response.data);
         } catch (error) {
             console.error('Error fetching customers:', error);
+            throw error;
         }
     };
 
@@ -131,6 +143,7 @@ const CreateOrder = () => {
             setNextSerial(response.data.nextSerial);
         } catch (error) {
             console.error('Error fetching items:', error);
+            throw error;
         }
     };
 
@@ -161,6 +174,15 @@ const CreateOrder = () => {
     };
 
     const itemValues = calculateItemValues();
+
+    if (isLoading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#007AFF" />
+                <Text style={styles.loadingText}>Loading order data...</Text>
+            </View>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -254,8 +276,6 @@ const CreateOrder = () => {
 };
 
 export default CreateOrder;
-
-const windowWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
     container: {
@@ -417,5 +437,16 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         marginLeft: 8,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F2F2F7',
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#007AFF',
     },
 });
