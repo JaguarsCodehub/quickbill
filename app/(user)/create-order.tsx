@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Stack } from 'expo-router';
 
 interface Customer {
     CustomerID: number;
     CustomerName: string;
     // Add other fields as needed
 }
+
 
 interface Item {
     ItemID: number;
@@ -24,13 +27,15 @@ const SearchablePicker = ({
     onSelect,
     placeholder,
     labelKey,
-    valueKey
+    valueKey,
+    icon
 }: {
     items: any[],
     onSelect: (item: any) => void,
     placeholder: string,
     labelKey: string,
-    valueKey: string
+    valueKey: string,
+    icon: string
 }) => {
     const [query, setQuery] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
@@ -42,16 +47,19 @@ const SearchablePicker = ({
 
     return (
         <View style={styles.pickerContainer}>
-            <TextInput
-                style={styles.searchInput}
-                placeholder={placeholder}
-                value={query}
-                onChangeText={(text) => {
-                    setQuery(text);
-                    setShowDropdown(true);
-                }}
-                onFocus={() => setShowDropdown(true)}
-            />
+            <View style={styles.inputContainer}>
+                <Ionicons name={icon as any} size={24} color="#007AFF" style={styles.inputIcon} />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder={placeholder}
+                    value={query}
+                    onChangeText={(text) => {
+                        setQuery(text);
+                        setShowDropdown(true);
+                    }}
+                    onFocus={() => setShowDropdown(true)}
+                />
+            </View>
             {showDropdown && (
                 <FlatList
                     data={filteredItems}
@@ -65,7 +73,7 @@ const SearchablePicker = ({
                                 setShowDropdown(false);
                             }}
                         >
-                            <Text>{item[labelKey]} - {item[valueKey]}</Text>
+                            <Text style={styles.dropdownItemText}>{item[labelKey]} - {item[valueKey]}</Text>
                         </TouchableOpacity>
                     )}
                     style={styles.dropdown}
@@ -90,6 +98,7 @@ const CreateOrder = () => {
         fetchItems();
         setCurrentDate(new Date().toISOString().split('T')[0]); // Set current date
     }, []);
+
 
     const fetchCustomers = async () => {
         try {
@@ -154,157 +163,259 @@ const CreateOrder = () => {
     const itemValues = calculateItemValues();
 
     return (
-        <ScrollView style={styles.container} nestedScrollEnabled={true}>
-            <Text style={styles.title}>Sales Order Entry</Text>
+        <SafeAreaView style={styles.container}>
+            <Stack.Screen options={{ headerTitle: 'New Order' }} />
+            <ScrollView nestedScrollEnabled={true}>
+                <Text style={styles.title}>New Order</Text>
 
-            <View style={styles.headerInfo}>
-                <Text style={styles.headerText}>Date: {currentDate}</Text>
-                <Text style={styles.headerText}>Doc No: {nextSerial}</Text>
-            </View>
+                <View style={styles.card}>
+                    <View style={styles.headerInfo}>
+                        <View style={styles.headerItem}>
+                            <Ionicons name="calendar-outline" size={24} color="#007AFF" />
+                            <Text style={styles.headerText}>Order Date:</Text>
+                            <Text style={styles.headerValue}>{currentDate}</Text>
+                        </View>
+                        <View style={styles.headerItem}>
+                            <Ionicons name="document-text-outline" size={24} color="#007AFF" />
+                            <Text style={styles.headerText}>DocNo:</Text>
+                            <Text style={styles.headerValue}>{nextSerial}</Text>
+                        </View>
+                        <View style={styles.headerItem}>
+                            <Ionicons name="document-text-outline" size={24} color="#007AFF" />
+                            <Text style={styles.headerText}>Order No:</Text>
+                            <Text style={styles.headerValue}>SOR/{nextSerial}</Text>
+                        </View>
+                    </View>
+                </View>
 
-            <Text style={styles.sectionTitle}>Select Customer</Text>
-            <SearchablePicker
-                items={customers}
-                onSelect={setSelectedCustomer}
-                placeholder="Search and select a customer..."
-                labelKey="CustomerName"
-                valueKey="CustomerID"
-            />
-            {selectedCustomer && (
-                <Text style={styles.selectedCustomer}>
-                    Selected: {selectedCustomer.CustomerName}
-                </Text>
-            )}
-
-            <Text style={styles.sectionTitle}>Select Item</Text>
-            <SearchablePicker
-                items={items}
-                onSelect={setSelectedItem}
-                placeholder="Search and select an item..."
-                labelKey="ItemName"
-                valueKey="ItemCode"
-            />
-            {selectedItem && (
-                <View style={styles.itemDetails}>
-                    <Text style={styles.itemName}>{selectedItem.ItemName}</Text>
-                    <Text style={styles.itemCode}>Code: {selectedItem.ItemCode}</Text>
-                    <TextInput
-                        style={styles.quantityInput}
-                        placeholder="Quantity"
-                        value={quantity}
-                        onChangeText={setQuantity}
-                        keyboardType="numeric"
+                <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>Customer</Text>
+                    <SearchablePicker
+                        items={customers}
+                        onSelect={setSelectedCustomer}
+                        placeholder="Search customers..."
+                        labelKey="CustomerName"
+                        valueKey="CustomerID"
+                        icon="person-outline"
                     />
-                    {itemValues && (
-                        <View style={styles.itemValuesContainer}>
-                            {Object.entries(itemValues).map(([key, value]) => (
-                                <View key={key} style={styles.itemValue}>
-                                    <Text style={styles.itemValueLabel}>{key}:</Text>
-                                    <Text style={styles.itemValueText}>{value}</Text>
-                                </View>
-                            ))}
+                    {selectedCustomer && (
+                        <View style={styles.selectedInfo}>
+                            <Ionicons name="checkmark-circle" size={24} color="#34C759" />
+                            <Text style={styles.selectedInfoText}>{selectedCustomer.CustomerName}</Text>
                         </View>
                     )}
                 </View>
-            )}
-        </ScrollView>
+
+                <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>Item</Text>
+                    <SearchablePicker
+                        items={items}
+                        onSelect={setSelectedItem}
+                        placeholder="Search items..."
+                        labelKey="ItemName"
+                        valueKey="ItemCode"
+                        icon="cube-outline"
+                    />
+                    {selectedItem && (
+                        <View style={styles.itemDetails}>
+                            <Text style={styles.itemName}>{selectedItem.ItemName}</Text>
+                            <Text style={styles.itemCode}>Code: {selectedItem.ItemCode}</Text>
+                            <View style={styles.quantityContainer}>
+                                <Ionicons name="remove-circle-outline" size={24} color="#007AFF" onPress={() => setQuantity((prev) => (parseInt(prev) - 1).toString())} />
+                                <TextInput
+                                    style={styles.quantityInput}
+                                    value={quantity}
+                                    onChangeText={setQuantity}
+                                    keyboardType="numeric"
+                                />
+                                <Ionicons name="add-circle-outline" size={24} color="#007AFF" onPress={() => setQuantity((prev) => (parseInt(prev) + 1).toString())} />
+                            </View>
+                            {itemValues && (
+                                <View style={styles.itemValuesContainer}>
+                                    {Object.entries(itemValues).map(([key, value]) => (
+                                        <View key={key} style={styles.itemValue}>
+                                            <Text style={styles.itemValueLabel}>{key}</Text>
+                                            <Text style={styles.itemValueText}>{value}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
+                        </View>
+                    )}
+                </View>
+
+                <TouchableOpacity style={styles.addButton}>
+                    <Ionicons name="add" size={24} color="white" />
+                    <Text style={styles.addButtonText}>Add to Order</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 
 export default CreateOrder;
 
+const windowWidth = Dimensions.get('window').width;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        backgroundColor: '#F2F2F7',
     },
     title: {
-        fontSize: 24,
+        fontSize: 34,
         fontWeight: 'bold',
+        color: '#000',
+        marginTop: 20,
         marginBottom: 20,
+        marginLeft: 20,
     },
-    pickerContainer: {
-        marginBottom: 20,
-    },
-    searchInput: {
-        height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
-        paddingHorizontal: 10,
-    },
-    dropdown: {
-        maxHeight: 200,
-        borderColor: 'gray',
-        borderWidth: 1,
-        borderTopWidth: 0,
-    },
-    dropdownItem: {
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-    selectedCustomer: {
-        marginTop: 10,
-        fontSize: 16,
+    card: {
+        backgroundColor: 'white',
+        borderRadius: 12,
+        padding: 16,
+        marginHorizontal: 16,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     headerInfo: {
+        flexDirection: 'column',
+    },
+    headerItem: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
+        alignItems: 'center',
+        marginBottom: 12,
+        flexWrap: 'wrap',
     },
     headerText: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: '600',
+        color: '#007AFF',
+        marginLeft: 8,
+        marginRight: 4,
+    },
+    headerValue: {
+        fontSize: 16,
+        fontWeight: '400',
+        color: '#000',
     },
     sectionTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
-        marginTop: 20,
-        marginBottom: 10,
+        fontWeight: '600',
+        color: '#000',
+        marginBottom: 12,
     },
-    itemContainer: {
+    pickerContainer: {
+        marginBottom: 12,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#E5E5EA',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+    },
+    inputIcon: {
+        marginRight: 8,
+    },
+    searchInput: {
+        flex: 1,
+        height: 40,
+        fontSize: 16,
+    },
+    dropdown: {
+        maxHeight: 200,
+        borderColor: '#E5E5EA',
+        borderWidth: 1,
+        borderTopWidth: 0,
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
+    },
+    dropdownItem: {
+        padding: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-        paddingVertical: 10,
+        borderBottomColor: '#E5E5EA',
+    },
+    dropdownItemText: {
+        fontSize: 16,
+        color: '#000',
+    },
+    selectedInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    selectedInfoText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#34C759',
+        marginLeft: 8,
+    },
+    itemDetails: {
+        marginTop: 12,
     },
     itemName: {
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#000',
     },
     itemCode: {
         fontSize: 14,
-        color: '#666',
+        color: '#8E8E93',
+        marginTop: 4,
     },
-    itemPrice: {
-        fontSize: 14,
-        color: '#333',
-    },
-    itemDetails: {
-        marginTop: 20,
-        padding: 10,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 5,
+    quantityContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 12,
     },
     quantityInput: {
+        width: 50,
         height: 40,
-        borderColor: 'gray',
         borderWidth: 1,
-        marginTop: 10,
-        paddingHorizontal: 10,
+        borderColor: '#E5E5EA',
+        borderRadius: 8,
+        textAlign: 'center',
+        fontSize: 16,
+        marginHorizontal: 12,
     },
     itemValuesContainer: {
-        marginTop: 10,
-        paddingBottom: 100,
+        marginTop: 16,
     },
     itemValue: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 5,
+        marginBottom: 8,
     },
     itemValueLabel: {
-        fontWeight: 'bold',
+        fontSize: 14,
+        color: '#8E8E93',
     },
     itemValueText: {
-        marginLeft: 10,
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#000',
+    },
+    addButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#007AFF',
+        borderRadius: 12,
+        padding: 16,
+        marginHorizontal: 16,
+        marginTop: 16,
+        marginBottom: 32,
+    },
+    addButtonText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: '600',
+        marginLeft: 8,
     },
 });
