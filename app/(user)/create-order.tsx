@@ -162,6 +162,7 @@ const CreateOrder = () => {
                 <Text style={styles.headerText}>Doc No: {nextSerial}</Text>
             </View>
 
+            <Text style={styles.sectionTitle}>Select Customer</Text>
             <SearchablePicker
                 items={customers}
                 onSelect={setSelectedCustomer}
