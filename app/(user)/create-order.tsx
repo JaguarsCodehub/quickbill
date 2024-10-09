@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
+import { Table, Row } from 'react-native-table-component';
+import { useRouter } from 'expo-router';
 
 interface Customer {
     CustomerID: number;
     CustomerName: string;
+    Code: string;
     // Add other fields as needed
 }
 
@@ -20,6 +23,44 @@ interface Item {
     HSNCode: string;
     TaxCode: string;
     // Add other fields as needed
+}
+
+interface OrderItem extends Item {
+    UTGSTTaxCode: any;
+    IGSTTaxCode: any;
+    GSTTaxCode: any;
+    TaxCategory: any;
+    Qty: number;
+    Rate: number;
+    Value: number;
+    Disc: number;
+    Taxable: number;
+    TaxAmt: number;
+    Amount: number;
+}
+
+interface OrderItemSubmit {
+    ItemID: string;
+    ItemCode: string;
+    ItemName: string;
+    HSNCode: string;
+    TaxCategory: string;
+    GSTTaxCode: string;
+    IGSTTaxCode: string;
+    UTGSTTaxCode: string;
+    Qty: number;
+    Rate: number;
+    Value: number;
+    Disc: number;
+    Taxable: number;
+    TaxAmt: number;
+    Amount: number;
+}
+
+interface OrderSubmit {
+    CustomerCode: string;
+    Items: OrderItemSubmit[];
+    // Add other order fields as needed
 }
 
 const SearchablePicker = ({
@@ -95,6 +136,8 @@ const CreateOrder = () => {
     const [rate, setRate] = useState<string>('');
     const [value, setValue] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+    const router = useRouter();
 
     useEffect(() => {
         fetchData();
@@ -163,7 +206,7 @@ const CreateOrder = () => {
         const totalAmount = taxable + taxAmount;
 
         return {
-            HSN: selectedItem.HSNCode || 'N/A',
+            // HSN: selectedItem.HSNCode || 'N/A',
             Qty: qty.toFixed(2),
             Rate: itemRate.toFixed(2),
             Value: itemValue.toFixed(2),
@@ -193,6 +236,129 @@ const CreateOrder = () => {
             if (qty !== 0) {
                 setRate((parseFloat(newValue) / qty).toFixed(2));
             }
+        }
+    };
+
+    const addItemToOrder = () => {
+        if (!selectedItem) return;
+
+        const newItem: OrderItem = {
+            ...selectedItem,
+            Qty: parseFloat(quantity),
+            Rate: parseFloat(rate),
+            Value: parseFloat(value),
+            Disc: 0, // You may want to add a discount input field
+            Taxable: parseFloat(itemValues?.Taxable || '0'),
+            TaxAmt: parseFloat(itemValues?.TaxAmt || '0'),
+            Amount: parseFloat(itemValues?.Amount || '0'),
+            UTGSTTaxCode: undefined,
+            IGSTTaxCode: undefined,
+            GSTTaxCode: undefined,
+            TaxCategory: undefined
+        };
+
+        setOrderItems([...orderItems, newItem]);
+
+        // Reset item selection
+        setSelectedItem(null);
+        setQuantity('1');
+        setRate('');
+        setValue('');
+    };
+
+    const removeItemFromOrder = (index: number) => {
+        const newOrderItems = [...orderItems];
+        newOrderItems.splice(index, 1);
+        setOrderItems(newOrderItems);
+    };
+
+    const calculateOrderSummary = () => {
+        let totalValueAmount = 0;
+        let totalDiscountAmount = 0;
+        let totalTaxableAmount = 0;
+        let totalCGSTAmount = 0;
+        let totalSGSTAmount = 0;
+        let totalIGSTAmount = 0;
+        let totalTaxAmount = 0;
+        let totalAmount = 0;
+        let totalGoodsQty = 0;
+        let totalServicesQty = 0;
+
+        orderItems.forEach(item => {
+            totalValueAmount += item.Value;
+            totalDiscountAmount += item.Disc;
+            totalTaxableAmount += item.Taxable;
+            // Assuming CGST and SGST are half of the total tax each
+            totalCGSTAmount += item.TaxAmt / 2;
+            totalSGSTAmount += item.TaxAmt / 2;
+            totalTaxAmount += item.TaxAmt;
+            totalAmount += item.Amount;
+            // Assuming all items are goods for this example
+            totalGoodsQty += item.Qty;
+        });
+
+        return {
+            totalValueAmount,
+            totalDiscountAmount,
+            totalTaxableAmount,
+            totalCGSTAmount,
+            totalSGSTAmount,
+            totalIGSTAmount,
+            totalTaxAmount,
+            totalAmount,
+            totalGoodsQty,
+            totalServicesQty
+        };
+    };
+
+    const handleSubmit = async () => {
+        if (!selectedCustomer || orderItems.length === 0) {
+            Alert.alert('Error', 'Please select a customer and add at least one item to the order.');
+            return;
+        }
+
+        const orderSubmit: OrderSubmit = {
+            CustomerCode: selectedCustomer.Code,
+            Items: orderItems.map(item => ({
+                ItemID: String(item.ItemID),
+                ItemCode: item.ItemCode,
+                ItemName: item.ItemName,
+                HSNCode: item.HSNCode,
+                TaxCategory: item.TaxCategory,
+                GSTTaxCode: item.GSTTaxCode,
+                IGSTTaxCode: item.IGSTTaxCode,
+                UTGSTTaxCode: item.UTGSTTaxCode,
+                Qty: item.Qty,
+                Rate: item.Rate,
+                Value: item.Value,
+                Disc: item.Disc,
+                Taxable: item.Taxable,
+                TaxAmt: item.TaxAmt,
+                Amount: item.Amount,
+            })),
+            // Add other order fields as needed
+        };
+
+        try {
+            // const response = await fetch('YOUR_API_ENDPOINT_HERE', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(orderSubmit),
+            // });
+
+            // if (!response.ok) {
+            //     throw new Error('Failed to submit order');
+            // }
+
+            console.log("Submitted Order", orderSubmit);
+
+            Alert.alert('Success', 'Order submitted successfully!');
+            // router.push('/orders'); // Navigate to orders page or wherever appropriate
+        } catch (error) {
+            console.error('Error submitting order:', error);
+            Alert.alert('Error', 'Failed to submit order. Please try again.');
         }
     };
 
@@ -317,10 +483,95 @@ const CreateOrder = () => {
                     )}
                 </View>
 
-                <TouchableOpacity style={styles.addButton}>
+                <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>Order Items</Text>
+                    {orderItems.length > 0 ? (
+                        <View style={styles.tableContainer}>
+                            <Table borderStyle={{ borderWidth: 1, borderColor: '#E5E5EA' }}>
+                                <Row
+                                    data={['Item Name', 'Qty', 'Rate', 'Amount', 'Action']}
+                                    style={styles.tableHeader}
+                                    textStyle={styles.tableHeaderText}
+                                />
+                                {orderItems.map((item, index) => (
+                                    <Row
+                                        key={index}
+                                        data={[
+                                            item.ItemName,
+                                            item.Qty.toString(),
+                                            item.Rate.toFixed(2),
+                                            item.Amount.toFixed(2),
+                                            <TouchableOpacity onPress={() => removeItemFromOrder(index)}>
+                                                <Ionicons name="trash-outline" size={24} color="#FF3B30" />
+                                            </TouchableOpacity>
+                                        ]}
+                                        style={index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd}
+                                        textStyle={styles.tableRowText}
+                                    />
+                                ))}
+                            </Table>
+                        </View>
+                    ) : (
+                        <Text style={styles.noItemsText}>No items added to the order yet.</Text>
+                    )}
+                </View>
+
+                <TouchableOpacity style={styles.addButton} onPress={addItemToOrder}>
                     <Ionicons name="add" size={24} color="white" />
                     <Text style={styles.addButtonText}>Add to Order</Text>
                 </TouchableOpacity>
+
+                <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>Order Summary</Text>
+                    {/* <View style={styles.summaryHeader}>
+                        <Text style={styles.summaryHeaderText}>Summary Goods Total Qty: {calculateOrderSummary().totalGoodsQty.toFixed(2)}</Text>
+                        <Text style={styles.summaryHeaderText}>Services Total Qty: {calculateOrderSummary().totalServicesQty.toFixed(2)}</Text>
+                    </View> */}
+                    <View style={styles.summaryTable}>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Total Value Amount</Text>
+                            <Text style={styles.summaryValue}>{calculateOrderSummary().totalValueAmount.toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Total Discount Amount</Text>
+                            <Text style={styles.summaryValue}>{calculateOrderSummary().totalDiscountAmount.toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Total Taxable Amount</Text>
+                            <Text style={styles.summaryValue}>{calculateOrderSummary().totalTaxableAmount.toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Total CGST Amount</Text>
+                            <Text style={styles.summaryValue}>{calculateOrderSummary().totalCGSTAmount.toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Total SGST Amount</Text>
+                            <Text style={styles.summaryValue}>{calculateOrderSummary().totalSGSTAmount.toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Total IGST Amount</Text>
+                            <Text style={styles.summaryValue}>{calculateOrderSummary().totalIGSTAmount.toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Total Tax Amount</Text>
+                            <Text style={styles.summaryValue}>{calculateOrderSummary().totalTaxAmount.toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Round Off</Text>
+                            <Text style={styles.summaryValue}>0.00</Text>
+                        </View>
+                    </View>
+                    <View style={styles.totalAmountRow}>
+                        <Text style={styles.totalAmountLabel}>Total Amount</Text>
+                        <Text style={styles.totalAmountValue}>{calculateOrderSummary().totalAmount.toFixed(2)}</Text>
+                    </View>
+
+                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                        <Text style={styles.submitButtonText}>Submit Order</Text>
+                    </TouchableOpacity>
+                </View>
+
+
             </ScrollView>
         </SafeAreaView>
     );
@@ -520,6 +771,100 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 10,
         fontSize: 16,
+        color: '#007AFF',
+    },
+    tableContainer: {
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    tableHeader: {
+        height: 50,
+        backgroundColor: '#F2F2F7',
+    },
+    tableHeaderText: {
+        textAlign: 'center',
+        fontWeight: 'bold',
+        fontSize: 16,
+        color: '#007AFF',
+    },
+    tableRowEven: {
+        height: 60,
+        backgroundColor: '#FFFFFF',
+    },
+    tableRowOdd: {
+        height: 60,
+        backgroundColor: '#F8F8F8',
+    },
+    tableRowText: {
+        textAlign: 'center',
+        fontSize: 14,
+        color: '#000000',
+        paddingHorizontal: 5,
+    },
+    noItemsText: {
+        textAlign: 'center',
+        marginTop: 20,
+        marginBottom: 20,
+        fontSize: 16,
+        color: '#8E8E93',
+    },
+    submitButton: {
+        backgroundColor: '#4CAF50',
+        padding: 15,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    submitButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    summaryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    summaryHeaderText: {
+        fontSize: 14,
+        color: '#007AFF',
+    },
+    summaryTable: {
+        borderTopWidth: 1,
+        borderTopColor: '#E5E5EA',
+    },
+    summaryRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E5EA',
+    },
+    summaryLabel: {
+        fontSize: 14,
+        color: '#000',
+    },
+    summaryValue: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#000',
+    },
+    totalAmountRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 16,
+        paddingTop: 8,
+        borderTopWidth: 2,
+        borderTopColor: '#000',
+    },
+    totalAmountLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#000',
+    },
+    totalAmountValue: {
+        fontSize: 16,
+        fontWeight: 'bold',
         color: '#007AFF',
     },
 });
