@@ -101,12 +101,13 @@ const UserForm: React.FC = () => {
                     `Welcome, ${response.data.Tag1}`
                 );
 
-                const { CompanyID, CompanyName, Tag5, UserID } = response.data;
+                const { CompanyID, CompanyName, Tag5, UserID, Prefix } = response.data;
                 await AsyncStorage.multiSet([
                     ['CompanyID', CompanyID.toString()],
                     ['CompanyName', CompanyName],
                     ['Tag5', Tag5],
                     ['UserID', UserID.toString()],
+                    // ['Prefix', Prefix.toString()],
                 ]);
 
                 console.log('Data was added to AsyncStorage');
@@ -189,6 +190,11 @@ const UserForm: React.FC = () => {
                 <TouchableOpacity style={styles.button} onPress={handleLogin}>
                     <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
+                <View style={{ marginTop: 20 }}>
+                    <TouchableOpacity style={styles.button} onPress={() => router.push('/create-order')}>
+                        <Text style={styles.buttonText}>Add Customer</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TextInput, ScrollView, TouchableOpacity, Alert,
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 
 const User = () => {
     const [formData, setFormData] = useState({
@@ -72,17 +72,42 @@ const User = () => {
             setFormData({ name: '', groupName: 'Sundry Debtors (Customers)', contactName: '', address1: '', address2: '', city: '', postalCode: '', state: '', country: '', gstNo: '' })
             const result = await response.json();
             Alert.alert('Success', `Customer added successfully. ID: ${result.customerId}, Code: ${result.code}`);
+            router.push('/create-order');
         } catch (error) {
             console.error('Error submitting form:', error);
             Alert.alert('Error', 'Failed to add customer. Please try again.');
         }
     };
 
+    const validateInputs = () => {
+        const errors = [];
+
+        // ... existing validations ...
+
+        // GST number validation
+        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+        if (formData.gstNo.trim()) {
+            if (!gstRegex.test(formData.gstNo.trim())) {
+                errors.push("Invalid GST Number format");
+            }
+        }
+
+        return errors;
+    };
 
     // Sample group names, replace with your actual options
     const groupNames = [
         'Sundry Debtors (Customers)',
         // 'Sundry Creditors (Suppliers)',
+    ];
+
+    // Add this array of states
+    const states = [
+        'ANDHRA PRADESH', 'ARUNACHAL PRADESH', 'ASSAM', 'BIHAR', 'CHHATTISGARH',
+        'GOA', 'GUJARAT', 'HARYANA', 'HIMACHAL PRADESH', 'JHARKHAND', 'KARNATAKA',
+        'KERALA', 'MADHYA PRADESH', 'MAHARASHTRA', 'MANIPUR', 'MEGHALAYA', 'MIZORAM',
+        'NAGALAND', 'ODISHA', 'PUNJAB', 'RAJASTHAN', 'SIKKIM', 'TAMIL NADU', 'TELANGANA',
+        'TRIPURA', 'UTTAR PRADESH', 'UTTARAKHAND', 'WEST BENGAL'
     ];
 
     return (
@@ -106,6 +131,19 @@ const User = () => {
                                     >
                                         {groupNames.map((groupName) => (
                                             <Picker.Item key={groupName} label={groupName} value={groupName} />
+                                        ))}
+                                    </Picker>
+                                </View>
+                            ) : key === 'state' ? (
+                                <View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={value}
+                                        onValueChange={(itemValue) => handleInputChange(key, itemValue)}
+                                        style={styles.picker}
+                                    >
+                                        <Picker.Item label="Select a state" value="" />
+                                        {states.map((state) => (
+                                            <Picker.Item key={state} label={state} value={state} />
                                         ))}
                                     </Picker>
                                 </View>
