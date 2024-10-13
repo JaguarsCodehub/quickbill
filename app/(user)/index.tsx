@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, ScrollView, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, ScrollView, TouchableOpacity, Alert, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const User = () => {
     const [formData, setFormData] = useState({
@@ -26,6 +27,8 @@ const User = () => {
         UserID: '',
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+
     useEffect(() => {
         const fetchAsyncStorageData = async () => {
             try {
@@ -46,8 +49,10 @@ const User = () => {
     };
 
     const handleSubmit = async () => {
+        if (isLoading) return; // Prevent multiple submissions
+        setIsLoading(true);
         try {
-            const response = await fetch('http://192.168.1.9:3000/addCustomer', {
+            const response = await fetch('https://quickbill-backlend.vercel.app/addCustomer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,7 +70,7 @@ const User = () => {
                     groupCode: '000000023'
                 }),
             });
-            console.log(response)
+            // console.log(response)
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -76,6 +81,8 @@ const User = () => {
         } catch (error) {
             console.error('Error submitting form:', error);
             Alert.alert('Error', 'Failed to add customer. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -104,79 +111,102 @@ const User = () => {
     // Add this array of states
     const states = [
         'ANDHRA PRADESH', 'ARUNACHAL PRADESH', 'ASSAM', 'BIHAR', 'CHHATTISGARH',
-        'GOA', 'GUJARAT', 'HARYANA', 'HIMACHAL PRADESH', 'JHARKHAND', 'KARNATAKA',
+        'GOA', 'GUJARAT', 'HARYANA', 'HIMACHAL PRADESH', 'JHARKHND', 'KARNATAKA',
         'KERALA', 'MADHYA PRADESH', 'MAHARASHTRA', 'MANIPUR', 'MEGHALAYA', 'MIZORAM',
-        'NAGALAND', 'ODISHA', 'PUNJAB', 'RAJASTHAN', 'SIKKIM', 'TAMIL NADU', 'TELANGANA',
-        'TRIPURA', 'UTTAR PRADESH', 'UTTARAKHAND', 'WEST BENGAL'
+        'NAGALND', 'ODISHA', 'PUNJAB', 'RAJASTHAN', 'SIKKIM', 'TAMIL NADU', 'TELANGANA',
+        'TRIPURA', 'UTTAR PRADESH', 'UTTARAKHND', 'WEST BENGAL'
     ];
 
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <View style={styles.header}>
-                <Text style={styles.title}>New Customer Account</Text>
-                <Ionicons name="person-add" size={24} color="#000000" />
-            </View>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.formContainer}>
-                    {Object.entries(formData).map(([key, value], index) => (
-                        <View key={key} style={[styles.inputContainer, index % 2 === 0 ? styles.leftInput : styles.rightInput]}>
-                            <Text style={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
-                            {key === 'groupName' ? (
-                                <View style={styles.pickerContainer}>
-                                    <Picker
-                                        selectedValue={value}
-                                        onValueChange={(itemValue) => handleInputChange(key, itemValue)}
-                                        style={styles.picker}
-                                    >
-                                        {groupNames.map((groupName) => (
-                                            <Picker.Item key={groupName} label={groupName} value={groupName} />
-                                        ))}
-                                    </Picker>
-                                </View>
-                            ) : key === 'state' ? (
-                                <View style={styles.pickerContainer}>
-                                    <Picker
-                                        selectedValue={value}
-                                        onValueChange={(itemValue) => handleInputChange(key, itemValue)}
-                                        style={styles.picker}
-                                    >
-                                        <Picker.Item label="Select a state" value="" />
-                                        {states.map((state) => (
-                                            <Picker.Item key={state} label={state} value={state} />
-                                        ))}
-                                    </Picker>
-                                </View>
-                            ) : (
-                                <TextInput
-                                    style={styles.input}
-                                    value={value}
-                                    onChangeText={(text) => handleInputChange(key, text)}
-                                    placeholder={`Enter ${key}`}
-                                    placeholderTextColor="#B0C4DE"
-                                />
-                            )}
+            <LinearGradient
+                colors={['#1a1a1a', '#0a0a0a']}
+                style={styles.gradient}
+            >
+                <View style={styles.header}>
+                    <Text style={styles.title}>New Customer Account</Text>
+                    <Ionicons name="person-add" size={24} color="#4CAF50" />
+                </View>
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    <View style={styles.formContainer}>
+                        {Object.entries(formData).reduce<Array<Array<{ key: string; value: string }>>>((rows, [key, value], index) => {
+                            if (index % 2 === 0) rows.push([]);
+                            rows[rows.length - 1].push({ key, value: value as string });
+                            return rows;
+                        }, []).map((row, rowIndex) => (
+                            <View key={rowIndex} style={styles.rowContainer}>
+                                {row.map(({ key, value }) => (
+                                    <View key={key} style={styles.inputContainer}>
+                                        <Text style={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+                                        {key === 'groupName' ? (
+                                            <View style={styles.pickerContainer}>
+                                                <Picker
+                                                    selectedValue={value}
+                                                    onValueChange={(itemValue) => handleInputChange(key, itemValue)}
+                                                    style={styles.picker}
+                                                >
+                                                    {groupNames.map((groupName) => (
+                                                        <Picker.Item key={groupName} label={groupName} value={groupName} color="#e0e0e0" />
+                                                    ))}
+                                                </Picker>
+                                            </View>
+                                        ) : key === 'state' ? (
+                                            <View style={styles.pickerContainer}>
+                                                <Picker
+                                                    selectedValue={value}
+                                                    onValueChange={(itemValue) => handleInputChange(key, itemValue)}
+                                                    style={styles.picker}
+                                                >
+                                                    <Picker.Item label="Select a state" value="" color="#e0e0e0" />
+                                                    {states.map((state) => (
+                                                        <Picker.Item key={state} label={state} value={state} color="#e0e0e0" />
+                                                    ))}
+                                                </Picker>
+                                            </View>
+                                        ) : (
+                                            <TextInput
+                                                style={styles.input}
+                                                value={value}
+                                                onChangeText={(text) => handleInputChange(key, text)}
+                                                placeholder={`Enter ${key}`}
+                                                placeholderTextColor="#808080"
+                                            />
+                                        )}
+                                    </View>
+                                ))}
+                            </View>
+                        ))}
+                    </View>
+
+                    <TouchableOpacity 
+                        style={[styles.submitButton, isLoading && styles.submitButtonDisabled]} 
+                        onPress={handleSubmit}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color="#0a0a0a" />
+                        ) : (
+                            <>
+                                <Text style={styles.submitButtonText}>Create Customer Account</Text>
+                                <Ionicons name="arrow-forward" size={20} color="#0a0a0a" />
+                            </>
+                        )}
+                    </TouchableOpacity>
+
+                    <View style={styles.asyncDataContainer}>
+                        <Text style={styles.asyncDataTitle}>Current Session</Text>
+                        <View style={styles.asyncDataRow}>
+                            <Ionicons name="business" size={20} color="#4CAF50" />
+                            <Text style={styles.asyncDataText}>{asyncStorageData.CompanyName}</Text>
                         </View>
-                    ))}
-                </View>
-
-                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                    <Text style={styles.submitButtonText}>Create Customer Account</Text>
-                    <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
-                </TouchableOpacity>
-
-                <View style={styles.asyncDataContainer}>
-                    <Text style={styles.asyncDataTitle}>Current Session</Text>
-                    <View style={styles.asyncDataRow}>
-                        <Ionicons name="business" size={20} color="#000000" />
-                        <Text style={styles.asyncDataText}>{asyncStorageData.CompanyName}</Text>
+                        <View style={styles.asyncDataRow}>
+                            <Ionicons name="person" size={20} color="#4CAF50" />
+                            <Text style={styles.asyncDataText}>User ID: {asyncStorageData.UserID}</Text>
+                        </View>
                     </View>
-                    <View style={styles.asyncDataRow}>
-                        <Ionicons name="person" size={20} color="#000000" />
-                        <Text style={styles.asyncDataText}>User ID: {asyncStorageData.UserID}</Text>
-                    </View>
-                </View>
-            </ScrollView>
+                </ScrollView>
+            </LinearGradient>
         </SafeAreaView>
     );
 };
@@ -184,109 +214,84 @@ const User = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F5F5',
-        marginTop: 50,
+        backgroundColor: '#0a0a0a',
+    },
+    gradient: {
+        flex: 1,
+        padding: 20,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#000000',
+        marginBottom: 20,
+        marginTop: 40,
     },
     title: {
         fontSize: 24,
         fontWeight: '700',
-        color: '#000000',
+        color: '#e0e0e0',
     },
     scrollContent: {
-        padding: 20,
+        paddingBottom: 20,
     },
     formContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-    },
-    inputContainer: {
-        width: '48%',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: 15,
+        paddingHorizontal: 10,
+        paddingVertical: 20,
         marginBottom: 20,
     },
-    leftInput: {
-        marginRight: '2%',
-    },
-    rightInput: {
-        marginLeft: '2%',
+    inputContainer: {
+        flex: 1,
+        marginHorizontal: 5,
     },
     label: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#000000',
+        color: '#e0e0e0',
         marginBottom: 8,
     },
     input: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 4,
-        // borderColor: '#000000',
-        // borderWidth: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 10,
         padding: 12,
         fontSize: 16,
-        color: '#000000',
+        color: '#e0e0e0',
     },
     pickerContainer: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 4,
-        borderColor: '#000000',
-        borderWidth: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 10,
         overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 1,
-        elevation: 2,
     },
     picker: {
-        height: 50,
-        width: '100%',
+        color: '#e0e0e0',
     },
     submitButton: {
-        backgroundColor: '#000000',
-        borderRadius: 10,
+        backgroundColor: '#4CAF50',
+        borderRadius: 25,
         padding: 16,
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
     },
     submitButtonText: {
-        color: '#FFFFFF',
+        color: '#0a0a0a',
         fontSize: 18,
         fontWeight: '600',
         marginRight: 10,
     },
     asyncDataContainer: {
         marginTop: 30,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 8,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: 15,
         padding: 20,
-        borderColor: '#000000',
-        borderWidth: 1,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
     },
     asyncDataTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#000000',
+        color: '#e0e0e0',
         marginBottom: 15,
     },
     asyncDataRow: {
@@ -296,8 +301,16 @@ const styles = StyleSheet.create({
     },
     asyncDataText: {
         fontSize: 16,
-        color: '#000000',
+        color: '#e0e0e0',
         marginLeft: 15,
+    },
+    rowContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+    },
+    submitButtonDisabled: {
+        opacity: 0.7,
     },
 });
 
