@@ -179,8 +179,8 @@ const User = () => {
                         ))}
                     </View>
 
-                    <TouchableOpacity 
-                        style={[styles.submitButton, isLoading && styles.submitButtonDisabled]} 
+                    <TouchableOpacity
+                        style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
                         onPress={handleSubmit}
                         disabled={isLoading}
                     >
@@ -189,6 +189,20 @@ const User = () => {
                         ) : (
                             <>
                                 <Text style={styles.submitButtonText}>Create Customer Account</Text>
+                                <Ionicons name="arrow-forward" size={20} color="#0a0a0a" />
+                            </>
+                        )}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
+                        onPress={() => router.push('/create-order')}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color="#0a0a0a" />
+                        ) : (
+                            <>
+                                <Text style={styles.submitButtonText}>Go to Sales Order</Text>
                                 <Ionicons name="arrow-forward" size={20} color="#0a0a0a" />
                             </>
                         )}

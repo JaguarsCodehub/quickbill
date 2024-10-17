@@ -116,6 +116,7 @@ const UserForm: React.FC = () => {
                 ]);
 
                 console.log('Data was added to AsyncStorage');
+                console.log("Selected Year:", year);
                 showToastWithGravityAndOffset('Welcome !');
                 setUsername('');
                 setPassword('');
@@ -192,7 +193,7 @@ const UserForm: React.FC = () => {
                         />
                     </View>
                     {errors.userId && <Text style={styles.errorText}>{errors.userId}</Text>}
-                    
+
                     <View style={styles.inputContainer}>
                         <Ionicons name="key-outline" size={24} color="#4CAF50" />
                         <TextInput
@@ -208,7 +209,7 @@ const UserForm: React.FC = () => {
                         </TouchableOpacity>
                     </View>
                     {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-                    
+
                     <View style={styles.inputContainer}>
                         <Ionicons name="calendar-outline" size={24} color="#4CAF50" />
                         <Picker
@@ -236,7 +237,7 @@ const UserForm: React.FC = () => {
                     <Text style={styles.registerLink}>Register Now</Text>
                 </Text>
 
-                
+
             </LinearGradient>
         </SafeAreaView>
     );

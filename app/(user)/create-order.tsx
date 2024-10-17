@@ -42,27 +42,69 @@ interface OrderItem extends Item {
 
 
 interface OrderItemSubmit {
-    ItemID: string;
-    ItemCode: string;
-    ItemName: string;
-    HSNCode: string;
-    TaxCategory: string;
-    GSTTaxCode: string;
-    IGSTTaxCode: string;
-    UTGSTTaxCode: string;
-    Qty: number;
-    Rate: number;
-    Value: number;
-    Disc: number;
-    Taxable: number;
-    TaxAmt: number;
-    Amount: number;
+    srl: string;
+    sNo: string;
+    currName: string;
+    currRate: number;
+    docDate: string;
+    itemCode: string;
+    qty: number;
+    rate: number;
+    disc: number;
+    amt: number;
+    storeCode: string;
+    narration: string;
+    branchCode: string;
+    unit: string;
+    discAmt: number;
+    mrp: number;
+    newRate: number;
+    taxCode: string;
+    taxAmt: number;
+    cessAmt: number;
+    taxable: number;
+    barcodeValue: string;
+    cgst: number;
+    sgst: number;
+    igst: number;
+    utgst: number;
+    pnding: number;
+    delivaryDate: string;
 }
 
 interface OrderSubmit {
-    CustomerCode: string;
-    Items: OrderItemSubmit[];
-    // Add other order fields as needed
+    docNo: string;
+    docDate: string;
+    orderNo: string;
+    orderDate: string;
+    pageNo: string;
+    partyCode: string;
+    billAmt: number;
+    totalQty: number;
+    netAmt: number;
+    taxAmt: number;
+    discAmt: number;
+    mainType: string;
+    subType: string;
+    type: string;
+    prefix: string;
+    narration: string;
+    userId: string;
+    companyId: string;
+    createdBy: string;
+    modifiedBy: string;
+    partyName: string;
+    selection: string;
+    productName: string;
+    discPer: number;
+    cgst: number;
+    sgst: number;
+    igst: number;
+    utgst: number;
+    rate: number;
+    totalAmt: number;
+    addCode: string;
+    items: OrderItemSubmit[];
 }
 
 
@@ -326,48 +368,105 @@ const CreateOrder = () => {
             return;
         }
 
+        const summary = calculateOrderSummary();
+        console.log('Order summary:', summary);
+        const userId = await AsyncStorage.getItem('UserID');
+        const companyId = await AsyncStorage.getItem('CompanyID');
+        const prefix = await AsyncStorage.getItem('SelectedYear');
+
         const orderSubmit: OrderSubmit = {
-            CustomerCode: selectedCustomer.Code,
-            Items: orderItems.map(item => ({
-                ItemID: String(item.ItemID),
-                ItemCode: item.ItemCode,
-                ItemName: item.ItemName,
-                HSNCode: item.HSNCode,
-                TaxCategory: item.TaxCategory,
-                GSTTaxCode: item.GSTTaxCode,
-                IGSTTaxCode: item.IGSTTaxCode,
-                UTGSTTaxCode: item.UTGSTTaxCode,
-                Qty: item.Qty,
-                Rate: item.Rate,
-                Value: item.Value,
-                Disc: item.Disc,
-                Taxable: item.Taxable,
-                TaxAmt: item.TaxAmt,
-                Amount: item.Amount,
-            })),
-            // Add other order fields as needed
+            docNo: nextSerial,
+            docDate: currentDate,
+            orderNo: `SOR/${nextSerial}`,
+            orderDate: currentDate,
+            pageNo: '',
+            partyCode: selectedCustomer.Code,
+            billAmt: summary.totalAmount,
+            totalQty: summary.totalGoodsQty + summary.totalServicesQty,
+            netAmt: summary.totalTaxableAmount,
+            taxAmt: summary.totalTaxAmount,
+            discAmt: summary.totalDiscountAmount,
+            mainType: 'SL', // Adjust as needed
+            subType: 'RS', // Adjust as needed
+            type: 'SOR', // Adjust as needed
+            prefix: await AsyncStorage.getItem('SelectedYear') || '',
+            narration: '', // Add a narration field if needed
+            userId: userId || '',
+            companyId: companyId || '',
+            createdBy: userId || '',
+            modifiedBy: userId || '',
+            partyName: selectedCustomer.CustomerName,
+            selection: '', // Add a selection field if needed
+            productName: '', // Add a productName field if needed
+            discPer: 0, // Calculate discount percentage if needed
+            cgst: summary.totalCGSTAmount,
+            sgst: summary.totalSGSTAmount,
+            igst: summary.totalIGSTAmount,
+            utgst: 0, // Add UTGST if needed
+            rate: 0, // Add an overall rate if needed
+            addCode: '',
+            totalAmt: summary.totalAmount,
+            items: orderItems.map((item, index) => ({
+                srl: nextSerial,
+                sNo: '0000' + index,
+                currName: item.HSNCode, // Adjust as needed
+                currRate: 0, // Adjust as needed
+                docDate: currentDate,
+                itemCode: item.ItemCode,
+                qty: item.Qty,
+                rate: item.Rate,
+                disc: item.Disc,
+                amt: item.Amount,
+                partyCode: selectedCustomer.Code,
+                storeCode: '', // Add a storeCode if needed
+                mainType: 'SL',
+                subType: 'RS',
+                type: 'SOR',
+                prefix: prefix || '',
+                narration: '', // Add a narration if needed
+                branchCode: '', // Add a branchCode if needed
+                unit: '', // Add a unit if needed
+                discAmt: item.Disc,
+                mrp: item.Rate, // Adjust if MRP is different from Rate
+                newRate: item.Rate,
+                taxCode: item.TaxCode || '',
+                taxAmt: item.TaxAmt,
+                cessAmt: 0, // Add cess amount if applicable
+                taxable: item.Taxable,
+                barcodeValue: '', // Add barcode value if available
+                userId: userId || '',
+                companyId: companyId || '',
+                createdBy: userId || '',
+                modifiedBy: userId || '',
+                cgst: item.TaxAmt / 2, // Assuming equal split between CGST and SGST
+                sgst: item.TaxAmt / 2,
+                igst: 0, // Add IGST if applicable
+                utgst: 0, // Add UTGST if applicable
+                pnding: item.Qty, // Make sure this field is correctly set
+                delivaryDate: currentDate // Make sure this field is correctly set
+            }))
         };
 
         try {
-            // const response = await fetch('YOUR_API_ENDPOINT_HERE', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify(orderSubmit),
-            // });
+            const response = await fetch('http://192.168.1.9:3000/api/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderSubmit),
+            });
 
-            // if (!response.ok) {
-            //     throw new Error('Failed to submit order');
-            // }
+            const responseData = await response.json();
 
-            console.log("Submitted Order", orderSubmit);
+            if (!response.ok) {
+                throw new Error(responseData.error || 'Failed to submit order');
+            }
 
             Alert.alert('Success', 'Order submitted successfully!');
             // router.push('/orders'); // Navigate to orders page or wherever appropriate
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error submitting order:', error);
-            Alert.alert('Error', 'Failed to submit order. Please try again.');
+            Alert.alert('Error', `Failed to submit order. ${error.message}`);
         }
     };
 
