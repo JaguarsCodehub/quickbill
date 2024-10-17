@@ -408,7 +408,7 @@ const CreateOrder = () => {
             totalAmt: summary.totalAmount,
             items: orderItems.map((item, index) => ({
                 srl: nextSerial,
-                sNo: '00001' + index,
+                sNo: '0000' + (index + 1),
                 currName: item.HSNCode, // Adjust as needed
                 currRate: 0, // Adjust as needed
                 docDate: currentDate,
@@ -443,7 +443,7 @@ const CreateOrder = () => {
                 igst: 0, // Add IGST if applicable
                 utgst: 0, // Add UTGST if applicable
                 pnding: item.Qty, // Make sure this field is correctly set
-                delivaryDate: currentDate // Make sure this field is correctly set
+                delivaryDate: new Date().toISOString() // Make sure this field is correctly set
             }))
         };
 
