@@ -408,7 +408,7 @@ const CreateOrder = () => {
             totalAmt: summary.totalAmount,
             items: orderItems.map((item, index) => ({
                 srl: nextSerial,
-                sNo: '0000' + index,
+                sNo: '00001' + index,
                 currName: item.HSNCode, // Adjust as needed
                 currRate: 0, // Adjust as needed
                 docDate: currentDate,
