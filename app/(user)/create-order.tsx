@@ -185,6 +185,7 @@ const CreateOrder = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
     const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     useEffect(() => {
         fetchData();
@@ -368,6 +369,8 @@ const CreateOrder = () => {
             return;
         }
 
+        setIsSubmitting(true);
+
         const summary = calculateOrderSummary();
         console.log('Order summary:', summary);
         const userId = await AsyncStorage.getItem('UserID');
@@ -448,7 +451,7 @@ const CreateOrder = () => {
         };
 
         try {
-            const response = await fetch('http://192.168.1.9:3000/api/create-order', {
+            const response = await fetch('https://quickbill-backlend.vercel.app/api/create-order', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -467,6 +470,8 @@ const CreateOrder = () => {
         } catch (error: any) {
             console.error('Error submitting order:', error);
             Alert.alert('Error', `Failed to submit order. ${error.message}`);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -642,8 +647,16 @@ const CreateOrder = () => {
                             <Text style={styles.totalAmountValue}>{calculateOrderSummary().totalAmount.toFixed(2)}</Text>
                         </View>
 
-                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                            <Text style={styles.submitButtonText}>Submit Order</Text>
+                        <TouchableOpacity
+                            style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+                            onPress={handleSubmit}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? (
+                                <ActivityIndicator size="small" color="#0a0a0a" />
+                            ) : (
+                                <Text style={styles.submitButtonText}>Submit Order</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
@@ -825,7 +838,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#4CAF50',
-        borderRadius: 25,
+        borderRadius: 10,
         padding: 16,
         marginBottom: 20,
     },
@@ -893,11 +906,14 @@ const styles = StyleSheet.create({
         color: '#808080',
     },
     submitButton: {
-        backgroundColor: '#4CAF50',
-        borderRadius: 25,
+        backgroundColor: '#21b4f3',
+        borderRadius: 10,
         padding: 16,
         alignItems: 'center',
         marginTop: 20,
+    },
+    submitButtonDisabled: {
+        backgroundColor: '#8FBC8F',
     },
     submitButtonText: {
         color: '#0a0a0a',
