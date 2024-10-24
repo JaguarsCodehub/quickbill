@@ -114,17 +114,23 @@ const SearchablePicker = ({
     placeholder,
     labelKey,
     valueKey,
-    icon
+    icon,
+    selectedItem
 }: {
     items: any[],
     onSelect: (item: any) => void,
     placeholder: string,
     labelKey: string,
     valueKey: string,
-    icon: string
+    icon: string,
+    selectedItem: any
 }) => {
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState(selectedItem ? selectedItem[labelKey] : '');
     const [showDropdown, setShowDropdown] = useState(false);
+
+    useEffect(() => {
+        setQuery(selectedItem ? selectedItem[labelKey] : '');
+    }, [selectedItem]);
 
     const filteredItems = items.filter((item) =>
         (item[labelKey] && item[labelKey].toString().toLowerCase().includes(query.toLowerCase())) ||
@@ -134,7 +140,7 @@ const SearchablePicker = ({
     return (
         <View style={styles.pickerContainer}>
             <View style={styles.inputContainer}>
-                <Ionicons name={icon as any} size={24} color="#4CAF50" style={styles.inputIcon} />
+                <Ionicons name={icon as any} size={24} color="#7868e5" style={styles.inputIcon} />
                 <TextInput
                     style={styles.searchInput}
                     placeholder={placeholder}
@@ -307,14 +313,15 @@ const CreateOrder = () => {
             TaxCategory: undefined
         };
 
-
         setOrderItems([...orderItems, newItem]);
+        
 
         // Reset item selection
         setSelectedItem(null);
         setQuantity('1');
         setRate('');
         setValue('');
+        setItems([])
     };
 
     const removeItemFromOrder = (index: number) => {
@@ -335,21 +342,36 @@ const CreateOrder = () => {
         let totalGoodsQty = 0;
         let totalServicesQty = 0;
 
-        orderItems.forEach(item => {
+        const itemBreakdown = orderItems.map(item => {
+            const itemCGST = item.TaxAmt / 2; // Assuming equal split between CGST and SGST
+            const itemSGST = item.TaxAmt / 2;
+            const itemIGST = 0; // Adjust if applicable
+
             totalValueAmount += item.Value;
             totalDiscountAmount += item.Disc;
             totalTaxableAmount += item.Taxable;
-            // Assuming CGST and SGST are half of the total tax each
-            totalCGSTAmount += item.TaxAmt / 2;
-            totalSGSTAmount += item.TaxAmt / 2;
+            totalCGSTAmount += itemCGST;
+            totalSGSTAmount += itemSGST;
             totalTaxAmount += item.TaxAmt;
             totalAmount += item.Amount;
-            // Assuming all items are goods for this example
             totalGoodsQty += item.Qty;
+
+            return {
+                name: item.ItemName,
+                qty: item.Qty,
+                rate: item.Rate,
+                value: item.Value,
+                taxable: item.Taxable,
+                taxAmt: item.TaxAmt,
+                cgst: itemCGST,
+                sgst: itemSGST,
+                igst: itemIGST,
+                amount: item.Amount
+            };
         });
 
-
         return {
+            itemBreakdown,
             totalValueAmount,
             totalDiscountAmount,
             totalTaxableAmount,
@@ -363,6 +385,8 @@ const CreateOrder = () => {
         };
     };
 
+    const orderSummary = calculateOrderSummary();
+
     const handleSubmit = async () => {
         if (!selectedCustomer || orderItems.length === 0) {
             Alert.alert('Error', 'Please select a customer and add at least one item to the order.');
@@ -371,8 +395,7 @@ const CreateOrder = () => {
 
         setIsSubmitting(true);
 
-        const summary = calculateOrderSummary();
-        console.log('Order summary:', summary);
+        console.log('Order summary:', orderSummary);
         const userId = await AsyncStorage.getItem('UserID');
         const companyId = await AsyncStorage.getItem('CompanyID');
         const prefix = await AsyncStorage.getItem('SelectedYear');
@@ -384,11 +407,11 @@ const CreateOrder = () => {
             orderDate: currentDate,
             pageNo: '',
             partyCode: selectedCustomer.Code,
-            billAmt: summary.totalAmount,
-            totalQty: summary.totalGoodsQty + summary.totalServicesQty,
-            netAmt: summary.totalTaxableAmount,
-            taxAmt: summary.totalTaxAmount,
-            discAmt: summary.totalDiscountAmount,
+            billAmt: orderSummary.totalAmount,
+            totalQty: orderSummary.totalGoodsQty + orderSummary.totalServicesQty,
+            netAmt: orderSummary.totalTaxableAmount,
+            taxAmt: orderSummary.totalTaxAmount,
+            discAmt: orderSummary.totalDiscountAmount,
             mainType: 'SL', // Adjust as needed
             subType: 'RS', // Adjust as needed
             type: 'SOR', // Adjust as needed
@@ -402,13 +425,13 @@ const CreateOrder = () => {
             selection: '', // Add a selection field if needed
             productName: '', // Add a productName field if needed
             discPer: 0, // Calculate discount percentage if needed
-            cgst: summary.totalCGSTAmount,
-            sgst: summary.totalSGSTAmount,
-            igst: summary.totalIGSTAmount,
+            cgst: orderSummary.totalCGSTAmount,
+            sgst: orderSummary.totalSGSTAmount,
+            igst: orderSummary.totalIGSTAmount,
             utgst: 0, // Add UTGST if needed
             rate: 0, // Add an overall rate if needed
             addCode: '',
-            totalAmt: summary.totalAmount,
+            totalAmt: orderSummary.totalAmount,
             items: orderItems.map((item, index) => ({
                 srl: nextSerial,
                 sNo: '0000' + (index + 1),
@@ -478,7 +501,7 @@ const CreateOrder = () => {
     if (isLoading) {
         return (
             <LinearGradient colors={['#1a1a1a', '#0a0a0a']} style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#4CAF50" />
+                <ActivityIndicator size="large" color="#7868e5" />
                 <Text style={styles.loadingText}>Loading order data...</Text>
             </LinearGradient>
         );
@@ -491,23 +514,23 @@ const CreateOrder = () => {
                 <ScrollView nestedScrollEnabled={true}>
                     <View style={styles.header}>
                         <Text style={styles.title}>New Order</Text>
-                        <Ionicons name="cart" size={24} color="#4CAF50" />
+                        <Ionicons name="cart" size={24} color="#7868e5" />
                     </View>
 
                     <View style={styles.card}>
                         <View style={styles.headerInfo}>
                             <View style={styles.headerItem}>
-                                <Ionicons name="calendar-outline" size={24} color="#4CAF50" />
+                                <Ionicons name="calendar-outline" size={24} color="#7868e5" />
                                 <Text style={styles.headerText}>Order Date:</Text>
                                 <Text style={styles.headerValue}>{currentDate}</Text>
                             </View>
-                            <View style={styles.headerItem}>
-                                <Ionicons name="document-text-outline" size={24} color="#4CAF50" />
+                            {/* <View style={styles.headerItem}>
+                                <Ionicons name="document-text-outline" size={24} color="#7868e5" />
                                 <Text style={styles.headerText}>DocNo:</Text>
                                 <Text style={styles.headerValue}>{nextSerial}</Text>
-                            </View>
+                            </View> */}
                             <View style={styles.headerItem}>
-                                <Ionicons name="document-text-outline" size={24} color="#4CAF50" />
+                                <Ionicons name="document-text-outline" size={24} color="#7868e5" />
                                 <Text style={styles.headerText}>Order No:</Text>
                                 <Text style={styles.headerValue}>SOR/{nextSerial}</Text>
                             </View>
@@ -523,10 +546,11 @@ const CreateOrder = () => {
                             labelKey="CustomerName"
                             valueKey="CustomerID"
                             icon="person-outline"
+                            selectedItem={selectedCustomer}
                         />
                         {selectedCustomer && (
                             <View style={styles.selectedInfo}>
-                                <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                                <Ionicons name="checkmark-circle" size={24} color="#7868e5" />
                                 <Text style={styles.selectedInfoText}>{selectedCustomer.CustomerName}</Text>
                             </View>
                         )}
@@ -545,6 +569,7 @@ const CreateOrder = () => {
                             labelKey="ItemName"
                             valueKey="ItemCode"
                             icon="cube-outline"
+                            selectedItem={selectedItem}
                         />
                         {selectedItem && (
                             <View style={styles.itemDetails}>
@@ -554,7 +579,7 @@ const CreateOrder = () => {
                                     <View style={styles.boxinputContainer}>
                                         <Text style={styles.inputLabel}>Quantity</Text>
                                         <View style={styles.quantityContainer}>
-                                            <Ionicons name="remove-circle-outline" size={24} color="#4CAF50" onPress={() => setQuantity((prev) => (Math.max(1, parseInt(prev) - 1)).toString())} />
+                                            <Ionicons name="remove-circle-outline" size={24} color="#7868e5" onPress={() => setQuantity((prev) => (Math.max(1, parseInt(prev) - 1)).toString())} />
                                             <TextInput
                                                 style={styles.quantityInput}
                                                 value={quantity}
@@ -564,7 +589,7 @@ const CreateOrder = () => {
                                                 }}
                                                 keyboardType="numeric"
                                             />
-                                            <Ionicons name="add-circle-outline" size={24} color="#4CAF50" onPress={() => setQuantity((prev) => (parseInt(prev) + 1).toString())} />
+                                            <Ionicons name="add-circle-outline" size={24} color="#7868e5" onPress={() => setQuantity((prev) => (parseInt(prev) + 1).toString())} />
                                         </View>
                                     </View>
                                     <View style={styles.boxinputContainer}>
@@ -639,12 +664,40 @@ const CreateOrder = () => {
 
                     <View style={styles.card}>
                         <Text style={styles.sectionTitle}>Order Summary</Text>
-                        <View style={styles.summaryTable}>
-                            {/* ... existing summary rows ... */}
-                        </View>
-                        <View style={styles.totalAmountRow}>
-                            <Text style={styles.totalAmountLabel}>Total Amount</Text>
-                            <Text style={styles.totalAmountValue}>{calculateOrderSummary().totalAmount.toFixed(2)}</Text>
+                        {orderSummary.itemBreakdown.map((item, index) => (
+                            <View key={index} style={styles.itemSummaryCard}>
+                                <Text style={styles.itemSummaryName}>{item.name}</Text>
+                                <View style={styles.itemSummaryDetails}>
+                                    <View style={styles.itemSummaryColumn}>
+                                        <Text style={styles.itemSummaryLabel}>Qty:</Text>
+                                        <Text style={styles.itemSummaryLabel}>Rate:</Text>
+                                        <Text style={styles.itemSummaryLabel}>Value:</Text>
+                                    </View>
+                                    <View style={styles.itemSummaryColumn}>
+                                        <Text style={styles.itemSummaryValue}>{item.qty}</Text>
+                                        <Text style={styles.itemSummaryValue}>₹{item.rate.toFixed(2)}</Text>
+                                        <Text style={styles.itemSummaryValue}>₹{item.value.toFixed(2)}</Text>
+                                    </View>
+                                    <View style={styles.itemSummaryColumn}>
+                                        <Text style={styles.itemSummaryLabel}>Taxable:</Text>
+                                        <Text style={styles.itemSummaryLabel}>CGST:</Text>
+                                        <Text style={styles.itemSummaryLabel}>SGST:</Text>
+                                    </View>
+                                    <View style={styles.itemSummaryColumn}>
+                                        <Text style={styles.itemSummaryValue}>₹{item.taxable.toFixed(2)}</Text>
+                                        <Text style={styles.itemSummaryValue}>₹{item.cgst.toFixed(2)}</Text>
+                                        <Text style={styles.itemSummaryValue}>₹{item.sgst.toFixed(2)}</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.itemSummaryTotal}>
+                                    <Text style={styles.itemSummaryTotalLabel}>Total:</Text>
+                                    <Text style={styles.itemSummaryTotalValue}>₹{item.amount.toFixed(2)}</Text>
+                                </View>
+                            </View>
+                        ))}
+                        <View style={styles.orderTotalCard}>
+                            <Text style={styles.orderTotalLabel}>Order Total: </Text>
+                            <Text style={styles.orderTotalValue}>₹ {orderSummary.totalAmount.toFixed(2)}</Text>
                         </View>
 
                         <TouchableOpacity
@@ -669,290 +722,355 @@ const CreateOrder = () => {
 export default CreateOrder;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#0a0a0a',
-    },
-    gradient: {
-        flex: 1,
-        padding: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-        marginTop: 40,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: '#e0e0e0',
-    },
-    card: {
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: 15,
-        padding: 20,
-        marginBottom: 20,
-    },
-    headerInfo: {
-        flexDirection: 'column',
-    },
-    headerItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    headerText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#e0e0e0',
-        marginLeft: 8,
-        marginRight: 4,
-    },
-    headerValue: {
-        fontSize: 16,
-        fontWeight: '400',
-        color: '#e0e0e0',
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#e0e0e0',
-        marginBottom: 12,
-    },
-    pickerContainer: {
-        marginBottom: 12,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        borderRadius: 10,
-        paddingHorizontal: 12,
-    },
-    inputIcon: {
-        marginRight: 8,
-    },
-    searchInput: {
-        flex: 1,
-        height: 40,
-        fontSize: 16,
-        color: '#e0e0e0',
-    },
-    dropdown: {
-        maxHeight: 200,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        borderBottomLeftRadius: 10,
-        borderBottomRightRadius: 10,
-    },
-    dropdownItem: {
-        padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    dropdownItemText: {
-        fontSize: 16,
-        color: '#e0e0e0',
-    },
-    selectedInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 8,
-    },
-    selectedInfoText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#4CAF50',
-        marginLeft: 8,
-    },
-    itemDetails: {
-        marginTop: 12,
-    },
-    itemName: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#e0e0e0',
-    },
-    itemCode: {
-        fontSize: 14,
-        color: '#808080',
-        marginTop: 4,
-    },
-    inputRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 12,
-    },
-    boxinputContainer: {
-        flex: 1,
-        marginHorizontal: 4,
-    },
-    inputLabel: {
-        fontSize: 14,
-        color: '#808080',
-        marginBottom: 4,
-    },
-    input: {
-        height: 40,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        borderRadius: 10,
-        paddingHorizontal: 8,
-        fontSize: 16,
-        color: '#e0e0e0',
-    },
-    quantityContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        borderRadius: 10,
-        paddingHorizontal: 8,
-    },
-    quantityInput: {
-        height: 40,
-        width: 40,
-        textAlign: 'center',
-        fontSize: 16,
-        color: '#e0e0e0',
-    },
-    itemValuesContainer: {
-        marginTop: 16,
-    },
-    itemValue: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-    },
-    itemValueLabel: {
-        fontSize: 14,
-        color: '#808080',
-    },
-    itemValueText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#e0e0e0',
-    },
-    addButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#4CAF50',
-        borderRadius: 10,
-        padding: 16,
-        marginBottom: 20,
-    },
-    addButtonText: {
-        color: '#0a0a0a',
-        fontSize: 18,
-        fontWeight: '600',
-        marginLeft: 8,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    loadingText: {
-        marginTop: 10,
-        fontSize: 16,
-        color: '#4CAF50',
-    },
-    tableContainer: {
-        marginTop: 10,
-        marginBottom: 10,
-        borderRadius: 10,
-        overflow: 'hidden',
-    },
-    tableHeader: {
-        height: 50,
-        backgroundColor: 'rgba(76, 175, 80, 0.1)',
-    },
-    tableHeaderText: {
-        textAlign: 'center',
-        fontWeight: 'bold',
-        fontSize: 14,
-        color: '#4CAF50',
-    },
-    tableRowEven: {
-        height: 60,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    },
-    tableRowOdd: {
-        height: 60,
-        backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    },
-    tableRowText: {
-        textAlign: 'center',
-        fontSize: 14,
-        color: '#e0e0e0',
-    },
-    itemNameText: {
-        fontSize: 14,
-        color: '#e0e0e0',
-        paddingHorizontal: 5,
-        flex: 1,
-    },
-    deleteButton: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 5,
-    },
-    noItemsText: {
-        textAlign: 'center',
-        marginTop: 20,
-        marginBottom: 20,
-        fontSize: 16,
-        color: '#808080',
-    },
-    submitButton: {
-        backgroundColor: '#21b4f3',
-        borderRadius: 10,
-        padding: 16,
-        alignItems: 'center',
-        marginTop: 20,
-    },
-    submitButtonDisabled: {
-        backgroundColor: '#8FBC8F',
-    },
-    submitButtonText: {
-        color: '#0a0a0a',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    summaryTable: {
-        marginTop: 10,
-    },
-    summaryRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-    },
-    summaryLabel: {
-        fontSize: 16,
-        color: '#e0e0e0',
-    },
-    summaryValue: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#e0e0e0',
-    },
-    totalAmountRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 16,
-        paddingTop: 16,
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    totalAmountLabel: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#4CAF50',
-    },
-    totalAmountValue: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#4CAF50',
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#1E1E1E', // Dark background
+  },
+  gradient: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 40,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF', // White text
+  },
+  card: {
+    backgroundColor: '#2C2C2C', // Dark card background
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
+  },
+  headerInfo: {
+    flexDirection: 'column',
+  },
+  headerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  headerText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF', // White text
+    marginLeft: 8,
+    marginRight: 4,
+  },
+  headerValue: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#FFFFFF', // White text
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#FFFFFF', // White text
+    marginBottom: 12,
+  },
+  pickerContainer: {
+    marginBottom: 12,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1C1C1E', // Dark input background
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  inputIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+    color: '#FFFFFF', // White text
+  },
+  dropdown: {
+    maxHeight: 200,
+    backgroundColor: '#1C1C1E', // Dark dropdown background
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333', // Dark border
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#FFFFFF', // White text
+  },
+  selectedInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  selectedInfoText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#7868e5', // Green text
+    marginLeft: 8,
+  },
+  itemDetails: {
+    marginTop: 12,
+  },
+  itemName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF', // White text
+  },
+  itemCode: {
+    fontSize: 14,
+    color: '#888888', // Grey text
+    marginTop: 4,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  boxinputContainer: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#888888', // Grey text
+    marginBottom: 4,
+  },
+  input: {
+    height: 40,
+    backgroundColor: '#1C1C1E', // Dark input background
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    fontSize: 16,
+    color: '#FFFFFF', // White text
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1C1C1E', // Dark input background
+    borderRadius: 10,
+    paddingHorizontal: 8,
+  },
+  quantityInput: {
+    height: 40,
+    width: 40,
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#FFFFFF', // White text
+  },
+  itemValuesContainer: {
+    marginTop: 16,
+  },
+  itemValue: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  itemValueLabel: {
+    fontSize: 14,
+    color: '#888888', // Grey text
+  },
+  itemValueText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF', // White text
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#7868e5', // Purple button
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 20,
+  },
+  addButtonText: {
+    color: '#FFFFFF', // White text
+    fontSize: 18,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#7868e5', // Green text
+  },
+  tableContainer: {
+    marginTop: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  tableHeader: {
+    height: 50,
+    backgroundColor: '#3C3C3C', // Dark header background
+  },
+  tableHeaderText: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#7868e5', // Green text
+  },
+  tableRowEven: {
+    height: 60,
+    backgroundColor: '#2C2C2C', // Dark row background
+  },
+  tableRowOdd: {
+    height: 60,
+    backgroundColor: '#1E1E1E', // Darker row background
+  },
+  tableRowText: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#FFFFFF', // White text
+  },
+  itemNameText: {
+    fontSize: 14,
+    color: '#FFFFFF', // White text
+    paddingHorizontal: 5,
+    flex: 1,
+  },
+  deleteButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 5,
+  },
+  noItemsText: {
+    textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+    fontSize: 16,
+    color: '#888888', // Grey text
+  },
+  submitButton: {
+    backgroundColor: '#4d37e3', // Purple button
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#8FBC8F', // Disabled button color
+  },
+  submitButtonText: {
+    color: '#FFFFFF', // White text
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  summaryTable: {
+    marginTop: 10,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  summaryLabel: {
+    fontSize: 16,
+    color: '#FFFFFF', // White text
+  },
+  summaryValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF', // White text
+  },
+  totalAmountRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#333333', // Dark border
+  },
+  totalAmountLabel: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#7868e5', // Green text
+  },
+  totalAmountValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#7868e5', // Green text
+  },
+  itemSummaryCard: {
+    backgroundColor: '#3C3C3C',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+  },
+  itemSummaryName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 10,
+  },
+  itemSummaryDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  itemSummaryColumn: {
+    flex: 1,
+  },
+  itemSummaryLabel: {
+    fontSize: 14,
+    color: '#BBBBBB',
+    marginBottom: 5,
+  },
+  itemSummaryValue: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    marginBottom: 5,
+  },
+  itemSummaryTotal: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#555555',
+  },
+  itemSummaryTotalLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  itemSummaryTotalValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#7868e5',
+  },
+  orderTotalCard: {
+    backgroundColor: '#7868e5',
+    borderRadius: 10,
+    padding: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  orderTotalLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  orderTotalValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
 });
