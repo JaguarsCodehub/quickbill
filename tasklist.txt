@@ -4,7 +4,6 @@
 - Implement the above for the backend API too
 - Need to add the Party Master in the frontend and backend
 
-
 - User Dashboard: Sales Order, Invoice, Quotation, Purchase Order
 - Input in single inputs
 - Account Master, Product Master, Sales, Purchase, Receipt / Payment
