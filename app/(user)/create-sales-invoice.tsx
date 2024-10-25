@@ -25,7 +25,7 @@ const CreateSalesInvoice = () => {
             <TouchableOpacity>
               <Ionicons name='arrow-back' size={24} color='#FFFFFF' />
             </TouchableOpacity>
-            <Text style={styles.title}>Create Challan</Text>
+            <Text style={styles.title}>Create Invoice</Text>
             <View style={styles.headerIcons}>
               <TouchableOpacity>
                 <Ionicons name='play' size={24} color='#FF0000' />
@@ -56,7 +56,7 @@ const CreateSalesInvoice = () => {
 
           <View style={styles.card}>
             <View style={styles.cardRow}>
-              <Text style={styles.cardLabel}>Challan #</Text>
+              <Text style={styles.cardLabel}>Invoice #</Text>
               <TouchableOpacity>
                 <Text style={styles.editText}>Edit</Text>
               </TouchableOpacity>

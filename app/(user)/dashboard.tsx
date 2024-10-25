@@ -33,7 +33,7 @@ const DropdownSection = ({ title, items, icon, color }: { title: string; items: 
   return (
     <View style={styles.dropdownContainer}>
       <LinearGradient
-        colors={['#3C3C3C', '#7868e5']}
+        colors={['#7868e5', '#7868e5']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.dropdownHeader}
