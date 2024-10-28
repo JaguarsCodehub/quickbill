@@ -1,5 +1,5 @@
-import 'react-native-gesture-handler'; // Import at the top of the file
-
+// import 'react-native-gesture-handler'; // Import at the top of the file
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,10 +21,12 @@ export default function Layout() {
   //   );
   // }
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       {/* <Stack.Screen name="(user)" options={{ headerShown: false }} /> */}
-    </Stack>
+      </Stack>
+    </GestureHandlerRootView>
   );
 }
 
