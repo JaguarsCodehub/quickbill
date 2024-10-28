@@ -10,8 +10,11 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 
 
-const TabButton = ({ title, active }: { title: string; active: boolean }) => (
-  <TouchableOpacity style={[styles.tabButton, active && styles.activeTab]}>
+const TabButton = ({ title, active, onPress }: { title: string; active: boolean; onPress: () => void }) => (
+  <TouchableOpacity 
+    style={[styles.tabButton, active && styles.activeTab]} 
+    onPress={onPress}
+  >
     <Text style={[styles.tabText, active && styles.activeTabText]}>{title}</Text>
   </TouchableOpacity>
 );
@@ -23,46 +26,106 @@ const TransactionItem = ({ title, onPress }: { title: string; onPress: () => voi
   </TouchableOpacity>
 );
 
+const MastersContent = () => (
+  <ScrollView>
+    <View style={styles.categorySection}>
+      <Text style={styles.categoryHeader}>Items</Text>
+      <TransactionItem title="Add Item" onPress={() => {}} />
+      <TransactionItem title="Item Categories" onPress={() => {}} />
+      <TransactionItem title="Item Groups" onPress={() => {}} />
+    </View>
+    
+    <View style={styles.categorySection}>
+      <Text style={styles.categoryHeader}>Parties</Text>
+      <TransactionItem title="Add Customer" onPress={() => {}} />
+      <TransactionItem title="Add Supplier" onPress={() => {}} />
+      <TransactionItem title="Add Employee" onPress={() => {}} />
+    </View>
+  </ScrollView>
+);
+
+const FavouritesContent = () => (
+  <ScrollView>
+    <View style={styles.categorySection}>
+      <Text style={styles.categoryHeader}>Quick Access</Text>
+      <TransactionItem title="Add New Sale" onPress={() => {}} />
+      <TransactionItem title="Add New Purchase" onPress={() => {}} />
+      <TransactionItem title="Recent Transactions" onPress={() => {}} />
+    </View>
+  </ScrollView>
+);
+
+const TransactionsContent = () => (
+  <ScrollView>
+    <View style={styles.categorySection}>
+      <Text style={styles.categoryHeader}>Sales</Text>
+      <TransactionItem title="Order" onPress={() => router.push('/create-sales-order' as Href<string>)} />
+      <TransactionItem title="Delivery Challan" onPress={() => {}} />
+      <TransactionItem title="Sale Invoice" onPress={() => {}} />
+      <TransactionItem title="Sale Return" onPress={() => {}} />
+      <TransactionItem title="Estimate/Quotation" onPress={() => {}} />
+    </View>
+
+    <View style={styles.categorySection}>
+      <Text style={styles.categoryHeader}>Purchase</Text>
+      <TransactionItem title="Purchase Order" onPress={() => {}} />
+      <TransactionItem title="Purchase Challan" onPress={() => {}} />
+      <TransactionItem title="Purchase Invoice" onPress={() => {}} />
+      <TransactionItem title="Purchase Return" onPress={() => {}} />
+      <TransactionItem title="Expense" onPress={() => {}} />
+    </View>
+
+    <View style={styles.categorySection}>
+      <Text style={styles.categoryHeader}>Accounting</Text>
+      <TransactionItem title="Payment In" onPress={() => {}} />
+      <TransactionItem title="Payment Out" onPress={() => {}} />
+    </View>
+  </ScrollView>
+);
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('TRANSACTIONS');
+
+  const handleTabPress = (tab: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setActiveTab(tab);
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'FAVOURITES':
+        return <FavouritesContent />;
+      case 'MASTERS':
+        return <MastersContent />;
+      case 'TRANSACTIONS':
+      default:
+        return <TransactionsContent />;
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: true }} />
       
-      {/* Top Navigation Tabs */}
       <View style={styles.tabContainer}>
-        <TabButton title="FAVOURITES" active={activeTab === 'FAVOURITES'} />
-        <TabButton title="MASTERS" active={activeTab === 'MASTERS'} />
-        <TabButton title="TRANSACTIONS" active={activeTab === 'TRANSACTIONS'} />
+        <TabButton 
+          title="FAVOURITES" 
+          active={activeTab === 'FAVOURITES'} 
+          onPress={() => handleTabPress('FAVOURITES')} 
+        />
+        <TabButton 
+          title="MASTERS" 
+          active={activeTab === 'MASTERS'} 
+          onPress={() => handleTabPress('MASTERS')} 
+        />
+        <TabButton 
+          title="TRANSACTIONS" 
+          active={activeTab === 'TRANSACTIONS'} 
+          onPress={() => handleTabPress('TRANSACTIONS')} 
+        />
       </View>
 
-      <ScrollView>
-        {/* Categories */}
-        <View style={styles.categorySection}>
-          <Text style={styles.categoryHeader}>Sales</Text>
-          <TransactionItem title="Order" onPress={() => router.push('/create-sales-order' as Href<string>)} />
-          <TransactionItem title="Delivery Challan" onPress={() => {}} />
-          <TransactionItem title="Sale Invoice" onPress={() => {}} />
-          <TransactionItem title="Sale Return" onPress={() => {}} />
-          <TransactionItem title="Estimate/Quotation" onPress={() => {}} />
-        </View>
-
-        <View style={styles.categorySection}>
-          <Text style={styles.categoryHeader}>Purchase</Text>
-          <TransactionItem title="Purchase Order" onPress={() => {}} />
-          <TransactionItem title="Purchase Challan" onPress={() => {}} />
-          <TransactionItem title="Purchase Invoice" onPress={() => {}} />
-          <TransactionItem title="Purchase Return" onPress={() => {}} />
-          <TransactionItem title="Expense" onPress={() => {}} />
-        </View>
-
-        <View style={styles.categorySection}>
-          <Text style={styles.categoryHeader}>Accounting</Text>
-          <TransactionItem title="Payment In" onPress={() => {}} />
-          <TransactionItem title="Payment Out" onPress={() => {}} />
-        </View>
-      </ScrollView>
+      {renderContent()}
     </SafeAreaView>
   );
 };

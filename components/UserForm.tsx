@@ -10,6 +10,7 @@ import {
     StatusBar,
     Alert,
     ToastAndroid,
+    ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -144,116 +145,135 @@ const UserForm: React.FC = () => {
         }
     };
 
-    if (loading) {
-        return <LoadingScreen />;
-    }
-
     return (
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle='light-content' />
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Image source={require('../assets/logo.jpg')} style={styles.icon} />
-            <View style={styles.languageSelector}>
-              <Ionicons name='globe-outline' size={20} color='#fff' />
-              <Text style={styles.languageText}>EN</Text>
-              <Ionicons name='chevron-down' size={20} color='#fff' />
+        <StatusBar barStyle="light-content" />
+        <ScrollView style={styles.content}>
+          {/* Logo and Header Section */}
+          <View style={styles.headerContainer}>
+            <Image 
+              source={require('../assets/logo.jpg')} 
+              style={styles.logo}
+            />
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.headerTitle}>Quick Bill</Text>
+              <Text style={styles.headerSubtitle}>
+                Professional Accounting Solution
+              </Text>
             </View>
           </View>
 
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.headerText}>Quick Bill App</Text>
-            <Text style={styles.headerDescription}>
-              Accounting at your fingertips
-            </Text>
-          </View>
-
+          {/* Form Section */}
           <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Ionicons
-                name='person-circle-outline'
-                size={24}
-                color='#7868e5'
-              />
-              <TextInput
-                style={styles.input}
-                placeholder='User Name'
-                placeholderTextColor='#8E8E93'
-                value={username}
-                onChangeText={setUsername}
-              />
+            {/* Username Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Username</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="person-outline" size={20} color="#58a6ff" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your username"
+                  placeholderTextColor="#8b949e"
+                  value={username}
+                  onChangeText={setUsername}
+                />
+              </View>
+              {errors.userId && (
+                <Text style={styles.errorText}>{errors.userId}</Text>
+              )}
             </View>
-            {errors.userId && (
-              <Text style={styles.errorText}>{errors.userId}</Text>
-            )}
 
-            <View style={styles.inputContainer}>
-              <Ionicons name='key-outline' size={24} color='#7868e5' />
-              <TextInput
-                style={styles.input}
-                placeholder='Password'
-                placeholderTextColor='#8E8E93'
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-              />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Ionicons
-                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                  size={24}
-                  color='#7868e5'
+            {/* Password Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="lock-closed-outline" size={20} color="#58a6ff" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your password"
+                  placeholderTextColor="#8b949e"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
                 />
-              </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons
+                    name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={20}
+                    color="#58a6ff"
+                  />
+                </TouchableOpacity>
+              </View>
+              {errors.password && (
+                <Text style={styles.errorText}>{errors.password}</Text>
+              )}
             </View>
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password}</Text>
-            )}
 
-            <View style={styles.inputContainer}>
-              <Ionicons name='calendar-outline' size={24} color='#7868e5' />
-              <Picker
-                selectedValue={year}
-                style={styles.picker}
-                onValueChange={handleYearChange}
-              >
-                <Picker.Item label='Select a Year' value='' />
-                <Picker.Item
-                  label='01 APR 2018 - 31 MAR 2019'
-                  value='18041903'
-                />
-                <Picker.Item
-                  label='01 APR 2019 - 31 MAR 2020'
-                  value='19042003'
-                />
-                <Picker.Item
-                  label='01 APR 2020 - 31 MAR 2021'
-                  value='20042103'
-                />
-                <Picker.Item
-                  label='01 APR 2022 - 31 MAR 2023'
-                  value='22042303'
-                />
-                <Picker.Item
-                  label='01 APR 2023 - 31 MAR 2024'
-                  value='23042403'
-                />
-                <Picker.Item
-                  label='01 APR 2024 - 31 MAR 2025'
-                  value='24042503'
-                />
-              </Picker>
+            {/* Year Picker */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Financial Year</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="calendar-outline" size={20} color="#58a6ff" />
+                <Picker
+                  selectedValue={year}
+                  style={styles.picker}
+                  dropdownIconColor="#58a6ff"
+                  onValueChange={handleYearChange}
+                >
+                  <Picker.Item 
+                    label="Select Financial Year" 
+                    value="" 
+                    style={styles.pickerPlaceholder}
+                  />
+                  <Picker.Item
+                    label='01 APR 2018 - 31 MAR 2019'
+                    value='18041903'
+                  />
+                  <Picker.Item
+                    label='01 APR 2019 - 31 MAR 2020'
+                    value='19042003'
+                  />
+                  <Picker.Item
+                    label='01 APR 2020 - 31 MAR 2021'
+                    value='20042103'
+                  />
+                  <Picker.Item
+                    label='01 APR 2022 - 31 MAR 2023'
+                    value='22042303'
+                  />
+                  <Picker.Item
+                    label='01 APR 2023 - 31 MAR 2024'
+                    value='23042403'
+                  />
+                  <Picker.Item
+                    label='01 APR 2024 - 31 MAR 2025'
+                    value='24042503'
+                  />
+                </Picker>
+              </View>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Log in</Text>
-          </TouchableOpacity>
+          {/* Action Buttons */}
+          <View style={styles.actionContainer}>
+            <TouchableOpacity 
+              style={styles.loginButton}
+              onPress={handleLogin}
+            >
+              <Text style={styles.loginButtonText}>LOGIN</Text>
+              <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </TouchableOpacity>
 
-          <Text style={styles.registerText}>
-            Don't have an account yet?{' '}
-            <Text style={styles.registerLink}>Register Now</Text>
-          </Text>
-        </View>
+            <TouchableOpacity style={styles.registerContainer}>
+              <Text style={styles.registerText}>
+                Don't have an account? {' '}
+                <Text style={styles.registerLink}>Register Now</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+        {loading && <LoadingScreen />}
       </SafeAreaView>
     );
 };
@@ -261,84 +281,101 @@ const UserForm: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0d1117',
   },
   content: {
     flex: 1,
     padding: 20,
-    paddingTop: 60,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  headerContainer: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginTop: 40,
+    marginBottom: 40,
   },
-  icon: {
-    width: 40,
-    height: 40,
-  },
-  languageSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  languageText: {
-    color: '#fff',
-    marginHorizontal: 5,
+  logo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 20,
   },
   headerTextContainer: {
-    alignItems: 'flex-start',
-    marginBottom: 30,
+    alignItems: 'center',
   },
-  headerText: {
+  headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
+    color: '#c9d1d9',
+    marginBottom: 8,
   },
-  headerDescription: {
+  headerSubtitle: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#8b949e',
   },
   formContainer: {
+    backgroundColor: '#161b22',
+    borderRadius: 12,
+    padding: 20,
     marginBottom: 20,
+  },
+  inputWrapper: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    color: '#8b949e',
+    fontSize: 14,
+    marginBottom: 8,
+    marginLeft: 4,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C1E',
-    borderRadius: 10,
-    marginBottom: 15,
-    paddingHorizontal: 15,
+    backgroundColor: '#0d1117',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#30363d',
   },
   input: {
     flex: 1,
-    color: '#fff',
-    paddingVertical: 15,
-    marginLeft: 10,
+    color: '#c9d1d9',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    fontSize: 16,
   },
   picker: {
     flex: 1,
-    color: '#fff',
+    color: '#c9d1d9',
+  },
+  pickerPlaceholder: {
+    color: '#8b949e',
+  },
+  actionContainer: {
+    marginTop: 20,
   },
   loginButton: {
-    backgroundColor: '#7868e5',
-    paddingVertical: 15,
-    borderRadius: 10,
+    backgroundColor: '#58a6ff',
+    borderRadius: 8,
+    paddingVertical: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   loginButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+    marginRight: 8,
+  },
+  registerContainer: {
+    alignItems: 'center',
   },
   registerText: {
-    color: '#8E8E93',
-    textAlign: 'center',
+    color: '#8b949e',
+    fontSize: 14,
   },
   registerLink: {
-    color: '#7868e5',
+    color: '#58a6ff',
   },
   errorText: {
     color: '#FF3B30',

@@ -1,8 +1,11 @@
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, TextInput, Modal } from 'react-native'
-import React, { useState, useCallback, useRef, useMemo } from 'react'
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, TextInput, Modal, ActivityIndicator, Alert } from 'react-native'
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
+import { Stack, useRouter } from 'expo-router'
 import BottomSheet from '@gorhom/bottom-sheet'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import SearchablePicker from '@/components/SearchablePicker'
 
 interface OrderItem {
   id: string;
@@ -14,6 +17,20 @@ interface OrderItem {
   total: number;
 }
 
+interface Customer {
+  CustomerID: number;
+  CustomerName: string;
+  Code: string;
+}
+
+interface Item {
+  ItemID: string;
+  ItemName: string;
+  SalRate: number;
+  ItemCode: string;
+  // ... other fields from your API
+}
+
 const CreateSalesOrder = () => {
   const router = useRouter();
   const [orderType, setOrderType] = useState('Retail Order');
@@ -21,11 +38,13 @@ const CreateSalesOrder = () => {
   const [rate, setRate] = useState('100');
   const [quantity, setQuantity] = useState('1');
   const [discount, setDiscount] = useState('');
+  const [nextSerial, setNextSerial] = useState<string>('');
   const [notes, setNotes] = useState('');
   
   // Bottom sheet refs and snap points
   const itemDetailsSheetRef = useRef<BottomSheet>(null);
   const itemDetailsSnapPoints = useMemo(() => ['5%', '25%', '90%'], []); // Using 5% as minimum
+
 
   // Replace itemSelectSheetRef with modal state
   const [isItemSelectModalVisible, setIsItemSelectModalVisible] = useState(false);
@@ -37,15 +56,98 @@ const CreateSalesOrder = () => {
   // Add new state for order items
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
 
-  // Add Item button handler
-  const handleAddItem = useCallback(() => {
-    setIsItemSelectModalVisible(true);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [items, setItems] = useState<Item[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Add new state for products search and loading
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isProductsLoading, setIsProductsLoading] = useState(false);
+
+  // Add memoized filtered items
+  const filteredItems = useMemo(() => {
+    return items.filter(item => 
+      item.ItemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.ItemCode.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [items, searchQuery]);
+
+  // Add useEffect for initial data fetch
+  useEffect(() => {
+    fetchData();
   }, []);
 
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      await Promise.all([fetchCustomers(), fetchItems()]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('UserID');
+      const response = await axios.get('https://quickbill-backlend.vercel.app/customers', {
+        headers: {
+          'UserID': userId,
+        }
+      });
+      setCustomers(response.data);
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+      throw error;
+    }
+  };
+
+  const fetchItems = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('UserID');
+      const companyId = await AsyncStorage.getItem('CompanyID');
+      const prefix = await AsyncStorage.getItem('SelectedYear');
+
+      const response = await axios.get('https://quickbill-backlend.vercel.app/items', {
+        headers: {
+          'UserID': userId,
+          'CompanyID': companyId,
+          'Prefix': prefix,
+        }
+      });
+      setItems(response.data.items);
+      setNextSerial(response.data.nextSerial);
+    } catch (error) {
+      console.error('Error fetching items:', error);
+      throw error;
+    }
+  };
+
+  // Modify handleAddItem to show loading state
+  const handleAddItem = useCallback(async () => {
+    setIsProductsLoading(true);
+    setIsItemSelectModalVisible(true);
+    // If items are not yet loaded, fetch them
+    if (items.length === 0) {
+      try {
+        await fetchItems();
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    }
+    setIsProductsLoading(false);
+  }, [items.length]);
+
   // Item selection handler
-  const handleItemSelect = (item: any) => {
+  const handleItemSelect = (item: Item) => {
     setSelectedItem(item);
-    setRate(item.price.toString());
+    // Use SalRate instead of price
+    setRate(item.SalRate.toString());
+    // Calculate initial value based on quantity and SalRate
+    const initialValue = Number(quantity) * item.SalRate;
+    setRate(initialValue.toString());
     setIsItemSelectModalVisible(false);
     setIsItemDetailsModalVisible(true);
   };
@@ -54,14 +156,22 @@ const CreateSalesOrder = () => {
   const handleAddItemToOrder = () => {
     if (!selectedItem) return;
 
+    const qty = Number(quantity);
+    const itemRate = Number(rate) || selectedItem.SalRate;
+    const itemValue = qty * itemRate;
+    const discountAmount = discount ? (itemValue * Number(discount)) / 100 : 0;
+    const taxable = itemValue - discountAmount;
+    const taxRate = 0.18; // 18% GST
+    const taxAmount = taxable * taxRate;
+
     const newItem: OrderItem = {
-      id: selectedItem.id,
-      name: selectedItem.name,
-      price: Number(selectedItem.price),
-      quantity: Number(quantity),
-      rate: Number(rate),
-      discount: discount ? Number(discount) : 0,
-      total: Number(rate) * Number(quantity)
+      id: selectedItem.ItemID, // Use ItemID instead of id
+      name: selectedItem.ItemName, // Use ItemName instead of name
+      price: selectedItem.SalRate, // Use SalRate instead of price
+      quantity: qty,
+      rate: itemRate,
+      discount: Number(discount) || 0,
+      total: taxable + taxAmount
     };
 
     setOrderItems([...orderItems, newItem]);
@@ -69,7 +179,7 @@ const CreateSalesOrder = () => {
     
     // Reset form
     setSelectedItem(null);
-    setRate('100');
+    setRate('');
     setQuantity('1');
     setDiscount('');
   };
@@ -79,8 +189,38 @@ const CreateSalesOrder = () => {
     return orderItems.reduce((sum, item) => sum + item.total, 0);
   }, [orderItems]);
 
+  // Add calculation for order summary
+  const calculateOrderSummary = () => {
+    return orderItems.reduce((summary, item) => {
+      const itemValue = item.quantity * item.rate;
+      const discountAmount = (itemValue * (item.discount || 0)) / 100;
+      const taxable = itemValue - discountAmount;
+      const taxAmount = taxable * 0.18; // 18% GST
+
+      return {
+        totalValue: summary.totalValue + itemValue,
+        totalDiscount: summary.totalDiscount + discountAmount,
+        totalTaxable: summary.totalTaxable + taxable,
+        totalTax: summary.totalTax + taxAmount,
+        totalAmount: summary.totalAmount + (taxable + taxAmount)
+      };
+    }, {
+      totalValue: 0,
+      totalDiscount: 0,
+      totalTaxable: 0,
+      totalTax: 0,
+      totalAmount: 0
+    });
+  };
+
+  const handleSaveOrder = () => {
+    Alert.alert('Order Saved', 'This Feature is under development');
+    // console.log('Saving order...');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -92,10 +232,13 @@ const CreateSalesOrder = () => {
         </View>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Order Number and Date */}
         <View style={styles.row}>
-          <Text style={styles.orderNumber}>SO002</Text>
+          <Text style={styles.orderNumber}>Order No: SOR/{nextSerial}</Text>
           <TouchableOpacity style={styles.dateButton}>
             <Text style={styles.dateText}>28-Oct-2024</Text>
             <Ionicons name='calendar' size={20} color='#8b949e' />
@@ -103,12 +246,22 @@ const CreateSalesOrder = () => {
         </View>
 
         {/* Customer Section */}
-        <View style={styles.section}>
+        <View style={[styles.section, { zIndex: 100 }]}>
           <Text style={styles.sectionLabel}>Customer</Text>
-          <TouchableOpacity style={styles.customerButton}>
-            <Text style={styles.customerText}>Demo Customer</Text>
-            <Ionicons name='chevron-down' size={20} color='#8b949e' />
-          </TouchableOpacity>
+          <SearchablePicker
+            items={customers}
+            onSelect={setSelectedCustomer}
+            placeholder="Search customers..."
+            labelKey="CustomerName"
+            valueKey="CustomerID"
+            icon="person-outline"
+            selectedItem={selectedCustomer}
+          />
+          {selectedCustomer && (
+            <View style={styles.selectedInfo}>
+              <Text style={styles.selectedInfoText}>{selectedCustomer.CustomerName}</Text>
+            </View>
+          )}
           <View style={styles.balanceRow}>
             <Text style={styles.balanceLabel}>To Receive</Text>
             <Text style={styles.balanceAmount}>₹ 0</Text>
@@ -121,7 +274,7 @@ const CreateSalesOrder = () => {
             <Text style={styles.itemsTitle}>Items</Text>
             <TouchableOpacity
               style={styles.addItemButton}
-              onPress={() => setIsItemSelectModalVisible(true)}
+              onPress={handleAddItem}
             >
               <Ionicons name='add' size={20} color='#58a6ff' />
               <Text style={styles.addItemText}>Item</Text>
@@ -153,21 +306,47 @@ const CreateSalesOrder = () => {
                 <Text style={styles.summaryLabel}>Total Items</Text>
                 <Text style={styles.summaryValue}>{orderItems.length}</Text>
               </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Total Amount</Text>
-                <Text style={styles.summaryValue}>₹{orderTotal}</Text>
-              </View>
+              {/* Add detailed summary using calculateOrderSummary */}
+              {(() => {
+                const summary = calculateOrderSummary();
+                return (
+                  <>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Total Value</Text>
+                      <Text style={styles.summaryValue}>₹{summary.totalValue.toFixed(2)}</Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Discount</Text>
+                      <Text style={styles.summaryValue}>₹{summary.totalDiscount.toFixed(2)}</Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Taxable Amount</Text>
+                      <Text style={styles.summaryValue}>₹{summary.totalTaxable.toFixed(2)}</Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Tax (18% GST)</Text>
+                      <Text style={styles.summaryValue}>₹{summary.totalTax.toFixed(2)}</Text>
+                    </View>
+                    <View style={[styles.summaryRow, styles.finalTotal]}>
+                      <Text style={[styles.summaryLabel, styles.finalTotalLabel]}>Total Amount</Text>
+                      <Text style={[styles.summaryValue, styles.finalTotalAmount]}>
+                        ₹{summary.totalAmount.toFixed(2)}
+                      </Text>
+                    </View>
+                  </>
+                );
+              })()}
             </View>
           )}
         </View>
       </ScrollView>
 
       {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton}>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSaveOrder}>
         <Text style={styles.saveButtonText}>SAVE</Text>
       </TouchableOpacity>
 
-      {/* Replace Item Selection Bottom Sheet with Modal */}
+      {/* Update Item Selection Modal */}
       <Modal
         visible={isItemSelectModalVisible}
         animationType='fade'
@@ -186,8 +365,8 @@ const CreateSalesOrder = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Search bar */}
-            {/* <View style={styles.searchContainer}>
+            {/* Add Search bar */}
+            <View style={styles.searchContainer}>
               <Ionicons
                 name='search'
                 size={20}
@@ -198,28 +377,35 @@ const CreateSalesOrder = () => {
                 style={styles.searchInput}
                 placeholder='Search products...'
                 placeholderTextColor='#8b949e'
+                value={searchQuery}
+                onChangeText={setSearchQuery}
               />
-            </View> */}
+            </View>
 
-            <ScrollView style={styles.modalItemsList}>
-              {/* Sample Items */}
-              <TouchableOpacity
-                style={styles.itemOption}
-                onPress={() =>
-                  handleItemSelect({
-                    id: '1',
-                    name: 'Sample Item',
-                    price: 100.00,
-                  })
-                }
-              >
-                <View>
-                    <Text style={styles.itemName}>Sample Item</Text>
-                  <Text style={styles.itemPrice}>₹ 100.00</Text>
-                </View>
-                <Ionicons name='chevron-forward' size={20} color='#8b949e' />
-              </TouchableOpacity>
-            </ScrollView>
+            {/* Show loading indicator or items list */}
+            {isProductsLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#58a6ff" />
+                <Text style={styles.loadingText}>Loading products...</Text>
+              </View>
+            ) : (
+              <ScrollView style={styles.modalItemsList}>
+                {filteredItems.map((item) => (
+                  <TouchableOpacity
+                    key={item.ItemID}
+                    style={styles.itemOption}
+                    onPress={() => handleItemSelect(item)}
+                  >
+                    <View>
+                      <Text style={styles.itemName}>{item.ItemName}</Text>
+                      <Text style={styles.itemCode}>{item.ItemCode}</Text>
+                      <Text style={styles.itemPrice}>₹ {item.SalRate}</Text>
+                    </View>
+                    <Ionicons name='chevron-forward' size={20} color='#8b949e' />
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
           </View>
         </View>
       </Modal>
@@ -250,8 +436,10 @@ const CreateSalesOrder = () => {
                 <Text style={styles.inputLabel}>Selected Item</Text>
                 <TouchableOpacity style={styles.itemSelector}>
                   <View>
-                    <Text style={styles.selectedItemText}>{selectedItem?.name}</Text>
-                    <Text style={styles.itemPrice}>₹ {selectedItem?.price}</Text>
+                    <Text style={styles.selectedItemText}>
+                      {selectedItem?.ItemName}
+                    </Text>
+                    <Text style={styles.itemPrice}>₹ {selectedItem?.SalRate}</Text>
                   </View>
                   <Ionicons name='chevron-down' size={20} color='#8b949e' />
                 </TouchableOpacity>
@@ -315,7 +503,7 @@ const CreateSalesOrder = () => {
             </ScrollView>
 
             <View style={styles.bottomButtons}>
-              <TouchableOpacity 
+              {/* <TouchableOpacity 
                 style={styles.doneNewButton}
                 onPress={() => {
                   handleAddItemToOrder();
@@ -323,7 +511,7 @@ const CreateSalesOrder = () => {
                 }}
               >
                 <Text style={styles.doneNewButtonText}>DONE & NEW</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <TouchableOpacity
                 style={styles.doneButton}
                 onPress={handleAddItemToOrder}
@@ -344,6 +532,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0d1117',
+    marginTop: 30,
   },
   header: {
     backgroundColor: '#161b22',
@@ -382,7 +571,7 @@ const styles = StyleSheet.create({
   orderNumber: {
     color: '#c9d1d9',
     fontSize: 16,
-    textDecorationLine: 'underline',
+    // textDecorationLine: 'underline',
   },
   dateButton: {
     flexDirection: 'row',
@@ -396,6 +585,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#30363d',
+    position: 'relative', // Add this
   },
   sectionLabel: {
     color: '#8b949e',
@@ -449,6 +639,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#58a6ff',
     padding: 16,
     alignItems: 'center',
+    margin: 10,
+    borderRadius: 10,
   },
   saveButtonText: {
     color: '#ffffff',
@@ -488,22 +680,22 @@ const styles = StyleSheet.create({
   bottomSheetContent: {
     flex: 1,
   },
-//   itemOption: {
-//     padding: 16,
-//     borderBottomWidth: 1,
-//     borderBottomColor: '#30363d',
-//   },
+  //   itemOption: {
+  //     padding: 16,
+  //     borderBottomWidth: 1,
+  //     borderBottomColor: '#30363d',
+  //   },
   itemOptionText: {
     color: '#c9d1d9',
     fontSize: 16,
   },
-  searchInput: {
-    backgroundColor: '#0d1117',
-    color: '#c9d1d9',
-    padding: 12,
-    margin: 16,
-    borderRadius: 6,
-  },
+  //   searchInput: {
+  //     backgroundColor: '#0d1117',
+  //     color: '#c9d1d9',
+  //     padding: 12,
+  //     margin: 16,
+  //     borderRadius: 6,
+  //   },
   detailsContent: {
     padding: 16,
   },
@@ -593,6 +785,7 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     backgroundColor: '#58a6ff',
+    borderRadius: 10,
   },
   doneNewButtonText: {
     color: '#c9d1d9',
@@ -649,15 +842,33 @@ const styles = StyleSheet.create({
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#30363d',
+    backgroundColor: '#0d1117',
   },
   searchIcon: {
     marginRight: 8,
   },
-//   searchInput: {
-//     flex: 1,
-//     color: '#c9d1d9',
-//     fontSize: 16,
-//   },
+  searchInput: {
+    flex: 1,
+    color: '#c9d1d9',
+    fontSize: 16,
+    height: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    color: '#c9d1d9',
+    marginTop: 12,
+    fontSize: 16,
+  },
+  itemCode: {
+    color: '#8b949e',
+    fontSize: 12,
+    marginBottom: 2,
+  },
   modalItemsList: {
     padding: 16,
   },
@@ -725,11 +936,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
     justifyContent: 'center',
   },
-//   discountContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'flex-start',
-//     gap: 12,
-//   },
+  //   discountContainer: {
+  //     flexDirection: 'row',
+  //     alignItems: 'flex-start',
+  //     gap: 12,
+  //   },
   discountInputWrapper: {
     flex: 1,
   },
@@ -755,12 +966,12 @@ const styles = StyleSheet.create({
   finalTotal: {
     borderTopWidth: 1,
     borderTopColor: '#30363d',
-    marginTop: 8,
     paddingTop: 8,
-    marginBottom: 0,
+    marginTop: 8,
   },
   finalTotalLabel: {
     fontWeight: 'bold',
+    color: '#c9d1d9',
   },
   finalTotalAmount: {
     color: '#58a6ff',
@@ -775,11 +986,11 @@ const styles = StyleSheet.create({
     color: '#c9d1d9',
     fontWeight: '500',
   },
-//   itemPrice: {
-//     color: '#58a6ff',
-//     fontSize: 14,
-//     marginTop: 2,
-//   },
+  //   itemPrice: {
+  //     color: '#58a6ff',
+  //     fontSize: 14,
+  //     marginTop: 2,
+  //   },
   // Add these styles to the main styles object
   orderItemCard: {
     backgroundColor: '#0d1117',
@@ -831,5 +1042,26 @@ const styles = StyleSheet.create({
     color: '#c9d1d9',
     fontSize: 15,
     fontWeight: '500',
+  },
+  searchablePickerContainer: {
+    marginBottom: 12,
+  },
+  searchablePickerInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#262647',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  selectedInfo: {
+    marginTop: 8,
+    padding: 12,
+    backgroundColor: '#262647',
+    borderRadius: 10,
+  },
+  selectedInfoText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
