@@ -60,9 +60,9 @@ const TransactionsContent = () => (
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Sales</Text>
       <TransactionItem title="Order" onPress={() => router.push('/create-sales-order' as Href<string>)} />
-      <TransactionItem title="Delivery Challan" onPress={() => {}} />
-      <TransactionItem title="Sale Invoice" onPress={() => {}} />
-      <TransactionItem title="Sale Return" onPress={() => {}} />
+      <TransactionItem title="Delivery Challan" onPress={() => router.push('/(user)/create-sales-challan')} />
+      <TransactionItem title="Sale Invoice" onPress={() => router.push('/(user)/create-sales-invoice' as Href<string>)} />
+      <TransactionItem title="Sale Return" onPress={() => router.push('/(user)/create-sales-return' as Href<string>)} />
       <TransactionItem title="Estimate/Quotation" onPress={() => {}} />
     </View>
 

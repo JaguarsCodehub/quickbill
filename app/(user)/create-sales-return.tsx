@@ -16,7 +16,7 @@ import { Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import SearchablePicker from '@/components/SearchablePicker';
 
-const CreateSalesInvoice = () => {
+const CreateSalesReturn = () => {
   const customers = [
     {
       id: '1',
@@ -28,7 +28,7 @@ const CreateSalesInvoice = () => {
     // Add more customer objects as needed
   ];
 
-  const [challanNumber, setChallanNumber] = useState('IN-1');
+  const [invoiceNumber, setInvoiceNumber] = useState('RE-1');
   const [date, setDate] = useState('24-10-2024');
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
@@ -140,9 +140,9 @@ const CreateSalesInvoice = () => {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Invoice</Text>
+          <Text style={styles.headerTitle}>Return</Text>
           <TouchableOpacity style={styles.orderTypeButton}>
-            <Text style={styles.orderTypeText}>Sales Invoice</Text>
+            <Text style={styles.orderTypeText}>Sales Return</Text>
             <Ionicons name='chevron-down' size={20} color='#8b949e' />
           </TouchableOpacity>
         </View>
@@ -151,7 +151,7 @@ const CreateSalesInvoice = () => {
       <ScrollView style={styles.content} keyboardShouldPersistTaps='handled'>
         {/* Challan Number and Date */}
         <View style={styles.row}>
-          <Text style={styles.orderNumber}>Invoice No: IN/{challanNumber}</Text>
+          <Text style={styles.orderNumber}>Return No: RT/{invoiceNumber}</Text>
           <TouchableOpacity style={styles.dateButton}>
             <Text style={styles.dateText}>{date}</Text>
             <Ionicons name='calendar' size={20} color='#8b949e' />
@@ -968,4 +968,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateSalesInvoice;
+export default CreateSalesReturn;
