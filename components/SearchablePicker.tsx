@@ -51,9 +51,9 @@ const SearchablePicker = ({
       </View>
       {showDropdown && (
         <>
-          <TouchableOpacity 
-            style={styles.backdrop} 
-            onPress={handleBackgroundPress} 
+          <TouchableOpacity
+            style={styles.backdrop}
+            onPress={handleBackgroundPress}
             activeOpacity={1}
           />
           <View style={styles.dropdownContainer}>
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#262647',
     borderRadius: 10,
     maxHeight: 200, // Set a fixed maximum height
-    zIndex: 999,
+    zIndex: 9999,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: {
