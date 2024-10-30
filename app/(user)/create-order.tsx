@@ -462,7 +462,7 @@ const CreateOrder = () => {
         subType: 'RS',
         type: 'SOR',
         prefix: prefix || '',
-        narration: '', // Add a narration if needed
+        narration: item.notes || '', // Add the item's note here
         branchCode: '', // Add a branchCode if needed
         unit: '', // Add a unit if needed
         discAmt: item.Disc,
@@ -585,17 +585,13 @@ const CreateOrder = () => {
             <View style={styles.headerInfo}>
               <View style={styles.headerItem}>
                 <Ionicons name="calendar-outline" size={24} color="#7868e5" />
-                <Text style={styles.headerText}>Order Date:</Text>
+                <Text style={styles.headerText}>Date:</Text>
                 <Text style={styles.headerValue}>{currentDate}</Text>
               </View>
-              {/* <View style={styles.headerItem}>
-                                <Ionicons name="document-text-outline" size={24} color="#7868e5" />
-                                <Text style={styles.headerText}>DocNo:</Text>
-                                <Text style={styles.headerValue}>{nextSerial}</Text>
-                            </View> */}
+
               <View style={styles.headerItem}>
                 <Ionicons name="document-text-outline" size={24} color="#7868e5" />
-                <Text style={styles.headerText}>Order No:</Text>
+                <Text style={styles.headerText}>No:</Text>
                 <Text style={styles.headerValue}>SOR/{nextSerial}</Text>
               </View>
             </View>
@@ -614,149 +610,127 @@ const CreateOrder = () => {
             />
             {selectedCustomer && (
               <View style={styles.selectedInfo}>
-                <Ionicons name="checkmark-circle" size={24} color="#7868e5" />
+                <Ionicons name="checkmark-circle" size={24} color="#00c06c" />
                 <Text style={styles.selectedInfoText}>{selectedCustomer.CustomerName}</Text>
               </View>
             )}
+
+            <View style={{ marginTop: 10 }}>
+              <Text style={styles.sectionTitle}>Item</Text>
+              <TouchableOpacity style={{ backgroundColor: "#000", borderRadius: 10, padding: 10, display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", }} onPress={handleAddItem}>
+                <Text style={{ color: "white", fontSize: 15, fontWeight: "500" }}>Add Item</Text>
+                <Ionicons name="add-circle" size={24} color="#FFF" style={{ marginLeft: 5 }} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Item</Text>
-            <TouchableOpacity onPress={handleAddItem}>
-              <Text style={{ fontSize: 18, color: "white", backgroundColor: "#7868e5", borderRadius: 10, padding: 10 }}>+ Add Item</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Order Items</Text>
+              {orderItems.length > 0 && (
+                <View style={styles.orderTotal}>
+                  <Text style={styles.orderTotalText}>
+                    Total: ₹{orderSummary.totalAmount.toFixed(2)}
+                  </Text>
+                </View>
+              )}
+            </View>
 
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Order Items</Text>
             {orderItems.length > 0 ? (
               <View style={styles.orderItemsList}>
                 {orderItems.map((item, index) => (
                   <View key={index} style={styles.orderItemCard}>
                     <View style={styles.orderItemHeader}>
                       <View style={styles.orderItemMain}>
-                        <Text style={styles.orderItemName}>{item.ItemName}</Text>
-                        <Text style={styles.orderItemQuantity}>{item.Qty} pcs × ₹{item.Rate.toFixed(2)}</Text>
+                        <View style={styles.orderItemTitleRow}>
+                          <Text style={styles.orderItemName}>{item.ItemName}</Text>
+                          <TouchableOpacity
+                            onPress={() => removeItemFromOrder(index)}
+                            style={styles.removeButton}
+                          >
+                            <Ionicons name="close-circle" size={24} color="#FF3B30" />
+                          </TouchableOpacity>
+                        </View>
+                        <Text style={styles.itemCode}>Itemcode: {item.ItemCode}</Text>
                       </View>
-                      <TouchableOpacity
-                        onPress={() => removeItemFromOrder(index)}
-                        style={styles.removeButton}
-                      >
-                        <Ionicons name="close-circle" size={24} color="#FF3B30" />
-                      </TouchableOpacity>
                     </View>
 
-                    {item.notes && (
-                      <View style={styles.notesContainer}>
-                        <Ionicons name="document-text-outline" size={16} color="#666666" />
-                        <Text style={styles.notesText}>{item.notes}</Text>
+                    <View style={styles.orderDetailsGrid}>
+                      <View style={styles.detailRow}>
+                        <View style={styles.detailCol}>
+                          <Text style={styles.detailLabel}>Quantity</Text>
+                          <Text style={styles.detailValue}>{item.Qty} pcs</Text>
+                        </View>
+                        <View style={styles.detailCol}>
+                          <Text style={styles.detailLabel}>Rate</Text>
+                          <Text style={styles.detailValue}>₹{item.Rate.toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.detailCol}>
+                          <Text style={styles.detailLabel}>Value</Text>
+                          <Text style={styles.detailValue}>₹{item.Value.toFixed(2)}</Text>
+                        </View>
                       </View>
-                    )}
 
-                    <View style={styles.orderItemFooter}>
-                      <Text style={styles.orderItemAmount}>₹{item.Amount.toFixed(2)}</Text>
-                      {item.discountAmount > 0 && (
-                        <Text style={styles.discountText}>
-                          Discount: {item.discountPercentage}% (₹{item.discountAmount.toFixed(2)})
-                        </Text>
+                      {(item.discountPercentage > 0 || item.discountAmount > 0) && (
+                        <View style={styles.discountRow}>
+                          <View style={styles.detailCol}>
+                            <Text style={styles.detailLabel}>Discount</Text>
+                            <Text style={styles.discountValue}>
+                              {item.discountPercentage}% (₹{item.discountAmount.toFixed(2)})
+                            </Text>
+                          </View>
+                          <View style={styles.detailCol}>
+                            <Text style={styles.detailLabel}>After Discount</Text>
+                            <Text style={styles.detailValue}>₹{item.Taxable.toFixed(2)}</Text>
+                          </View>
+                        </View>
+                      )}
+
+                      <View style={styles.taxRow}>
+                        <View style={styles.detailCol}>
+                          <Text style={styles.detailLabel}>Tax</Text>
+                          <Text style={styles.detailValue}>₹{item.TaxAmt.toFixed(2)}</Text>
+                        </View>
+                        <View style={styles.detailCol}>
+                          <Text style={styles.detailLabel}>Net Amount</Text>
+                          <Text style={styles.netAmountValue}>₹{item.Amount.toFixed(2)}</Text>
+                        </View>
+                      </View>
+
+                      {item.notes && (
+                        <View style={styles.notesContainer}>
+                          <Ionicons name="document-text-outline" size={16} color="#666666" />
+                          <Text style={styles.notesText}>{item.notes}</Text>
+                        </View>
                       )}
                     </View>
                   </View>
                 ))}
+
+                <View style={styles.orderSummaryFooter}>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Sub Total:</Text>
+                    <Text style={styles.summaryValue}>₹{orderSummary.totalValueAmount.toFixed(2)}</Text>
+                  </View>
+                  {orderSummary.totalDiscountAmount > 0 && (
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Total Discount:</Text>
+                      <Text style={styles.discountValue}>-₹{orderSummary.totalDiscountAmount.toFixed(2)}</Text>
+                    </View>
+                  )}
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Total Tax:</Text>
+                    <Text style={styles.summaryValue}>₹{orderSummary.totalTaxAmount.toFixed(2)}</Text>
+                  </View>
+                  <View style={[styles.summaryRow, styles.netAmountRow]}>
+                    <Text style={styles.netAmountLabel}>Net Amount:</Text>
+                    <Text style={styles.netAmountTotal}>₹{orderSummary.totalAmount.toFixed(2)}</Text>
+                  </View>
+                </View>
               </View>
             ) : (
               <Text style={styles.noItemsText}>No items added to the order yet.</Text>
             )}
-          </View>
-
-          <View style={styles.card}>
-            <View style={styles.summaryTitleContainer}>
-              <Ionicons name="receipt-outline" size={24} color="#7868e5" />
-              <Text style={styles.summaryTitle}>Order Summary</Text>
-            </View>
-
-            {orderSummary.itemBreakdown.map((item, index) => (
-              <View key={index}>
-                <View style={styles.itemSummaryCard}>
-                  <View style={styles.itemHeaderRow}>
-                    <View style={styles.itemNumberBadge}>
-                      <Text style={styles.itemNumberText}>{index + 1}</Text>
-                    </View>
-                    <Text style={styles.itemSummaryName}>{item.name}</Text>
-                  </View>
-
-                  <View style={styles.itemSummaryGrid}>
-                    <View style={styles.summaryRow}>
-                      <View style={styles.summaryCol}>
-                        <Text style={styles.summaryLabel}>Quantity:</Text>
-                        <Text style={styles.summaryValue}>{item.qty} Pcs</Text>
-                      </View>
-                      <View style={styles.summaryCol}>
-                        <Text style={styles.summaryLabel}>Rate:</Text>
-                        <Text style={styles.summaryValue}>₹{item.rate.toFixed(2)}</Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.summaryRow}>
-                      <View style={styles.summaryCol}>
-                        <Text style={styles.summaryLabel}>Value:</Text>
-                        <Text style={styles.summaryValue}>₹{item.value.toFixed(2)}</Text>
-                      </View>
-                      <View style={styles.summaryCol}>
-                        <Text style={styles.summaryLabel}>Discount:</Text>
-                        <Text style={styles.summaryValue}>
-                          {item.discountPercentage}% (₹{item.discountAmount.toFixed(2)})
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.summaryRow}>
-                      <View style={styles.summaryCol}>
-                        <Text style={styles.summaryLabel}>Taxable Amount:</Text>
-                        <Text style={styles.summaryValue}>₹{item.taxable.toFixed(2)}</Text>
-                      </View>
-                      <View style={styles.summaryCol}>
-                        <Text style={styles.summaryLabel}>Tax Amount:</Text>
-                        <Text style={styles.summaryValue}>₹{item.taxAmt.toFixed(2)}</Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.itemTotalRow}>
-                      <Text style={styles.itemTotalLabel}>Net Amount:</Text>
-                      <Text style={styles.itemTotalValue}>₹{item.amount.toFixed(2)}</Text>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Add separator if not the last item */}
-                {index < orderSummary.itemBreakdown.length - 1 && (
-                  <View style={styles.orderSeparator}>
-                    <View style={styles.separatorLine} />
-                    <View style={styles.separatorDot} />
-                    <View style={styles.separatorLine} />
-                  </View>
-                )}
-              </View>
-            ))}
-
-            <View style={styles.orderTotalCard}>
-              <View style={styles.orderTotalRow}>
-                <Text style={styles.orderTotalLabel}>Sub Total:</Text>
-                <Text style={styles.orderTotalValue}>₹{orderSummary.totalValueAmount.toFixed(2)}</Text>
-              </View>
-              <View style={styles.orderTotalRow}>
-                <Text style={styles.orderTotalLabel}>Total Discount:</Text>
-                <Text style={styles.orderTotalValue}>₹{orderSummary.totalDiscountAmount.toFixed(2)}</Text>
-              </View>
-              <View style={styles.orderTotalRow}>
-                <Text style={styles.orderTotalLabel}>Total Tax:</Text>
-                <Text style={styles.orderTotalValue}>₹{orderSummary.totalTaxAmount.toFixed(2)}</Text>
-              </View>
-              <View style={[styles.orderTotalRow, styles.finalTotal]}>
-                <Text style={styles.finalTotalLabel}>Net Amount:</Text>
-                <Text style={styles.finalTotalValue}>₹{orderSummary.totalAmount.toFixed(2)}</Text>
-              </View>
-            </View>
           </View>
 
           <TouchableOpacity
@@ -783,20 +757,29 @@ const CreateOrder = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Product</Text>
-              <TouchableOpacity onPress={() => setIsItemSelectModalVisible(false)}>
-                <Ionicons name='close' size={24} color='#c9d1d9' />
+              <View>
+                <Text style={styles.modalTitle}>Select Product</Text>
+                <Text style={styles.modalDescription}>Choose a product to add to your order</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setIsItemSelectModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name='close' size={24} color='#333333' />
               </TouchableOpacity>
             </View>
-            <SearchablePicker
-              items={items}
-              onSelect={handleItemSelect}
-              placeholder="Search items..."
-              labelKey="ItemName"
-              valueKey="ItemCode"
-              icon="cube-outline"
-              selectedItem={selectedItem}
-            />
+
+            <View style={styles.modalBody}>
+              <SearchablePicker
+                items={items}
+                onSelect={handleItemSelect}
+                placeholder="Search items..."
+                labelKey="ItemName"
+                valueKey="ItemCode"
+                icon="cube-outline"
+                selectedItem={selectedItem}
+              />
+            </View>
           </View>
         </View>
       </Modal>
@@ -808,7 +791,7 @@ const CreateOrder = () => {
         transparent={true}
         onRequestClose={() => setIsItemDetailsModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
+        <View style={styles.itemModalOverlay}>
           <View style={[styles.itemModalContent, { width: '90%', maxHeight: '80%' }]}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.modalHeader}>
@@ -944,12 +927,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headerInfo: {
-    flexDirection: 'column',
+    flexDirection: 'row',
+    justifyContent: "space-between"
   },
   headerItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 2,
   },
   headerText: {
     fontSize: 16,
@@ -962,12 +946,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
     color: '#333333', // Darker text
+    // marginLeft: 5
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
     color: '#333333', // Darker text
-    marginBottom: 12,
+    marginTop: 8,
+    marginBottom: 12
   },
   pickerContainer: {
     marginBottom: 12,
@@ -975,7 +961,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E0E6ED', // Light input background
+    backgroundColor: '#f1f1f1', // Light input background
     borderRadius: 10,
     paddingHorizontal: 12,
   },
@@ -1006,12 +992,12 @@ const styles = StyleSheet.create({
   selectedInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    // marginTop: 8,
   },
   selectedInfoText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1E88E5', // Blue accent
+    color: '#00c06c', // Blue accent
     marginLeft: 8,
   },
   itemDetails: {
@@ -1180,12 +1166,12 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 16,
-    color: '#616161', // White text
+    color: '#888888', // White text
   },
   summaryValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#616161', // White text
+    color: '#888888', // White text
   },
   totalAmountRow: {
     flexDirection: 'row',
@@ -1289,16 +1275,32 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Lighter overlay
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 20,
   },
   modalContent: {
-    backgroundColor: '#FFFFFF', // Light background
-    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 500,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  itemModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     padding: 10,
-    width: '80%',
   },
   itemModalContent: {
-    backgroundColor: '#FFFFFF', // Light background
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     padding: 10,
     width: '100%',
@@ -1306,15 +1308,29 @@ const styles = StyleSheet.create({
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 10
+    alignItems: 'flex-start',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E6ED',
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333333', // Dark text
-    marginLeft: 10,
+    fontWeight: '700',
+    color: '#333333',
+    marginBottom: 4,
+  },
+  modalDescription: {
+    fontSize: 14,
+    color: '#666666',
+    marginTop: 4,
+  },
+  closeButton: {
+    padding: 8,
+    marginTop: -8,
+    marginRight: -8,
+  },
+  modalBody: {
+    padding: 20,
   },
   itemDetailsContainer: {
     padding: 10,
@@ -1561,5 +1577,122 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
     // fontStyle: 'italic',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  orderTotal: {
+    backgroundColor: '#000',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  orderTotalText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  orderItemTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  // itemCode: {
+  //   fontSize: 14,
+  //   color: '#666666',
+  //   marginTop: 2,
+  // },
+  orderDetailsGrid: {
+    marginTop: 12,
+    gap: 12,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  detailCol: {
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 4,
+  },
+  detailValue: {
+    fontSize: 16,
+    color: '#333333',
+    fontWeight: '500',
+  },
+  discountRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E6ED',
+  },
+  discountValue: {
+    fontSize: 16,
+    color: '#00c06c',
+    fontWeight: '500',
+  },
+  taxRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E6ED',
+  },
+  netAmountValue: {
+    fontSize: 16,
+    color: '#7868e5',
+    fontWeight: '600',
+  },
+  orderSummaryFooter: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#1a1a1a', // Changed to dark background
+    borderRadius: 12,
+    gap: 12,
+  },
+  // summaryRow: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  //   alignItems: 'center',
+  // },
+  // summaryLabel: {
+  //   fontSize: 16,
+  //   color: '#a3a3a3', // Changed to lighter gray
+  // },
+  // summaryValue: {
+  //   fontSize: 16,
+  //   color: '#ffffff', // Changed to white
+  //   fontWeight: '500',
+  // },
+  // discountValue: {
+  //   fontSize: 16,
+  //   color: '#00c06c', // Kept the green color for discount
+  //   fontWeight: '500',
+  // },
+  netAmountRow: {
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#333333', // Changed to darker border
+  },
+  netAmountLabel: {
+    fontSize: 18,
+    color: '#ffffff', // Changed to white
+    fontWeight: '600',
+  },
+  netAmountTotal: {
+    fontSize: 20,
+    color: '#7868e5', // Kept the purple accent
+    fontWeight: '700',
   },
 });

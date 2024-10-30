@@ -14,5 +14,5 @@
 	- Sales Return
 
 
-- Discount, Units, Notes, Attachment
-- Clean UI like Bizops 
+- Discount, Units, Notes, Attachment Done✅
+- Clean UI like Bizops Done ✅
