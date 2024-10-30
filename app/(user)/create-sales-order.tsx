@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, Tex
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { Stack, useRouter } from 'expo-router'
-import BottomSheet from '@gorhom/bottom-sheet'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import SearchablePicker from '@/components/SearchablePicker'
@@ -40,18 +39,15 @@ const CreateSalesOrder = () => {
   const [discount, setDiscount] = useState('');
   const [nextSerial, setNextSerial] = useState<string>('');
   const [notes, setNotes] = useState('');
-  
-  // Bottom sheet refs and snap points
-  const itemDetailsSheetRef = useRef<BottomSheet>(null);
-  const itemDetailsSnapPoints = useMemo(() => ['5%', '25%', '90%'], []); // Using 5% as minimum
+
+
 
 
   // Replace itemSelectSheetRef with modal state
   const [isItemSelectModalVisible, setIsItemSelectModalVisible] = useState(false);
   const [isItemDetailsModalVisible, setIsItemDetailsModalVisible] = useState(false);
 
-  // Add new state for bottom sheet visibility
-  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+
 
   // Add new state for order items
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
@@ -67,7 +63,7 @@ const CreateSalesOrder = () => {
 
   // Add memoized filtered items
   const filteredItems = useMemo(() => {
-    return items.filter(item => 
+    return items.filter(item =>
       item.ItemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.ItemCode.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -176,7 +172,7 @@ const CreateSalesOrder = () => {
 
     setOrderItems([...orderItems, newItem]);
     setIsItemDetailsModalVisible(false);
-    
+
     // Reset form
     setSelectedItem(null);
     setRate('');
@@ -218,9 +214,14 @@ const CreateSalesOrder = () => {
     // console.log('Saving order...');
   };
 
+  // Add a new function to handle item deletion
+  const handleDeleteItem = (itemId: string) => {
+    setOrderItems(orderItems.filter(item => item.id !== itemId));
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-        <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen options={{ headerShown: false }} />
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -232,7 +233,7 @@ const CreateSalesOrder = () => {
         </View>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         keyboardShouldPersistTaps="handled"
       >
@@ -286,7 +287,7 @@ const CreateSalesOrder = () => {
             <View key={`${item.id}-${index}`} style={styles.orderItemCard}>
               <View style={styles.orderItemHeader}>
                 <Text style={styles.orderItemName}>{item.name}</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDeleteItem(item.id)}>
                   <Ionicons name="trash-outline" size={20} color="#f85149" />
                 </TouchableOpacity>
               </View>
@@ -647,29 +648,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  // Bottom Sheet Styles
-  bottomSheetBackground: {
-    backgroundColor: '#161b22',
-  },
+
   handleIndicator: {
     backgroundColor: '#30363d',
-  },
-  bottomSheetContainer: {
-    flex: 1,
-    backgroundColor: '#161b22',
-  },
-  bottomSheetHeader: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#30363d',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  bottomSheetTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#c9d1d9',
   },
   closeButton: {
     padding: 8,
@@ -677,14 +658,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#58a6ff',
   },
-  bottomSheetContent: {
-    flex: 1,
-  },
-  //   itemOption: {
-  //     padding: 16,
-  //     borderBottomWidth: 1,
-  //     borderBottomColor: '#30363d',
-  //   },
+
   itemOptionText: {
     color: '#c9d1d9',
     fontSize: 16,
