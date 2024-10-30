@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,12 +7,12 @@ import { Stack } from 'expo-router';
 import { Table, Row } from 'react-native-table-component';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+// import SearchablePicker from '@/components/SearchablePicker';
 
 interface Customer {
   CustomerID: number;
   CustomerName: string;
   Code: string;
-  // Add other fields as needed
 }
 
 
@@ -192,6 +192,8 @@ const CreateOrder = () => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isItemSelectModalVisible, setIsItemSelectModalVisible] = useState(false);
+  const [isItemDetailsModalVisible, setIsItemDetailsModalVisible] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -498,6 +500,45 @@ const CreateOrder = () => {
     }
   };
 
+  const handleAddItem = () => {
+    setIsItemSelectModalVisible(true); // Open item selection modal
+  };
+
+  const handleItemSelect = (item: Item) => {
+    setSelectedItem(item);
+    setRate(item.SalRate.toString());
+    setIsItemSelectModalVisible(false);
+    setIsItemDetailsModalVisible(true); // Open item details modal
+  };
+
+  const handleAddItemToOrder = () => {
+    if (!selectedItem) return;
+
+    const newItem: OrderItem = {
+      ...selectedItem,
+      Qty: parseFloat(quantity),
+      Rate: parseFloat(rate),
+      Value: parseFloat(value),
+      Disc: 0, // You may want to add a discount input field
+      Taxable: parseFloat(itemValues?.Taxable || '0'),
+      TaxAmt: parseFloat(itemValues?.TaxAmt || '0'),
+      Amount: parseFloat(itemValues?.Amount || '0'),
+      UTGSTTaxCode: undefined,
+      IGSTTaxCode: undefined,
+      GSTTaxCode: undefined,
+      TaxCategory: undefined
+    };
+
+    setOrderItems([...orderItems, newItem]);
+    setIsItemDetailsModalVisible(false); // close item details modal
+
+    // Reset item selection
+    setSelectedItem(null);
+    setQuantity('1');
+    setRate('');
+    setValue('');
+  };
+
   if (isLoading) {
     return (
       <LinearGradient colors={['#1a1a1a', '#0a0a0a']} style={styles.loadingContainer}>
@@ -558,77 +599,10 @@ const CreateOrder = () => {
 
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Item</Text>
-            <SearchablePicker
-              items={items}
-              onSelect={(item) => {
-                setSelectedItem(item);
-                setRate(item.SalRate.toString());
-                setValue((parseFloat(quantity) * item.SalRate).toFixed(2));
-              }}
-              placeholder="Search items..."
-              labelKey="ItemName"
-              valueKey="ItemCode"
-              icon="cube-outline"
-              selectedItem={selectedItem}
-            />
-            {selectedItem && (
-              <View style={styles.itemDetails}>
-                <Text style={styles.itemName}>{selectedItem.ItemName}</Text>
-                <Text style={styles.itemCode}>Code: {selectedItem.ItemCode}</Text>
-                <View style={styles.inputRow}>
-                  <View style={styles.boxinputContainer}>
-                    <Text style={styles.inputLabel}>Quantity</Text>
-                    <View style={styles.quantityContainer}>
-                      <Ionicons name="remove-circle-outline" size={24} color="#7868e5" onPress={() => setQuantity((prev) => (Math.max(1, parseInt(prev) - 1)).toString())} />
-                      <TextInput
-                        style={styles.quantityInput}
-                        value={quantity}
-                        onChangeText={(text) => {
-                          setQuantity(text);
-                          setValue((parseFloat(text) * parseFloat(rate)).toFixed(2));
-                        }}
-                        keyboardType="numeric"
-                      />
-                      <Ionicons name="add-circle-outline" size={24} color="#7868e5" onPress={() => setQuantity((prev) => (parseInt(prev) + 1).toString())} />
-                    </View>
-                  </View>
-                  <View style={styles.boxinputContainer}>
-                    <Text style={styles.inputLabel}>Rate</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={rate}
-                      onChangeText={updateRate}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                  <View style={styles.boxinputContainer}>
-                    <Text style={styles.inputLabel}>Value</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={value}
-                      onChangeText={updateValue}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                </View>
-                {itemValues && (
-                  <View style={styles.itemValuesContainer}>
-                    {Object.entries(itemValues).map(([key, value]) => (
-                      <View key={key} style={styles.itemValue}>
-                        <Text style={styles.itemValueLabel}>{key}</Text>
-                        <Text style={styles.itemValueText}>{value}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            )}
+            <TouchableOpacity onPress={handleAddItem}>
+              <Text style={{ fontSize: 18, color: "white", backgroundColor: "black", borderRadius: 10, padding: 10 }}>+ Add Item</Text>
+            </TouchableOpacity>
           </View>
-
-          <TouchableOpacity style={styles.addButton} onPress={addItemToOrder}>
-            <Ionicons name="add" size={24} color="#0a0a0a" />
-            <Text style={styles.addButtonText}>Add to Order</Text>
-          </TouchableOpacity>
 
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Order Items</Text>
@@ -714,6 +688,115 @@ const CreateOrder = () => {
           </View>
         </ScrollView>
       </LinearGradient>
+
+      {/* Item Selection Modal */}
+      <Modal
+        visible={isItemSelectModalVisible}
+        animationType='fade'
+        transparent={true}
+        onRequestClose={() => setIsItemSelectModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Product</Text>
+              <TouchableOpacity onPress={() => setIsItemSelectModalVisible(false)}>
+                <Ionicons name='close' size={24} color='#c9d1d9' />
+              </TouchableOpacity>
+            </View>
+            <SearchablePicker
+              items={items}
+              onSelect={handleItemSelect}
+              placeholder="Search items..."
+              labelKey="ItemName"
+              valueKey="ItemCode"
+              icon="cube-outline"
+              selectedItem={selectedItem}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Item Details Modal */}
+      <Modal
+        visible={isItemDetailsModalVisible}
+        animationType='slide'
+        transparent={true}
+        onRequestClose={() => setIsItemDetailsModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Item Details</Text>
+              {selectedItem && (
+                <View style={styles.itemDetails}>
+                  <Text style={styles.itemName}>{selectedItem.ItemName}</Text>
+                  <Text style={styles.itemCode}>Code: {selectedItem.ItemCode}</Text>
+                  <View style={styles.inputRow}>
+                    <View style={styles.boxinputContainer}>
+                      <Text style={styles.inputLabel}>Quantity</Text>
+                      <View style={styles.quantityContainer}>
+                        {/* <Ionicons
+                          name="remove-circle-outline"
+                          size={24}
+                          color="#7868e5"
+                          onPress={() => setQuantity((prev) => (Math.max(1, parseInt(prev) - 1)).toString())}
+                        /> */}
+                        <TextInput
+                          style={styles.quantityInput}
+                          value={quantity}
+                          onChangeText={(text) => {
+                            setQuantity(text);
+                            setValue((parseFloat(text) * parseFloat(rate)).toFixed(2));
+                          }}
+                          keyboardType="numeric"
+                        />
+                        {/* <Ionicons
+                          name="add-circle-outline"
+                          size={24}
+                          color="#7868e5"
+                          onPress={() => setQuantity((prev) => (parseInt(prev) + 1).toString())}
+                        /> */}
+                      </View>
+                    </View>
+                    <View style={styles.boxinputContainer}>
+                      <Text style={styles.inputLabel}>Rate</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={rate}
+                        onChangeText={updateRate}
+                        keyboardType="numeric"
+                      />
+                    </View>
+                    <View style={styles.boxinputContainer}>
+                      <Text style={styles.inputLabel}>Value</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={value}
+                        onChangeText={updateValue}
+                        keyboardType="numeric"
+                      />
+                    </View>
+                  </View>
+                  {itemValues && (
+                    <View style={styles.itemValuesContainer}>
+                      {Object.entries(itemValues).map(([key, value]) => (
+                        <View key={key} style={styles.itemValue}>
+                          <Text style={styles.itemValueLabel}>{key}</Text>
+                          <Text style={styles.itemValueText}>{value}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              )}
+              <TouchableOpacity onPress={handleAddItemToOrder} style={styles.addButton}>
+                <Text style={styles.addButtonText}>Add to Order</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -893,7 +976,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#7868e5', // Purple button
     borderRadius: 10,
     padding: 16,
-    marginBottom: 20,
+    marginTop: 20,
   },
   addButtonText: {
     color: '#FFFFFF', // White text
@@ -1073,4 +1156,66 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 10,
+    padding: 10,
+    width: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  itemDetailsContainer: {
+    padding: 16,
+    backgroundColor: '#2C2C2C',
+    borderRadius: 10,
+  },
+  selectedItemText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 16,
+  },
+  totalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#7868e5',
+  },
+  // addButton: {
+  //   backgroundColor: '#7868e5',
+  //   borderRadius: 10,
+  //   padding: 16,
+  //   alignItems: 'center',
+  //   marginTop: 16,
+  // },
+  // addButtonText: {
+  //   color: '#FFFFFF',
+  //   fontSize: 16,
+  //   fontWeight: 'bold',
+  // },
 });

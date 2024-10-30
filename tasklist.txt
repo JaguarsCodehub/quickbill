@@ -12,3 +12,7 @@
 	- Sales Challan
 	- Sales Invoice
 	- Sales Return
+
+
+- Discount, Units, Notes, Attachment
+- Clean UI like Bizops 

@@ -5,6 +5,7 @@ import { Stack, useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import SearchablePicker from '@/components/SearchablePicker'
+// import { OrderSubmit, OrderItemSubmit } from './path/to/types'; // Import the types if they are in a separate file
 
 interface OrderItem {
   id: string;
@@ -30,6 +31,72 @@ interface Item {
   // ... other fields from your API
 }
 
+interface OrderItemSubmit {
+  srl: string;
+  sNo: string;
+  currName: string;
+  currRate: number;
+  docDate: string;
+  itemCode: string;
+  qty: number;
+  rate: number;
+  disc: number;
+  amt: number;
+  storeCode: string;
+  narration: string;
+  branchCode: string;
+  unit: string;
+  discAmt: number;
+  mrp: number;
+  newRate: number;
+  taxCode: string;
+  taxAmt: number;
+  cessAmt: number;
+  taxable: number;
+  barcodeValue: string;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  utgst: number;
+  pnding: number;
+  delivaryDate: string;
+}
+
+interface OrderSubmit {
+  docNo: string;
+  docDate: string;
+  orderNo: string;
+  orderDate: string;
+  pageNo: string;
+  partyCode: string;
+  billAmt: number;
+  totalQty: number;
+  netAmt: number;
+  taxAmt: number;
+  discAmt: number;
+  mainType: string;
+  subType: string;
+  type: string;
+  prefix: string;
+  narration: string;
+  userId: string;
+  companyId: string;
+  createdBy: string;
+  modifiedBy: string;
+  partyName: string;
+  selection: string;
+  productName: string;
+  discPer: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  utgst: number;
+  rate: number;
+  totalAmt: number;
+  addCode: string;
+  items: OrderItemSubmit[];
+}
+
 const CreateSalesOrder = () => {
   const router = useRouter();
   const [orderType, setOrderType] = useState('Retail Order');
@@ -38,7 +105,7 @@ const CreateSalesOrder = () => {
   const [quantity, setQuantity] = useState('1');
   const [discount, setDiscount] = useState('');
   const [nextSerial, setNextSerial] = useState<string>('');
-  const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
 
 
@@ -209,9 +276,113 @@ const CreateSalesOrder = () => {
     });
   };
 
-  const handleSaveOrder = () => {
-    Alert.alert('Order Saved', 'This Feature is under development');
-    // console.log('Saving order...');
+  const handleSaveOrder = async () => {
+    if (!selectedCustomer || orderItems.length === 0) {
+      Alert.alert('Error', 'Please select a customer and add at least one item to the order.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const userId = await AsyncStorage.getItem('UserID');
+    const companyId = await AsyncStorage.getItem('CompanyID');
+    const prefix = await AsyncStorage.getItem('SelectedYear');
+
+    const orderSubmit: OrderSubmit = {
+      docNo: nextSerial,
+      docDate: new Date().toISOString().split('T')[0],
+      orderNo: `SOR/${nextSerial}`,
+      orderDate: new Date().toISOString().split('T')[0],
+      pageNo: '',
+      partyCode: selectedCustomer.Code,
+      billAmt: orderTotal, // Use the orderTotal calculated earlier
+      totalQty: orderItems.reduce((sum, item) => sum + item.quantity, 0),
+      netAmt: orderTotal, // Adjust as needed
+      taxAmt: orderItems.reduce((sum, item) => sum + item.total * 0.18, 0), // Assuming 18% tax
+      discAmt: 0, // Adjust if you have a discount
+      mainType: 'SL', // Adjust as needed
+      subType: 'RS', // Adjust as needed
+      type: 'SOR', // Adjust as needed
+      prefix: await AsyncStorage.getItem('SelectedYear') || '',
+      narration: '', // Add a narration field if needed
+      userId: await AsyncStorage.getItem('UserID') || '',
+      companyId: await AsyncStorage.getItem('CompanyID') || '',
+      createdBy: await AsyncStorage.getItem('UserID') || '',
+      modifiedBy: await AsyncStorage.getItem('UserID') || '',
+      partyName: selectedCustomer.CustomerName,
+      selection: '', // Add a selection field if needed
+      productName: '', // Add a productName field if needed
+      discPer: 0, // Calculate discount percentage if needed
+      cgst: orderItems.reduce((sum, item) => sum + (item.total * 0.09), 0), // Assuming equal split
+      sgst: orderItems.reduce((sum, item) => sum + (item.total * 0.09), 0), // Assuming equal split
+      igst: 0, // Adjust if applicable
+      utgst: 0, // Add UTGST if needed
+      rate: 0, // Add an overall rate if needed
+      addCode: '',
+      totalAmt: orderTotal,
+      items: orderItems.map((item, index) => ({
+        srl: nextSerial,
+        sNo: '0000' + (index + 1),
+        currName: item.name, // Adjust as needed
+        currRate: item.rate,
+        docDate: new Date().toISOString().split('T')[0],
+        itemCode: item.id, // Use the appropriate field
+        qty: item.quantity,
+        rate: item.rate,
+        disc: item.discount || 0,
+        amt: item.total,
+        partyCode: selectedCustomer.Code,
+        storeCode: '', // Add a storeCode if needed
+        mainType: 'SL',
+        subType: 'RS',
+        type: 'SOR',
+        prefix: prefix,
+        narration: '', // Add a narration if needed
+        branchCode: '', // Add a branchCode if needed
+        unit: '', // Add a unit if needed
+        discAmt: item.discount || 0,
+        mrp: item.rate, // Adjust if MRP is different from Rate
+        newRate: item.rate,
+        taxCode: '', // Add tax code if applicable
+        taxAmt: item.total * 0.18, // Assuming 18% tax
+        cessAmt: 0, // Add cess amount if applicable
+        taxable: item.total, // Adjust as needed
+        barcodeValue: '', // Add barcode value if available
+        userId: userId,
+        companyId: companyId,
+        createdBy: userId,
+        modifiedBy: userId,
+        cgst: item.total * 0.09, // Assuming equal split
+        sgst: item.total * 0.09, // Assuming equal split
+        igst: 0, // Add IGST if applicable
+        utgst: 0, // Add UTGST if applicable
+        pnding: item.quantity, // Make sure this field is correctly set
+        delivaryDate: new Date().toISOString() // Make sure this field is correctly set
+      }))
+    };
+
+    try {
+      const response = await fetch('https://quickbill-backlend.vercel.app/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderSubmit),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Failed to submit order');
+      }
+
+      Alert.alert('Success', 'Order submitted successfully!');
+      // router.push('/orders'); // Navigate to orders page or wherever appropriate
+    } catch (error: any) {
+      console.error('Error submitting order:', error);
+      Alert.alert('Error', `Failed to submit order. ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Add a new function to handle item deletion

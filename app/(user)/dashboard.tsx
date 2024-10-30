@@ -11,8 +11,8 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 
 const TabButton = ({ title, active, onPress }: { title: string; active: boolean; onPress: () => void }) => (
-  <TouchableOpacity 
-    style={[styles.tabButton, active && styles.activeTab]} 
+  <TouchableOpacity
+    style={[styles.tabButton, active && styles.activeTab]}
     onPress={onPress}
   >
     <Text style={[styles.tabText, active && styles.activeTabText]}>{title}</Text>
@@ -30,16 +30,16 @@ const MastersContent = () => (
   <ScrollView>
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Items</Text>
-      <TransactionItem title="Add Item" onPress={() => {}} />
-      <TransactionItem title="Item Categories" onPress={() => {}} />
-      <TransactionItem title="Item Groups" onPress={() => {}} />
+      <TransactionItem title="Add Item" onPress={() => { }} />
+      <TransactionItem title="Item Categories" onPress={() => { }} />
+      <TransactionItem title="Item Groups" onPress={() => { }} />
     </View>
-    
+
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Parties</Text>
-      <TransactionItem title="Add Customer" onPress={() => {}} />
-      <TransactionItem title="Add Supplier" onPress={() => {}} />
-      <TransactionItem title="Add Employee" onPress={() => {}} />
+      <TransactionItem title="Add Customer" onPress={() => { }} />
+      <TransactionItem title="Add Supplier" onPress={() => { }} />
+      <TransactionItem title="Add Employee" onPress={() => { }} />
     </View>
   </ScrollView>
 );
@@ -48,9 +48,9 @@ const FavouritesContent = () => (
   <ScrollView>
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Quick Access</Text>
-      <TransactionItem title="Add New Sale" onPress={() => {}} />
-      <TransactionItem title="Add New Purchase" onPress={() => {}} />
-      <TransactionItem title="Recent Transactions" onPress={() => {}} />
+      <TransactionItem title="Add New Sale" onPress={() => { }} />
+      <TransactionItem title="Add New Purchase" onPress={() => { }} />
+      <TransactionItem title="Recent Transactions" onPress={() => { }} />
     </View>
   </ScrollView>
 );
@@ -59,26 +59,26 @@ const TransactionsContent = () => (
   <ScrollView>
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Sales</Text>
-      <TransactionItem title="Order" onPress={() => router.push('/create-sales-order' as Href<string>)} />
+      <TransactionItem title="Order" onPress={() => router.push('/create-order' as Href<string>)} />
       <TransactionItem title="Delivery Challan" onPress={() => router.push('/(user)/create-sales-challan')} />
       <TransactionItem title="Sale Invoice" onPress={() => router.push('/(user)/create-sales-invoice' as Href<string>)} />
       <TransactionItem title="Sale Return" onPress={() => router.push('/(user)/create-sales-return' as Href<string>)} />
-      <TransactionItem title="Estimate/Quotation" onPress={() => {}} />
+      <TransactionItem title="Estimate/Quotation" onPress={() => { }} />
     </View>
 
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Purchase</Text>
-      <TransactionItem title="Purchase Order" onPress={() => {}} />
-      <TransactionItem title="Purchase Challan" onPress={() => {}} />
-      <TransactionItem title="Purchase Invoice" onPress={() => {}} />
-      <TransactionItem title="Purchase Return" onPress={() => {}} />
-      <TransactionItem title="Expense" onPress={() => {}} />
+      <TransactionItem title="Purchase Order" onPress={() => { }} />
+      <TransactionItem title="Purchase Challan" onPress={() => { }} />
+      <TransactionItem title="Purchase Invoice" onPress={() => { }} />
+      <TransactionItem title="Purchase Return" onPress={() => { }} />
+      <TransactionItem title="Expense" onPress={() => { }} />
     </View>
 
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Accounting</Text>
-      <TransactionItem title="Payment In" onPress={() => {}} />
-      <TransactionItem title="Payment Out" onPress={() => {}} />
+      <TransactionItem title="Payment In" onPress={() => { }} />
+      <TransactionItem title="Payment Out" onPress={() => { }} />
     </View>
   </ScrollView>
 );
@@ -106,22 +106,22 @@ const Dashboard = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: true }} />
-      
+
       <View style={styles.tabContainer}>
-        <TabButton 
-          title="FAVOURITES" 
-          active={activeTab === 'FAVOURITES'} 
-          onPress={() => handleTabPress('FAVOURITES')} 
+        <TabButton
+          title="FAVOURITES"
+          active={activeTab === 'FAVOURITES'}
+          onPress={() => handleTabPress('FAVOURITES')}
         />
-        <TabButton 
-          title="MASTERS" 
-          active={activeTab === 'MASTERS'} 
-          onPress={() => handleTabPress('MASTERS')} 
+        <TabButton
+          title="MASTERS"
+          active={activeTab === 'MASTERS'}
+          onPress={() => handleTabPress('MASTERS')}
         />
-        <TabButton 
-          title="TRANSACTIONS" 
-          active={activeTab === 'TRANSACTIONS'} 
-          onPress={() => handleTabPress('TRANSACTIONS')} 
+        <TabButton
+          title="TRANSACTIONS"
+          active={activeTab === 'TRANSACTIONS'}
+          onPress={() => handleTabPress('TRANSACTIONS')}
         />
       </View>
 
