@@ -147,7 +147,7 @@ const SearchablePicker = ({
         <TextInput
           style={styles.searchInput}
           placeholder={placeholder}
-          placeholderTextColor="#808080"
+          placeholderTextColor="#7868e5"
           value={query}
           onChangeText={(text) => {
             setQuery(text);
@@ -564,7 +564,7 @@ const CreateOrder = () => {
 
   if (isLoading) {
     return (
-      <LinearGradient colors={['#1a1a1a', '#0a0a0a']} style={styles.loadingContainer}>
+      <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#7868e5" />
         <Text style={styles.loadingText}>Loading order data...</Text>
       </LinearGradient>
@@ -574,8 +574,8 @@ const CreateOrder = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <LinearGradient colors={['#1a1a1a', '#0a0a0a']} style={styles.gradient}>
-        <ScrollView nestedScrollEnabled={true}>
+      <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.gradient}>
+        <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
             <Text style={styles.title}>New Order</Text>
             <Ionicons name="cart" size={24} color="#7868e5" />
@@ -623,36 +623,46 @@ const CreateOrder = () => {
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Item</Text>
             <TouchableOpacity onPress={handleAddItem}>
-              <Text style={{ fontSize: 18, color: "white", backgroundColor: "black", borderRadius: 10, padding: 10 }}>+ Add Item</Text>
+              <Text style={{ fontSize: 18, color: "white", backgroundColor: "#7868e5", borderRadius: 10, padding: 10 }}>+ Add Item</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Order Items</Text>
             {orderItems.length > 0 ? (
-              <View style={styles.tableContainer}>
-                <Table borderStyle={{ borderWidth: 0 }}>
-                  <Row
-                    data={['Item Name', 'Qty', 'Rate', 'Amount', 'Action']}
-                    style={styles.tableHeader}
-                    textStyle={styles.tableHeaderText}
-                  />
-                  {orderItems.map((item, index) => (
-                    <Row
-                      key={index}
-                      data={[
-                        <Text style={styles.itemNameText} numberOfLines={2} ellipsizeMode="tail">{item.ItemName}</Text>,
-                        <Text style={styles.tableRowText}>{item.Qty.toString()}</Text>,
-                        <Text style={styles.tableRowText}>{item.Rate.toFixed(2)}</Text>,
-                        <Text style={styles.tableRowText}>{item.Amount.toFixed(2)}</Text>,
-                        <TouchableOpacity onPress={() => removeItemFromOrder(index)} style={styles.deleteButton}>
-                          <Ionicons name="trash-outline" size={20} color="#FF3B30" />
-                        </TouchableOpacity>
-                      ]}
-                      style={index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd}
-                    />
-                  ))}
-                </Table>
+              <View style={styles.orderItemsList}>
+                {orderItems.map((item, index) => (
+                  <View key={index} style={styles.orderItemCard}>
+                    <View style={styles.orderItemHeader}>
+                      <View style={styles.orderItemMain}>
+                        <Text style={styles.orderItemName}>{item.ItemName}</Text>
+                        <Text style={styles.orderItemQuantity}>{item.Qty} pcs × ₹{item.Rate.toFixed(2)}</Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => removeItemFromOrder(index)}
+                        style={styles.removeButton}
+                      >
+                        <Ionicons name="close-circle" size={24} color="#FF3B30" />
+                      </TouchableOpacity>
+                    </View>
+
+                    {item.notes && (
+                      <View style={styles.notesContainer}>
+                        <Ionicons name="document-text-outline" size={16} color="#666666" />
+                        <Text style={styles.notesText}>{item.notes}</Text>
+                      </View>
+                    )}
+
+                    <View style={styles.orderItemFooter}>
+                      <Text style={styles.orderItemAmount}>₹{item.Amount.toFixed(2)}</Text>
+                      {item.discountAmount > 0 && (
+                        <Text style={styles.discountText}>
+                          Discount: {item.discountPercentage}% (₹{item.discountAmount.toFixed(2)})
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                ))}
               </View>
             ) : (
               <Text style={styles.noItemsText}>No items added to the order yet.</Text>
@@ -909,11 +919,11 @@ export default CreateOrder;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2C2C2C', // Dark background
+    backgroundColor: '#F7F9FC', // Light background
   },
   gradient: {
     flex: 1,
-    padding: 20,
+    padding: 15,
   },
   header: {
     flexDirection: 'row',
@@ -925,10 +935,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF', // White text
+    color: '#333333', // Darker text color for light theme
   },
   card: {
-    backgroundColor: '#2C2C2C', // Dark card background
+    backgroundColor: '#FFFFFF', // Light card background
     borderRadius: 15,
     padding: 20,
     marginBottom: 20,
@@ -944,19 +954,19 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF', // White text
+    color: '#333333', // Darker text
     marginLeft: 8,
     marginRight: 4,
   },
   headerValue: {
     fontSize: 16,
     fontWeight: '400',
-    color: '#FFFFFF', // White text
+    color: '#333333', // Darker text
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF', // White text
+    color: '#333333', // Darker text
     marginBottom: 12,
   },
   pickerContainer: {
@@ -965,7 +975,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C1E', // Dark input background
+    backgroundColor: '#E0E6ED', // Light input background
     borderRadius: 10,
     paddingHorizontal: 12,
   },
@@ -976,22 +986,22 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     fontSize: 16,
-    color: '#FFFFFF', // White text
+    color: '#333333', // Darker text
   },
   dropdown: {
     maxHeight: 200,
-    backgroundColor: '#1C1C1E', // Dark dropdown background
+    backgroundColor: '#E0E6ED', // Light dropdown background
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
   },
   dropdownItem: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333', // Dark border
+    borderBottomColor: '#D1D9E6', // Light border
   },
   dropdownItemText: {
     fontSize: 16,
-    color: '#FFFFFF', // White text
+    color: '#333333', // Darker text
   },
   selectedInfo: {
     flexDirection: 'row',
@@ -1001,7 +1011,7 @@ const styles = StyleSheet.create({
   selectedInfoText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#7868e5', // Green text
+    color: '#1E88E5', // Blue accent
     marginLeft: 8,
   },
   itemDetails: {
@@ -1101,33 +1111,35 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 10,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E0E6ED',
   },
   tableHeader: {
     height: 50,
-    backgroundColor: '#3C3C3C', // Dark header background
+    backgroundColor: '#F5F5F5',
   },
   tableHeaderText: {
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 14,
-    color: '#7868e5', // Green text
+    color: '#333333',
   },
   tableRowEven: {
     height: 60,
-    backgroundColor: '#2C2C2C', // Dark row background
+    backgroundColor: '#FFFFFF',
   },
   tableRowOdd: {
     height: 60,
-    backgroundColor: '#1E1E1E', // Darker row background
+    backgroundColor: '#F9FAFB',
   },
   tableRowText: {
     textAlign: 'center',
     fontSize: 14,
-    color: '#FFFFFF', // White text
+    color: '#333333',
   },
   itemNameText: {
     fontSize: 14,
-    color: '#FFFFFF', // White text
+    color: '#333333',
     paddingHorizontal: 5,
     flex: 1,
   },
@@ -1168,12 +1180,12 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 16,
-    color: '#FFFFFF', // White text
+    color: '#616161', // White text
   },
   summaryValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF', // White text
+    color: '#616161', // White text
   },
   totalAmountRow: {
     flexDirection: 'row',
@@ -1186,12 +1198,12 @@ const styles = StyleSheet.create({
   totalAmountLabel: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#7868e5', // Green text
+    color: '#616161', // Green text
   },
   totalAmountValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#7868e5', // Green text
+    color: '#616161', // Green text
   },
   itemSummaryGrid: {
     gap: 15,
@@ -1229,7 +1241,7 @@ const styles = StyleSheet.create({
   itemTotalLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#616161',
   },
   itemTotalValue: {
     fontSize: 18,
@@ -1250,11 +1262,11 @@ const styles = StyleSheet.create({
   },
   orderTotalLabel: {
     fontSize: 16,
-    color: '#888888',
+    color: '#919191',
   },
   orderTotalValue: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#919191',
     fontWeight: '500',
   },
   finalTotal: {
@@ -1277,16 +1289,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Lighter overlay
   },
   modalContent: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#FFFFFF', // Light background
     borderRadius: 10,
     padding: 10,
     width: '80%',
   },
   itemModalContent: {
-    backgroundColor: '#2C2C2C',
+    backgroundColor: '#FFFFFF', // Light background
     borderRadius: 10,
     padding: 10,
     width: '100%',
@@ -1301,12 +1313,12 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginLeft: 10
+    color: '#333333', // Dark text
+    marginLeft: 10,
   },
   itemDetailsContainer: {
     padding: 10,
-    // backgroundColor: '#2C2C2C',
+    backgroundColor: '#FFFFFF',
     borderRadius: 15,
   },
   selectedItemText: {
@@ -1324,21 +1336,21 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#333333',
   },
   totalValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#7868e5',
+    color: '#1E88E5',
   },
   itemDetailLabel: {
     fontSize: 16,
-    color: '#888888',
+    color: '#333333',
     marginBottom: 8,
   },
   itemDetailValue: {
     fontSize: 18,
-    color: '#FFFFFF',
+    color: '#333333',
     fontWeight: '600',
     marginBottom: 20,
   },
@@ -1346,13 +1358,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   detailInput: {
-    backgroundColor: '#1C1C1E',
+    backgroundColor: '#F5F5F5',
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#333333',
     borderWidth: 1,
-    borderColor: '#333333',
+    borderColor: '#E0E6ED',
   },
   stockValue: {
     fontSize: 16,
@@ -1365,18 +1377,18 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   discountSeparator: {
-    color: '#888888',
+    color: '#666666',
     fontSize: 20,
     marginHorizontal: 10,
   },
   notesInput: {
-    backgroundColor: '#1C1C1E',
+    backgroundColor: '#F5F5F5',
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#333333',
     borderWidth: 1,
-    borderColor: '#333333',
+    borderColor: '#E0E6ED',
     height: 100,
     textAlignVertical: 'top',
   },
@@ -1387,18 +1399,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: '#333333',
+    borderTopColor: '#E0E6ED',
   },
-  // totalLabel: {
-  //   fontSize: 18,
-  //   fontWeight: '600',
-  //   color: '#FFFFFF',
-  // },
-  // totalValue: {
-  //   fontSize: 20
-  // },
   // addButton: {
-  //   backgroundColor: '#7868e5',
+  //   backgroundColor: '#1E88E5',
   //   borderRadius: 10,
   //   padding: 16,
   //   alignItems: 'center',
@@ -1410,22 +1414,22 @@ const styles = StyleSheet.create({
   //   fontWeight: 'bold',
   // },
   readOnlyInput: {
-    backgroundColor: '#252525', // Slightly darker to indicate read-only
-    color: '#7868e5', // Use theme color to show calculated value
+    backgroundColor: '#F0F0F0',
+    color: '#1E88E5',
   },
   summaryTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#404040',
+    // paddingBottom: 15,
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#404040',
   },
 
   summaryTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#7868e5',
     marginLeft: 10,
   },
 
@@ -1446,15 +1450,17 @@ const styles = StyleSheet.create({
   },
 
   itemNumberText: {
-    color: '#FFFFFF',
+    color: '#e2ebf0',
     fontSize: 14,
     fontWeight: 'bold',
   },
 
   itemSummaryCard: {
-    backgroundColor: '#2C2C2C',
+    backgroundColor: '#FFFFFF',
     borderRadius: 15,
     padding: 10,
+    borderWidth: 1,
+    borderColor: '#e2ebf0',
   },
 
   orderSeparator: {
@@ -1482,6 +1488,78 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#333333',
+  },
+
+  orderItemsList: {
+    gap: 12,
+  },
+  orderItemCard: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E0E6ED',
+  },
+  orderItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  orderItemMain: {
+    flex: 1,
+    marginRight: 12,
+  },
+  orderItemName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+    marginBottom: 4,
+  },
+  orderItemQuantity: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  removeButton: {
+    padding: 4,
+  },
+  orderItemFooter: {
+    marginTop: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  orderItemAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#7868e5',
+  },
+  discountText: {
+    fontSize: 14,
+    color: '#00c06c',
+    fontWeight: "600"
+  },
+  // noItemsText: {
+  //   textAlign: 'center',
+  //   marginTop: 20,
+  //   marginBottom: 20,
+  //   fontSize: 16,
+  //   color: '#888888',
+  //   fontStyle: 'italic',
+  // },
+  notesContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E6ED',
+    gap: 6,
+  },
+  notesText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#666666',
+    // fontStyle: 'italic',
   },
 });
