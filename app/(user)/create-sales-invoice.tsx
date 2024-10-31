@@ -8,7 +8,6 @@ import { Table, Row } from 'react-native-table-component';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
-
 interface Customer {
   CustomerID: number;
   CustomerName: string;
@@ -239,7 +238,7 @@ const CreateSalesInvoice = () => {
       const companyId = await AsyncStorage.getItem('CompanyID');
       const prefix = await AsyncStorage.getItem('SelectedYear');
 
-      const response = await axios.get('https://quickbill-backlend.vercel.app/items', {
+      const response = await axios.get('http://192.168.1.8:3000/invoice-items', {
         headers: {
           'UserID': userId,
           'CompanyID': companyId,
@@ -248,6 +247,7 @@ const CreateSalesInvoice = () => {
       });
       setItems(response.data.items);
       setNextSerial(response.data.nextSerial);
+      console.log("Response:", response.data.nextSerial)
     } catch (error) {
       console.error('Error fetching items:', error);
       throw error;

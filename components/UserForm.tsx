@@ -147,84 +147,132 @@ const UserForm: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <ScrollView style={styles.content}>
-        {/* Decorative Background Elements */}
-        {/* <Image
-          source={{ uri: 'https://example.com/curved-lines.png' }} // Replace with actual curved lines background image
-          style={styles.backgroundImage}
-        /> */}
+        {/* Logo and Header Section */}
+        <View style={styles.headerContainer}>
+          <Image
+            source={require('../assets/logo.jpg')}
+            style={styles.logo}
+          />
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>Quick Bill</Text>
+            <Text style={styles.headerSubtitle}>
+              Professional Accounting Solution
+            </Text>
+          </View>
+        </View>
 
-        {/* Main Content */}
-        <View style={styles.mainContent}>
-          <Text style={styles.title}>Manage your bills and accounts.</Text>
-          <Text style={styles.subtitle}>Create Invoices under few minutes</Text>
-
-          {/* Form Container */}
-          <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Log in</Text>
-
-            {/* Email Input */}
-            <View style={styles.inputWrapper}>
+        {/* Form Section */}
+        <View style={styles.formContainer}>
+          {/* Username Input */}
+          <View style={styles.inputWrapper}>
+            {/* <Text style={styles.inputLabel}>Username</Text> */}
+            <View style={styles.inputContainer}>
+              <Ionicons name="person-outline" size={20} color="#58a6ff" />
               <TextInput
                 style={styles.input}
+                placeholder="Enter your username"
+                placeholderTextColor="#8b949e"
                 value={username}
                 onChangeText={setUsername}
-                placeholder="Email"
-                placeholderTextColor="#A0A0A0"
               />
-              {username.length > 0 && (
-                <View style={styles.checkmarkContainer}>
-                  <Ionicons name="checkmark" size={20} color="#0066FF" />
-                </View>
-              )}
             </View>
+            {errors.userId && (
+              <Text style={styles.errorText}>{errors.userId}</Text>
+            )}
+          </View>
 
-            {/* Password Input */}
-            <View style={styles.inputWrapper}>
+          {/* Password Input */}
+          <View style={styles.inputWrapper}>
+            {/* <Text style={styles.inputLabel}>Password</Text> */}
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color="#58a6ff" />
               <TextInput
                 style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor="#8b949e"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
-                placeholder="Password"
-                placeholderTextColor="#A0A0A0"
               />
-              <TouchableOpacity
-                style={styles.eyeIcon}
-                onPress={() => setShowPassword(!showPassword)}
-              >
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons
-                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={20}
-                  color="#A0A0A0"
+                  color="#58a6ff"
                 />
               </TouchableOpacity>
             </View>
+            {errors.password && (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            )}
+          </View>
 
-            {/* Sign In Button */}
-            <TouchableOpacity
-              style={styles.signInButton}
-              onPress={handleLogin}
-            >
-              <Text style={styles.signInText}>Sign in</Text>
-            </TouchableOpacity>
-
-            {/* Forgot Password */}
-            <TouchableOpacity style={styles.forgotPassword}>
-              <Text style={styles.forgotPasswordText}>Forgot password</Text>
-            </TouchableOpacity>
-
-            {/* Sign Up Link */}
-            <View style={styles.signUpContainer}>
-              <Text style={styles.signUpText}>Don't have an account? </Text>
-              <TouchableOpacity>
-                <Text style={styles.signUpLink}>Sign up</Text>
-              </TouchableOpacity>
+          {/* Year Picker */}
+          <View style={styles.inputWrapper}>
+            {/* <Text style={styles.inputLabel}>Financial Year</Text> */}
+            <View style={styles.inputContainer}>
+              <Ionicons name="calendar-outline" size={20} color="#58a6ff" />
+              <Picker
+                selectedValue={year}
+                style={styles.picker}
+                dropdownIconColor="#58a6ff"
+                onValueChange={handleYearChange}
+              >
+                <Picker.Item
+                  label="Select Financial Year"
+                  value=""
+                  style={styles.pickerPlaceholder}
+                />
+                <Picker.Item
+                  label='01 APR 2018 - 31 MAR 2019'
+                  value='18041903'
+                />
+                <Picker.Item
+                  label='01 APR 2019 - 31 MAR 2020'
+                  value='19042003'
+                />
+                <Picker.Item
+                  label='01 APR 2020 - 31 MAR 2021'
+                  value='20042103'
+                />
+                <Picker.Item
+                  label='01 APR 2022 - 31 MAR 2023'
+                  value='22042303'
+                />
+                <Picker.Item
+                  label='01 APR 2023 - 31 MAR 2024'
+                  value='23042403'
+                />
+                <Picker.Item
+                  label='01 APR 2024 - 31 MAR 2025'
+                  value='24042503'
+                />
+              </Picker>
             </View>
           </View>
         </View>
+
+        {/* Action Buttons */}
+        <View style={styles.actionContainer}>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={handleLogin}
+          >
+            <Text style={styles.loginButtonText}>LOGIN</Text>
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.registerContainer}>
+            <Text style={styles.registerText}>
+              Don't have an account? {' '}
+              <Text style={styles.registerLink}>Register Now</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
+
       {loading && <LoadingScreen />}
     </SafeAreaView>
   );
@@ -233,98 +281,106 @@ const UserForm: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0d1117',
   },
   content: {
     flex: 1,
+    padding: 20,
   },
-  backgroundImage: {
-    position: 'absolute',
-    width: '100%',
-    height: 300,
-    top: 0,
-    resizeMode: 'cover',
+  headerContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+    marginBottom: 40,
   },
-  mainContent: {
-    padding: 24,
-    paddingTop: 60,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000000',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666666',
+  logo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     marginBottom: 20,
   },
-  formContainer: {
-    // marginTop: 20,
+  headerTextContainer: {
+    alignItems: 'center',
   },
-  formTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 24,
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#c9d1d9',
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#8b949e',
+  },
+  formContainer: {
+    backgroundColor: '#161b22',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
   },
   inputWrapper: {
-    marginBottom: 16,
-    position: 'relative',
+    marginBottom: 20,
+  },
+  inputLabel: {
+    color: '#8b949e',
+    fontSize: 14,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0d1117',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#30363d',
   },
   input: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    padding: 16,
+    flex: 1,
+    color: '#c9d1d9',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     fontSize: 16,
-    color: '#000000',
   },
-  checkmarkContainer: {
-    position: 'absolute',
-    right: 16,
-    top: '50%',
-    transform: [{ translateY: -10 }],
+  picker: {
+    flex: 1,
+    color: '#c9d1d9',
   },
-  eyeIcon: {
-    position: 'absolute',
-    right: 16,
-    top: '50%',
-    transform: [{ translateY: -10 }],
+  pickerPlaceholder: {
+    color: '#8b949e',
   },
-  signInButton: {
-    backgroundColor: '#0066FF',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 24,
+  actionContainer: {
+    marginTop: 20,
   },
-  signInText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  forgotPassword: {
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  forgotPasswordText: {
-    color: '#0066FF',
-    fontSize: 14,
-  },
-  signUpContainer: {
+  loginButton: {
+    backgroundColor: '#58a6ff',
+    borderRadius: 15,
+    paddingVertical: 16,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 24,
+    marginBottom: 20,
   },
-  signUpText: {
-    color: '#666666',
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  registerContainer: {
+    alignItems: 'center',
+  },
+  registerText: {
+    color: '#8b949e',
     fontSize: 14,
   },
-  signUpLink: {
-    color: '#0066FF',
-    fontSize: 14,
-    fontWeight: '600',
+  registerLink: {
+    color: '#58a6ff',
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 12,
+    marginBottom: 10,
   },
 });
 

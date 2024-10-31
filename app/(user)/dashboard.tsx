@@ -8,8 +8,6 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-
-
 const TabButton = ({ title, active, onPress }: { title: string; active: boolean; onPress: () => void }) => (
   <TouchableOpacity
     style={[styles.tabButton, active && styles.activeTab]}
