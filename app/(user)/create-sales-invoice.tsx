@@ -23,7 +23,6 @@ interface Item {
   SalRate: number;
   HSNCode: string;
   TaxCode: string;
-  // Add other fields as needed
 }
 
 interface OrderItem extends Item {
