@@ -238,7 +238,7 @@ const CreateSalesInvoice = () => {
       const companyId = await AsyncStorage.getItem('CompanyID');
       const prefix = await AsyncStorage.getItem('SelectedYear');
 
-      const response = await axios.get('http://192.168.1.8:3000/invoice-items', {
+      const response = await axios.get('http://192.168.1.9:3000/invoice-items', {
         headers: {
           'UserID': userId,
           'CompanyID': companyId,
@@ -583,13 +583,13 @@ const CreateSalesInvoice = () => {
           <View style={styles.card}>
             <View style={styles.headerInfo}>
               <View style={styles.headerItem}>
-                <Ionicons name="calendar-outline" size={24} color="#7868e5" />
+                <Ionicons name="calendar-outline" size={20} color="#7868e5" />
                 <Text style={styles.headerText}>Date:</Text>
                 <Text style={styles.headerValue}>{currentDate}</Text>
               </View>
 
               <View style={styles.headerItem}>
-                <Ionicons name="document-text-outline" size={24} color="#7868e5" />
+                <Ionicons name="document-text-outline" size={20} color="#7868e5" />
                 <Text style={styles.headerText}>No:</Text>
                 <Text style={styles.headerValue}>SOR/{nextSerial}</Text>
               </View>
@@ -935,14 +935,14 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   headerText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#333333', // Darker text
     marginLeft: 8,
     marginRight: 4,
   },
   headerValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '400',
     color: '#333333', // Darker text
     // marginLeft: 5
