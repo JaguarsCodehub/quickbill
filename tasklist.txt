@@ -16,6 +16,12 @@
 - Discount, Units, Notes, Attachment Done✅
 - Clean UI like Bizops Done✅
 - Sales: Invoice - Sales T, SL, RS, SAL Done✅
-		 Return - Sales T, SL, NS, SRT Done✅ 
-		Inside Sales Table
+		 Return - Sales T, SL, NS, SRT Done✅
 
+		 Inside Sales Table
+
+New Taks:
+- Sales and Purchase Screens showing total Sales and Purchases
+- Single Dashboard Screens
+- Get ENdpoints in the backend
+- UI Revamp
