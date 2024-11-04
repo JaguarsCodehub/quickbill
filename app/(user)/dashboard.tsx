@@ -17,10 +17,13 @@ const TabButton = ({ title, active, onPress }: { title: string; active: boolean;
   </TouchableOpacity>
 );
 
-const TransactionItem = ({ title, onPress }: { title: string; onPress: () => void }) => (
+const TransactionItem = ({ title, onPress, icon = "add" }: { title: string; onPress: () => void; icon?: string }) => (
   <TouchableOpacity style={styles.transactionItem} onPress={onPress}>
-    <Text style={styles.transactionItemText}>{title}</Text>
-    <Ionicons name="add" size={24} color="#8b949e" />
+    <View style={styles.transactionItemLeft}>
+      <Ionicons name={icon as any} size={24} color="#2e7d32" style={styles.itemIcon} />
+      <Text style={styles.transactionItemText}>{title}</Text>
+    </View>
+    <Ionicons name="chevron-forward" size={24} color="#8b949e" />
   </TouchableOpacity>
 );
 
@@ -28,16 +31,16 @@ const MastersContent = () => (
   <ScrollView>
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Items</Text>
-      <TransactionItem title="Add Item" onPress={() => { }} />
-      <TransactionItem title="Item Categories" onPress={() => { }} />
-      <TransactionItem title="Item Groups" onPress={() => { }} />
+      <TransactionItem title="Add Item" icon="cube" onPress={() => { }} />
+      <TransactionItem title="Item Categories" icon="list" onPress={() => { }} />
+      <TransactionItem title="Item Groups" icon="layers" onPress={() => { }} />
     </View>
 
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Parties</Text>
-      <TransactionItem title="Add Customer" onPress={() => { }} />
-      <TransactionItem title="Add Supplier" onPress={() => { }} />
-      <TransactionItem title="Add Employee" onPress={() => { }} />
+      <TransactionItem title="Add Customer" icon="person-add" onPress={() => { }} />
+      <TransactionItem title="Add Supplier" icon="business" onPress={() => { }} />
+      <TransactionItem title="Add Employee" icon="people" onPress={() => { }} />
     </View>
   </ScrollView>
 );
@@ -46,9 +49,9 @@ const FavouritesContent = () => (
   <ScrollView>
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Quick Access</Text>
-      <TransactionItem title="Add New Sale" onPress={() => { }} />
-      <TransactionItem title="Add New Purchase" onPress={() => { }} />
-      <TransactionItem title="Recent Transactions" onPress={() => { }} />
+      <TransactionItem title="Add New Sale" icon="cart" onPress={() => { }} />
+      <TransactionItem title="Add New Purchase" icon="bag-handle" onPress={() => { }} />
+      <TransactionItem title="Recent Transactions" icon="time" onPress={() => { }} />
     </View>
   </ScrollView>
 );
@@ -57,26 +60,26 @@ const TransactionsContent = () => (
   <ScrollView>
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Sales</Text>
-      <TransactionItem title="Order" onPress={() => router.push('/create-order' as Href<string>)} />
-      <TransactionItem title="Delivery Challan" onPress={() => router.push('/(user)/create-sales-challan')} />
-      <TransactionItem title="Sale Invoice" onPress={() => router.push('/(user)/create-sales-invoice' as Href<string>)} />
-      <TransactionItem title="Sale Return" onPress={() => router.push('/(user)/create-sales-return' as Href<string>)} />
-      <TransactionItem title="Estimate/Quotation" onPress={() => { }} />
+      <TransactionItem title="Order" icon="receipt" onPress={() => router.push('/create-order' as Href<string>)} />
+      <TransactionItem title="Delivery Challan" icon="document-text" onPress={() => router.push('/(user)/create-sales-challan')} />
+      <TransactionItem title="Sale Invoice" icon="cash" onPress={() => router.push('/(user)/create-sales-invoice' as Href<string>)} />
+      <TransactionItem title="Sale Return" icon="return-up-back" onPress={() => router.push('/(user)/create-sales-return' as Href<string>)} />
+      <TransactionItem title="Estimate/Quotation" icon="calculator" onPress={() => { }} />
     </View>
 
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Purchase</Text>
-      <TransactionItem title="Purchase Order" onPress={() => { }} />
-      <TransactionItem title="Purchase Challan" onPress={() => { }} />
-      <TransactionItem title="Purchase Invoice" onPress={() => { }} />
-      <TransactionItem title="Purchase Return" onPress={() => { }} />
-      <TransactionItem title="Expense" onPress={() => { }} />
+      <TransactionItem title="Purchase Order" icon="cart" onPress={() => { }} />
+      <TransactionItem title="Purchase Challan" icon="document-text" onPress={() => { }} />
+      <TransactionItem title="Purchase Invoice" icon="cash" onPress={() => { }} />
+      <TransactionItem title="Purchase Return" icon="return-up-back" onPress={() => { }} />
+      <TransactionItem title="Expense" icon="wallet" onPress={() => { }} />
     </View>
 
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Accounting</Text>
-      <TransactionItem title="Payment In" onPress={() => { }} />
-      <TransactionItem title="Payment Out" onPress={() => { }} />
+      <TransactionItem title="Payment In" icon="arrow-down" onPress={() => { }} />
+      <TransactionItem title="Payment Out" icon="arrow-up" onPress={() => { }} />
     </View>
   </ScrollView>
 );
@@ -103,7 +106,7 @@ const Dashboard = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ headerShown: true }} />
+      <Stack.Screen options={{ title: "Dashboard" }} />
 
       <View style={styles.tabContainer}>
         <TabButton
@@ -133,14 +136,14 @@ export default Dashboard;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0d1117', // GitHub dark background
+    backgroundColor: '#ffffff', // Light background
   },
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     borderBottomWidth: 1,
-    borderBottomColor: '#30363d', // GitHub dark border
-    backgroundColor: '#161b22', // GitHub dark secondary background
+    borderBottomColor: '#e0e0e0', // Light border
+    backgroundColor: '#f5f5f5', // Light secondary background
   },
   tabButton: {
     paddingVertical: 15,
@@ -148,25 +151,25 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#58a6ff', // GitHub blue
+    borderBottomColor: '#2e7d32', // Dark green
   },
   tabText: {
-    color: '#8b949e', // GitHub dark text
+    color: '#757575', // Grey text
     fontSize: 14,
     fontWeight: '500',
   },
   activeTabText: {
-    color: '#58a6ff', // GitHub blue
+    color: '#2e7d32', // Dark green
   },
   categorySection: {
     marginTop: 10,
   },
   categoryHeader: {
     fontSize: 16,
-    color: '#c9d1d9', // GitHub light text
+    color: '#424242', // Dark grey text
     paddingHorizontal: 15,
     paddingVertical: 10,
-    backgroundColor: '#161b22', // GitHub dark secondary background
+    backgroundColor: '#f5f5f5', // Light secondary background
   },
   transactionItem: {
     flexDirection: 'row',
@@ -174,11 +177,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#30363d', // GitHub dark border
-    backgroundColor: '#0d1117', // GitHub dark background
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#ffffff',
+  },
+  transactionItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  itemIcon: {
+    marginRight: 12,
   },
   transactionItemText: {
     fontSize: 16,
-    color: '#c9d1d9', // GitHub light text
+    color: '#424242',
   },
 });

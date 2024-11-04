@@ -614,7 +614,7 @@ const CreateSalesReturn = () => {
               <View style={styles.headerItem}>
                 <Ionicons name="document-text-outline" size={20} color="#7868e5" />
                 <Text style={styles.headerText}>No:</Text>
-                <Text style={styles.headerValue}>SOR/{nextSerial}</Text>
+                <Text style={styles.headerValue}>SRT/{nextSerial}</Text>
               </View>
             </View>
           </View>
@@ -763,7 +763,7 @@ const CreateSalesReturn = () => {
             {isSubmitting ? (
               <ActivityIndicator size="small" color="#0a0a0a" />
             ) : (
-              <Text style={styles.submitButtonText}>Submit Order</Text>
+              <Text style={styles.submitButtonText}>Submit Sales Return</Text>
             )}
           </TouchableOpacity>
         </ScrollView>
@@ -908,7 +908,7 @@ const CreateSalesReturn = () => {
               )}
 
               <TouchableOpacity onPress={handleAddItemToOrder} style={styles.addButton}>
-                <Text style={styles.addButtonText}>Add to Order</Text>
+                <Text style={styles.addButtonText}>Add to Sales Return</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>

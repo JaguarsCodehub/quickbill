@@ -614,7 +614,7 @@ const CreateSalesInvoice = () => {
               <View style={styles.headerItem}>
                 <Ionicons name="document-text-outline" size={20} color="#7868e5" />
                 <Text style={styles.headerText}>No:</Text>
-                <Text style={styles.headerValue}>SOR/{nextSerial}</Text>
+                <Text style={styles.headerValue}>SAL/{nextSerial}</Text>
               </View>
             </View>
           </View>
@@ -763,7 +763,7 @@ const CreateSalesInvoice = () => {
             {isSubmitting ? (
               <ActivityIndicator size="small" color="#0a0a0a" />
             ) : (
-              <Text style={styles.submitButtonText}>Submit Order</Text>
+              <Text style={styles.submitButtonText}>Submit Invoice</Text>
             )}
           </TouchableOpacity>
         </ScrollView>
@@ -908,7 +908,7 @@ const CreateSalesInvoice = () => {
               )}
 
               <TouchableOpacity onPress={handleAddItemToOrder} style={styles.addButton}>
-                <Text style={styles.addButtonText}>Add to Order</Text>
+                <Text style={styles.addButtonText}>Add to Invoice</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
