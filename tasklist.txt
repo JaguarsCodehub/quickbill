@@ -15,7 +15,7 @@
 
 - Discount, Units, Notes, Attachment Done✅
 - Clean UI like Bizops Done✅
-- Sales: Invoice - Sales T, SL, RS, SAL
-		 Return - Sales T, SL, NS, SR
+- Sales: Invoice - Sales T, SL, RS, SAL Done✅
+		 Return - Sales T, SL, NS, SRT Done✅ 
+		Inside Sales Table
 
-		 Inside Sales Table

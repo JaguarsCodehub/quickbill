@@ -8,7 +8,6 @@ import { Table, Row } from 'react-native-table-component';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
-
 interface Customer {
   CustomerID: number;
   CustomerName: string;
@@ -239,7 +238,7 @@ const CreateSalesReturn = () => {
       const companyId = await AsyncStorage.getItem('CompanyID');
       const prefix = await AsyncStorage.getItem('SelectedYear');
 
-      const response = await axios.get('https://quickbill-backlend.vercel.app/items', {
+      const response = await axios.get('http://192.168.1.9:3000/return-items', {
         headers: {
           'UserID': userId,
           'CompanyID': companyId,
@@ -248,6 +247,7 @@ const CreateSalesReturn = () => {
       });
       setItems(response.data.items);
       setNextSerial(response.data.nextSerial);
+      console.log("Response:", response.data.nextSerial)
     } catch (error) {
       console.error('Error fetching items:', error);
       throw error;
@@ -407,104 +407,127 @@ const CreateSalesReturn = () => {
 
     setIsSubmitting(true);
 
-    console.log('Order summary:', orderSummary);
     const userId = await AsyncStorage.getItem('UserID');
     const companyId = await AsyncStorage.getItem('CompanyID');
     const prefix = await AsyncStorage.getItem('SelectedYear');
 
-    const orderSubmit: OrderSubmit = {
+    const invoiceSubmit = {
       docNo: nextSerial,
       docDate: currentDate,
-      orderNo: `SOR/${nextSerial}`,
-      orderDate: currentDate,
-      pageNo: '',
+      billNo: `${nextSerial}`,
+      billDate: currentDate,
       partyCode: selectedCustomer.Code,
       billAmt: orderSummary.totalAmount,
       totalQty: orderSummary.totalGoodsQty + orderSummary.totalServicesQty,
       netAmt: orderSummary.totalTaxableAmount,
       taxAmt: orderSummary.totalTaxAmount,
       discAmt: orderSummary.totalDiscountAmount,
-      mainType: 'SL', // Adjust as needed
-      subType: 'NS', // Adjust as needed
-      type: 'SRT', // Adjust as needed
-      prefix: await AsyncStorage.getItem('SelectedYear') || '',
-      narration: '', // Add a narration field if needed
-      userId: userId || '',
-      companyId: companyId || '',
-      createdBy: userId || '',
-      modifiedBy: userId || '',
+      mainType: 'SL',
+      subType: 'NS',
+      type: 'SRT',
+      prefix: prefix || '',
+      narration: '',
+      userId: parseInt(userId || '0'),
+      companyId: parseInt(companyId || '0'),
+      createdBy: parseInt(userId || '0'),
+      modifiedBy: parseInt(userId || '0'),
       partyName: selectedCustomer.CustomerName,
-      selection: '', // Add a selection field if needed
-      productName: '', // Add a productName field if needed
-      discPer: 0, // Calculate discount percentage if needed
+      selection: '',
+      productName: '',
+      discPer: 0,
       cgst: orderSummary.totalCGSTAmount,
       sgst: orderSummary.totalSGSTAmount,
       igst: orderSummary.totalIGSTAmount,
-      utgst: 0, // Add UTGST if needed
-      rate: 0, // Add an overall rate if needed
-      addCode: '',
+      utgst: 0,
+      rate: 0,
       totalAmt: orderSummary.totalAmount,
+      addCode: '',
+      status: 'PENDING',
+      roundoff: 0,
+      extrCharch: 0,
+      discountExtra: 0,
+      exchargelager: '',
+      refVoucherNo: '',
+      refVoucherDate: currentDate,
+      fileName: '',
+      transpoter: '',
+      lrNo: '',
+      eWayBillNo: '',
+      modeofTarn: '',
+      dispatch: '',
+      noPackage: '',
+      eInvRemarks: '',
+      placeOfSuply: '',
       items: orderItems.map((item, index) => ({
         srl: nextSerial,
         sNo: '0000' + (index + 1),
-        currName: item.HSNCode, // Adjust as needed
-        currRate: 0, // Adjust as needed
+        currName: item.HSNCode,
+        currRate: 0,
         docDate: currentDate,
         itemCode: item.ItemCode,
         qty: item.Qty,
         rate: item.Rate,
-        disc: item.Disc,
+        disc: item.discountPercentage || 0,
         amt: item.Amount,
         partyCode: selectedCustomer.Code,
-        storeCode: '', // Add a storeCode if needed
+        storeCode: '',
         mainType: 'SL',
         subType: 'NS',
         type: 'SRT',
         prefix: prefix || '',
-        narration: item.notes || '', // Add the item's note here
-        branchCode: '', // Add a branchCode if needed
-        unit: '', // Add a unit if needed
-        discAmt: item.Disc,
-        mrp: item.Rate, // Adjust if MRP is different from Rate
+        narration: item.notes || '',
+        branchCode: '',
+        unit: '',
+        discAmt: item.discountAmount || 0,
+        mrp: item.Rate,
         newRate: item.Rate,
         taxCode: item.TaxCode || '',
         taxAmt: item.TaxAmt,
-        cessAmt: 0, // Add cess amount if applicable
+        cessAmt: 0,
         taxable: item.Taxable,
-        barcodeValue: '', // Add barcode value if available
-        userId: userId || '',
-        companyId: companyId || '',
-        createdBy: userId || '',
-        modifiedBy: userId || '',
-        cgst: item.TaxAmt / 2, // Assuming equal split between CGST and SGST
+        barcodeValue: '',
+        userId: parseInt(userId || '0'),
+        companyId: parseInt(companyId || '0'),
+        createdBy: parseInt(userId || '0'),
+        modifiedBy: parseInt(userId || '0'),
+        cgst: item.TaxAmt / 2,
         sgst: item.TaxAmt / 2,
-        igst: 0, // Add IGST if applicable
-        utgst: 0, // Add UTGST if applicable
-        pnding: item.Qty, // Make sure this field is correctly set
-        delivaryDate: new Date().toISOString() // Make sure this field is correctly set
+        igst: 0,
+        utgst: 0,
+        pnding: item.Qty,
+        colours: '',
+        s1: '', q1: 0,
+        s2: '', q2: 0,
+        s3: '', q3: 0,
+        s4: '', q4: 0,
+        s5: '', q5: 0,
+        s6: '', q6: 0,
+        s7: '', q7: 0,
+        s8: '', q8: 0,
+        s9: '', q9: 0
       }))
     };
 
     try {
-      const response = await fetch('https://quickbill-backlend.vercel.app/api/create-order', {
+      const response = await fetch('http://192.168.1.9:3000/api/create-return', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(orderSubmit),
+        body: JSON.stringify(invoiceSubmit),
       });
 
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(responseData.error || 'Failed to submit order');
+        throw new Error(responseData.error || 'Failed to create invoice');
       }
 
-      Alert.alert('Success', 'Order submitted successfully!');
-      // router.push('/orders'); // Navigate to orders page or wherever appropriate
+      Alert.alert('Success', 'Return created successfully!');
+      // router.push('/invoices');
     } catch (error: any) {
-      console.error('Error submitting order:', error);
-      Alert.alert('Error', `Failed to submit order. ${error.message}`);
+      console.error('Error creating invoice:', error);
+      Alert.alert('Error', `Failed to create invoice. ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -576,20 +599,20 @@ const CreateSalesReturn = () => {
       <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.gradient}>
         <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
-            <Text style={styles.title}>New Return</Text>
+            <Text style={styles.title}>New Invoice</Text>
             <Ionicons name="cart" size={24} color="#7868e5" />
           </View>
 
           <View style={styles.card}>
             <View style={styles.headerInfo}>
               <View style={styles.headerItem}>
-                <Ionicons name="calendar-outline" size={24} color="#7868e5" />
+                <Ionicons name="calendar-outline" size={20} color="#7868e5" />
                 <Text style={styles.headerText}>Date:</Text>
                 <Text style={styles.headerValue}>{currentDate}</Text>
               </View>
 
               <View style={styles.headerItem}>
-                <Ionicons name="document-text-outline" size={24} color="#7868e5" />
+                <Ionicons name="document-text-outline" size={20} color="#7868e5" />
                 <Text style={styles.headerText}>No:</Text>
                 <Text style={styles.headerValue}>SOR/{nextSerial}</Text>
               </View>
@@ -935,14 +958,14 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   headerText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#333333', // Darker text
     marginLeft: 8,
     marginRight: 4,
   },
   headerValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '400',
     color: '#333333', // Darker text
     // marginLeft: 5
