@@ -69,10 +69,10 @@ const TransactionsContent = () => (
 
     <View style={styles.categorySection}>
       <Text style={styles.categoryHeader}>Purchase</Text>
+      <TransactionItem title="Purchase Invoice" icon="cash" onPress={() => router.push('/(user)/create-purchase-invoice' as Href<string>)} />
+      <TransactionItem title="Purchase Return" icon="return-up-back" onPress={() => router.push('/(user)/create-purchase-return' as Href<string>)} />
       <TransactionItem title="Purchase Order" icon="cart" onPress={() => { }} />
       <TransactionItem title="Purchase Challan" icon="document-text" onPress={() => { }} />
-      <TransactionItem title="Purchase Invoice" icon="cash" onPress={() => { }} />
-      <TransactionItem title="Purchase Return" icon="return-up-back" onPress={() => { }} />
       <TransactionItem title="Expense" icon="wallet" onPress={() => { }} />
     </View>
 
