@@ -260,7 +260,7 @@ export default function SalesScreen() {
                         borderRadius: 20,
                         backgroundColor: '#000',
                     }}>
-                        <Ionicons name="add" size={24} color={COLORS.primary} />
+                        <Ionicons name="add" size={24} color={COLORS.background} />
                     </TouchableOpacity>
                 </View>
                 {/* <Text style={styles.headerSubtitle}>An easy way to manage sales with care and precision.</Text> */}
