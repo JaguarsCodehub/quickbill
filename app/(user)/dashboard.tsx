@@ -4,10 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Href, router, Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BarChart, LineChart } from "react-native-gifted-charts";
-import Animated, { 
-  withTiming, 
-  useAnimatedStyle, 
-  useSharedValue 
+import Animated, {
+  withTiming,
+  useAnimatedStyle,
+  useSharedValue
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { MotiView } from 'moti';
@@ -33,11 +33,12 @@ const COLORS = {
   border: '#E5E7EB',
   success: '#7868e5',
   error: '#FF5252',
+  secondary: '#FFB74D', // New secondary color
 };
 
 const QuickActionButton = ({ title, icon, onPress }: { title: string; icon: string; onPress: () => void }) => (
-  <TouchableOpacity 
-    style={styles.quickActionButton} 
+  <TouchableOpacity
+    style={styles.quickActionButton}
     onPress={onPress}
     activeOpacity={0.7}
   >
@@ -56,7 +57,7 @@ const QuickActionButton = ({ title, icon, onPress }: { title: string; icon: stri
 const CollapsibleSection = ({ title, children }: SectionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const rotation = useSharedValue(0);
-  
+
   const animatedStyles = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
@@ -78,20 +79,20 @@ const CollapsibleSection = ({ title, children }: SectionProps) => {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <TouchableOpacity 
-          style={styles.sectionHeader} 
+        <TouchableOpacity
+          style={styles.sectionHeader}
           onPress={toggleExpand}
           activeOpacity={0.7}
         >
-          <MotiView 
+          <MotiView
             style={styles.headerContent}
             animate={{ translateX: isExpanded ? 10 : 0 }}
           >
             <View style={[styles.iconBubble, isExpanded && styles.iconBubbleExpanded]}>
-              <Ionicons 
-                name="folder-outline" 
-                size={24} 
-                color={isExpanded ? "#fff" : COLORS.primary} 
+              <Ionicons
+                name="folder-outline"
+                size={24}
+                color={isExpanded ? "#fff" : COLORS.primary}
               />
             </View>
             <Text style={[styles.sectionTitle, isExpanded && styles.sectionTitleExpanded]}>
@@ -99,14 +100,14 @@ const CollapsibleSection = ({ title, children }: SectionProps) => {
             </Text>
           </MotiView>
           <Animated.View style={animatedStyles}>
-            <Ionicons 
-              name="chevron-down-circle" 
-              size={24} 
-              color={isExpanded ? "#fff" : COLORS.primary} 
+            <Ionicons
+              name="chevron-down-circle"
+              size={24}
+              color={isExpanded ? "#fff" : COLORS.primary}
             />
           </Animated.View>
         </TouchableOpacity>
-        
+
         {isExpanded && children}
       </LinearGradient>
     </MotiView>
@@ -123,8 +124,8 @@ const ActionButton = ({ title, icon, onPress }: { title: string; icon: string; o
       delay: Math.random() * 200
     }}
   >
-    <TouchableOpacity 
-      style={styles.actionButton} 
+    <TouchableOpacity
+      style={styles.actionButton}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -159,8 +160,8 @@ const Dashboard = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen 
-        options={{ 
+      <Stack.Screen
+        options={{
           title: "Dashboard",
           headerStyle: {
             backgroundColor: COLORS.surface,
@@ -173,22 +174,22 @@ const Dashboard = () => {
           headerShadowVisible: false, // removes the bottom border
           headerTintColor: COLORS.primary, // for back button and other icons
           headerRight: () => (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.headerButton}
-              onPress={() => {/* handle press */}}
+              onPress={() => {/* handle press */ }}
             >
               <Ionicons name="notifications-outline" size={24} color={COLORS.primary} />
             </TouchableOpacity>
           ),
           headerLeft: () => (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.headerButton}
-              onPress={() => {/* handle press */}}
+              onPress={() => {/* handle press */ }}
             >
               <Ionicons name="menu-outline" size={24} color={COLORS.primary} />
             </TouchableOpacity>
           ),
-        }} 
+        }}
       />
       <ScrollView>
         {/* Stats Card */}
@@ -196,7 +197,7 @@ const Dashboard = () => {
           <View style={styles.periodSelector}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Text style={styles.periodText}>{selectedPeriod}</Text>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => { }}>
                 <Text style={styles.viewBills}>View Bills</Text>
               </TouchableOpacity>
             </View>
@@ -238,75 +239,91 @@ const Dashboard = () => {
           </View>
         </View>
 
+        {/* New Section Above Quick Actions */}
+        <View style={styles.newSection}>
+          <Text style={styles.newSectionTitle}>Individual Dashboards</Text>
+          <Text style={styles.newSectionContent}>This is the content of the new section.</Text>
+          <View style={styles.navigationButtonsContainer}>
+            <TouchableOpacity onPress={() => router.push('/(user)/sales')} style={styles.navigationButton}>
+              <Text style={styles.navigationButtonText}>Sales</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/(user)/purchase')} style={styles.navigationButton}>
+              <Text style={styles.navigationButtonText}>Purchases</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Quick Actions Section */}
         <View style={styles.quickActionsSection}>
           <Text style={styles.sectionHeaderText}>Quick Actions</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.quickActionsRow}>
-              <QuickActionButton title="E-way Bill" icon="car" onPress={() => {}} />
-              <QuickActionButton title="E-Invoice" icon="document" onPress={() => {}} />
-              <QuickActionButton title="Payments" icon="cash" onPress={() => {}} />
-              <QuickActionButton title="Online Store" icon="storefront" onPress={() => {}} />
+              <QuickActionButton title="E-way Bill" icon="car" onPress={() => { }} />
+              <QuickActionButton title="E-Invoice" icon="document" onPress={() => { }} />
+              <QuickActionButton title="Payments" icon="cash" onPress={() => { }} />
+              <QuickActionButton title="Online Store" icon="storefront" onPress={() => { }} />
             </View>
           </ScrollView>
         </View>
 
         <View style={styles.mainContainer}>
           <CollapsibleSection title="Sales">
-            <ActionButton 
-              title="Sales Order" 
-              icon="document-text-outline" 
-              onPress={() => router.push('/(user)/create-order')} 
+            <ActionButton
+              title="Sales Order"
+              icon="document-text-outline"
+              onPress={() => router.push('/(user)/create-order')}
             />
-            <ActionButton 
-              title="Sales Invoice" 
-              icon="receipt-outline" 
-              onPress={() => router.push('/(user)/create-sales-invoice')} 
+            <ActionButton
+              title="Sales Invoice"
+              icon="receipt-outline"
+              onPress={() => router.push('/(user)/create-sales-invoice')}
             />
-            <ActionButton 
-              title="Sales Return" 
-              icon="return-up-back-outline" 
-              onPress={() => router.push('/(user)/create-sales-return')} 
+            <ActionButton
+              title="Sales Return"
+              icon="return-up-back-outline"
+              onPress={() => router.push('/(user)/create-sales-return')}
             />
-            <ActionButton 
-              title="Delivery Challan" 
-              icon="car-outline" 
-              onPress={() => router.push('/(user)/create-sales-return')} 
+            <ActionButton
+              title="Delivery Challan"
+              icon="car-outline"
+              onPress={() => router.push('/(user)/create-sales-return')}
             />
           </CollapsibleSection>
 
           <CollapsibleSection title="Purchase">
-            <ActionButton 
-              title="Purchase Order" 
-              icon="cart-outline" 
-              onPress={() => router.push('/(user)/create-order')} 
+            <ActionButton
+              title="Purchase Order"
+              icon="cart-outline"
+              onPress={() => router.push('/(user)/create-order')}
             />
-            <ActionButton 
-              title="Purchase Invoice" 
-              icon="receipt-outline" 
-              onPress={() => router.push('/(user)/create-purchase-invoice')} 
+            <ActionButton
+              title="Purchase Invoice"
+              icon="receipt-outline"
+              onPress={() => router.push('/(user)/create-purchase-invoice')}
             />
-            <ActionButton 
-              title="Purchase Return" 
-              icon="return-down-back-outline" 
-              onPress={() => router.push('/(user)/create-purchase-return')} 
+            <ActionButton
+              title="Purchase Return"
+              icon="return-down-back-outline"
+              onPress={() => router.push('/(user)/create-purchase-return')}
             />
           </CollapsibleSection>
 
           <CollapsibleSection title="Product">
-            <ActionButton 
-              title="Add Product" 
-              icon="add-circle-outline" 
-              onPress={() => router.push('/(user)/add-product')} 
+            <ActionButton
+              title="Add Product"
+              icon="add-circle-outline"
+              onPress={() => router.push('/')}
             />
-            <ActionButton 
-              title="Product List" 
-              icon="list-outline" 
-              onPress={() => router.push('/(user)/product-list')} 
+            <ActionButton
+              title="Product List"
+              icon="list-outline"
+              onPress={() => router.push('/')}
             />
           </CollapsibleSection>
         </View>
       </ScrollView>
+
+
     </SafeAreaView>
   );
 };
@@ -314,15 +331,23 @@ const Dashboard = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: 'linear-gradient(to bottom, #F8F9FE, #E0E7FF)', // Gradient background
   },
   statsCard: {
     margin: 16,
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
+    borderRadius: 20, // Increased border radius
     padding: 20,
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: "#000", // Shadow for elevation
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    elevation: 5, // Elevation for Android
   },
   periodSelector: {
     flexDirection: 'row',
@@ -450,11 +475,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
+    margin: 6,
     borderRadius: 12,
     marginBottom: 8,
     backgroundColor: COLORS.surfaceLight,
     borderWidth: 1,
     borderColor: COLORS.border,
+    // transition: 'background-color 0.3s', // Hover effect
   },
   actionIconContainer: {
     width: 36,
@@ -466,9 +493,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   actionButtonText: {
-    fontSize: 15,
+    fontSize: 16, // Increased font size
     color: COLORS.text,
-    fontWeight: '500',
+    fontWeight: '600', // Bolder text
   },
   mainContainer: {
     padding: 16,
@@ -482,6 +509,37 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     borderRadius: 20,
     backgroundColor: 'rgba(120, 104, 229, 0.1)',
+  },
+  navigationButtonsContainer: {
+    // flexDirection: 'row',
+    // justifyContent: 'space-around',
+    marginVertical: 16,
+  },
+  navigationButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    marginBottom: 10
+  },
+  navigationButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  newSection: {
+    marginVertical: 16,
+    paddingHorizontal: 16,
+  },
+  newSectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 6,
+  },
+  newSectionContent: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
   },
 });
 
