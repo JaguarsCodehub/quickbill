@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, Lay
 import { Ionicons } from '@expo/vector-icons';
 import { Href, router, Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BarChart, LineChart } from "react-native-gifted-charts";
+import { BarChart, LineChart, PieChart } from "react-native-gifted-charts";
 import Animated, {
   withTiming,
   useAnimatedStyle,
@@ -11,6 +11,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { MotiView } from 'moti';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -33,7 +35,7 @@ const COLORS = {
   border: '#E5E7EB',
   success: '#7868e5',
   error: '#FF5252',
-  secondary: '#FFB74D', // New secondary color
+  secondary: '#aba0f3', // New secondary color
 };
 
 const QuickActionButton = ({ title, icon, onPress }: { title: string; icon: string; onPress: () => void }) => (
@@ -139,24 +141,72 @@ const ActionButton = ({ title, icon, onPress }: { title: string; icon: string; o
 
 const Dashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('This Year');
+  const [salesVsPurchases, setSalesVsPurchases] = useState({
+    totalSales: 0,
+    totalPurchases: 0
+  });
 
-  const salesData = [
-    { value: 5000, label: 'Jan' },
-    { value: 8000, label: 'Feb' },
-    { value: 6000, label: 'Mar' },
-    { value: 12000, label: 'Apr' },
-    { value: 9000, label: 'May' },
-    { value: 15000, label: 'Jun' },
-  ];
+  useEffect(() => {
+    const fetchSalesVsPurchases = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('UserID');
+        const companyId = await AsyncStorage.getItem('CompanyID');
+        const prefix = await AsyncStorage.getItem('SelectedYear');
 
-  const purchaseData = [
-    { value: 4000, label: 'Jan' },
-    { value: 7000, label: 'Feb' },
-    { value: 5000, label: 'Mar' },
-    { value: 10000, label: 'Apr' },
-    { value: 8000, label: 'May' },
-    { value: 13000, label: 'Jun' },
-  ];
+        console.log('Making API request with headers:', {
+          'UserID': userId,
+          'CompanyID': companyId,
+          'Prefix': prefix
+        });
+
+        const response = await fetch('http://192.168.1.11:3000/api/sales-vs-purchases', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'UserID': userId || '',
+            'CompanyID': companyId || '',
+            'Prefix': prefix || ''
+          }
+        });
+
+        // Log the raw response
+        const rawResponse = await response.text();
+        console.log('Raw API Response:', rawResponse);
+
+        // Check if response is ok
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Try to parse the response
+        const data = JSON.parse(rawResponse);
+        console.log('Parsed Data:', data);
+
+        setSalesVsPurchases(data);
+      } catch (error: any) {
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack
+        });
+        // Set default values in case of error
+        setSalesVsPurchases({
+          totalSales: 0,
+          totalPurchases: 0
+        });
+      }
+    };
+
+    fetchSalesVsPurchases();
+  }, []);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -171,8 +221,8 @@ const Dashboard = () => {
             fontSize: 20,
             fontWeight: '600',
           },
-          headerShadowVisible: false, // removes the bottom border
-          headerTintColor: COLORS.primary, // for back button and other icons
+          headerShadowVisible: false,
+          headerTintColor: COLORS.primary,
           headerRight: () => (
             <TouchableOpacity
               style={styles.headerButton}
@@ -199,36 +249,65 @@ const Dashboard = () => {
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statLabel}>Sales</Text>
-              <Text style={styles.statAmount}>₹15,000</Text>
+              <Text style={styles.statAmount}>
+                {formatCurrency(salesVsPurchases.totalSales)}
+              </Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Text style={styles.statLabel}>Purchases</Text>
-              <Text style={styles.statAmount}>₹13,000</Text>
+              <Text style={styles.statAmount}>
+                {formatCurrency(salesVsPurchases.totalPurchases)}
+              </Text>
             </View>
           </View>
 
           <View style={styles.chartContainer}>
-            <BarChart
-              data={salesData}
-              barWidth={16}
-              spacing={24}
-              // roundedTop
-              // roundedBottom
-              hideRules
-              xAxisThickness={0}
-              yAxisThickness={0}
-              yAxisTextStyle={{ color: COLORS.textSecondary }}
-              xAxisLabelTextStyle={{ color: COLORS.textSecondary }}
-              noOfSections={4}
-              maxValue={20000}
-              height={150}
-              width={300}
-              barBorderRadius={4}
-              frontColor={COLORS.primary}
-              gradientColor="rgba(120, 104, 229, 0.2)"
-              showGradient
+            <PieChart
+              data={[
+                {
+                  value: salesVsPurchases.totalSales,
+                  color: COLORS.primary,
+                  text: `${((salesVsPurchases.totalSales / (salesVsPurchases.totalSales + salesVsPurchases.totalPurchases)) * 100).toFixed(0)}%`,
+                },
+                {
+                  value: salesVsPurchases.totalPurchases,
+                  color: COLORS.secondary,
+                  text: `${((salesVsPurchases.totalPurchases / (salesVsPurchases.totalSales + salesVsPurchases.totalPurchases)) * 100).toFixed(0)}%`,
+                }
+              ]}
+              donut
+              radius={120}
+              innerRadius={60}
+              innerCircleColor={'#fff'}
+              // labelPosition="onBorder"
+              showText
+              textColor="#000"
+              textSize={12}
+              showValuesAsLabels={true}
+              centerLabelComponent={() => (
+                <View style={styles.centerLabel}>
+                  <Text style={styles.centerLabelText}>Total</Text>
+                  <Text style={styles.centerLabelAmount}>
+                    {formatCurrency(salesVsPurchases.totalSales + salesVsPurchases.totalPurchases)}
+                  </Text>
+                </View>
+              )}
             />
+
+            {/* Legend */}
+            <View style={styles.legendContainer}>
+              <View style={styles.legendRow}>
+                <View style={[styles.legendDot, { backgroundColor: COLORS.primary }]} />
+                <Text style={styles.legendText}>Sales</Text>
+                <Text style={styles.legendAmount}>{formatCurrency(salesVsPurchases.totalSales)}</Text>
+              </View>
+              <View style={styles.legendRow}>
+                <View style={[styles.legendDot, { backgroundColor: COLORS.secondary }]} />
+                <Text style={styles.legendText}>Purchases</Text>
+                <Text style={styles.legendAmount}>{formatCurrency(salesVsPurchases.totalPurchases)}</Text>
+              </View>
+            </View>
           </View>
         </View>
 
@@ -385,8 +464,46 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   chartContainer: {
-    marginTop: 20,
     alignItems: 'center',
+    paddingVertical: 20,
+  },
+  centerLabel: {
+    alignItems: 'center',
+  },
+  centerLabelText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  centerLabelAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  legendContainer: {
+    marginTop: 20,
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  legendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  legendText: {
+    flex: 1,
+    color: COLORS.textSecondary,
+    fontSize: 14,
+  },
+  legendAmount: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
   },
   quickActionsSection: {
     marginVertical: 16,
