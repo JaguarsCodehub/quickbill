@@ -2,6 +2,7 @@ import React from 'react';
 import { View, ScrollView, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Stack } from 'expo-router';
 
 // Define TypeScript interfaces
 interface SalesData {
@@ -75,30 +76,38 @@ const PerformanceView: React.FC<PerformanceViewProps> = ({ salesData }) => {
     const totalNetAmount = salesData.reduce((sum, item) => sum + (item.NetAmt || 0), 0);
     const totalTaxAmount = salesData.reduce((sum, item) => sum + (item.TaxAmt || 0), 0);
 
+    // Calculate total for percentage calculation
+    const totalOverall = totalAmount + totalNetAmount + totalTaxAmount;
+
+    // Calculate percentages based on totalOverall
+    const billPercentage = totalOverall > 0 ? (totalAmount / totalOverall) * 100 : 0;
+    const netPercentage = totalOverall > 0 ? (totalNetAmount / totalOverall) * 100 : 0;
+    const taxPercentage = totalOverall > 0 ? (totalTaxAmount / totalOverall) * 100 : 0;
+
     const pieData: ChartData[] = [
         {
             value: totalAmount,
-            color: '#FF8C00',
-            text: totalAmount > 0 ? `${((totalAmount / totalAmount) * 100).toFixed(0)}%` : '0%',
+            color: COLORS.primary,
+            text: `${billPercentage.toFixed(0)}%`,
             label: 'Bill Amount'
         },
         {
             value: totalNetAmount,
-            color: '#4CAF50',
-            text: totalAmount > 0 ? `${((totalNetAmount / totalAmount) * 100).toFixed(0)}%` : '0%',
+            color: COLORS.secondary,
+            text: `${netPercentage.toFixed(0)}%`,
             label: 'Net Amount'
         },
         {
             value: totalTaxAmount,
-            color: '#2196F3',
-            text: totalAmount > 0 ? `${((totalTaxAmount / totalAmount) * 100).toFixed(0)}%` : '0%',
+            color: COLORS.background,
+            text: `${taxPercentage.toFixed(0)}%`,
             label: 'Tax Amount'
         },
     ];
 
     return (
         <View style={styles.performanceCard}>
-            <Text style={styles.cardTitle}>Total View Performance</Text>
+            <Text style={styles.cardTitle}>Total Sales Performance</Text>
 
             <View style={styles.chartWrapper}>
                 <PieChart
@@ -135,7 +144,7 @@ const PerformanceView: React.FC<PerformanceViewProps> = ({ salesData }) => {
                 <Text style={styles.guideTitle}>Level up your sales managing to the next level.</Text>
                 <Text style={styles.guideSubtitle}>An easy way to manage sales with care and precision.</Text>
                 <TouchableOpacity style={styles.updateButton}>
-                    <Text style={styles.updateButtonText}>Update to Siohoma+</Text>
+                    <Text style={styles.updateButtonText}>Update to Quickbill Pro</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -200,8 +209,9 @@ export default function SalesScreen() {
 
     return (
         <ScrollView style={styles.container}>
+            <Stack.Screen options={{ headerShown: false }} />
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Dashboard</Text>
+                <Text style={styles.headerTitle}>Sales Dashboard</Text>
                 <Text style={styles.headerSubtitle}>An easy way to manage sales with care and precision.</Text>
             </View>
 
@@ -211,10 +221,25 @@ export default function SalesScreen() {
     );
 }
 
+const COLORS = {
+    primary: '#7868e5',
+    primaryDark: '#6354d9',
+    background: '#F8F9FE',
+    surface: '#FFFFFF',
+    surfaceLight: '#F4F6FA',
+    text: '#1A1A1A',
+    textSecondary: '#666666',
+    border: '#E5E7EB',
+    success: '#7868e5',
+    error: '#FF5252',
+    secondary: '#aba0f3',
+};
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: COLORS.background,
+        marginTop: 20,
     },
     header: {
         padding: 20,
@@ -222,11 +247,11 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#333',
+        color: COLORS.text,
     },
     headerSubtitle: {
         fontSize: 14,
-        color: '#666',
+        color: COLORS.textSecondary,
         marginTop: 4,
     },
     statsContainer: {
@@ -268,7 +293,7 @@ const styles = StyleSheet.create({
         color: '#F44336',
     },
     transactionsCard: {
-        backgroundColor: 'white',
+        backgroundColor: COLORS.surface,
         margin: 10,
         borderRadius: 12,
         padding: 16,
@@ -290,7 +315,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#EEE',
+        borderBottomColor: COLORS.border,
     },
     transactionLeft: {
         flexDirection: 'row',
@@ -299,7 +324,7 @@ const styles = StyleSheet.create({
     transactionIcon: {
         width: 40,
         height: 40,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: COLORS.surfaceLight,
         borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
@@ -308,10 +333,11 @@ const styles = StyleSheet.create({
     transactionTitle: {
         fontSize: 16,
         fontWeight: '500',
+        color: COLORS.text,
     },
     transactionDate: {
         fontSize: 12,
-        color: '#666',
+        color: COLORS.textSecondary,
         marginTop: 2,
     },
     transactionRight: {
@@ -337,7 +363,7 @@ const styles = StyleSheet.create({
         marginTop: 2,
     },
     performanceCard: {
-        backgroundColor: 'white',
+        backgroundColor: COLORS.surface,
         borderRadius: 12,
         padding: 16,
         margin: 10,
@@ -347,6 +373,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 20,
+        color: COLORS.text,
     },
     chartContainer: {
         alignItems: 'center',
@@ -403,7 +430,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     updateButton: {
-        backgroundColor: '#2E7D32',
+        backgroundColor: COLORS.primary,
         borderRadius: 8,
         padding: 12,
         alignItems: 'center',
@@ -416,11 +443,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F5F5F5',
+        backgroundColor: COLORS.background,
     },
     loadingText: {
         marginTop: 10,
-        color: '#666',
+        color: COLORS.textSecondary,
     },
     chartWrapper: {
         alignItems: 'center',
@@ -430,16 +457,17 @@ const styles = StyleSheet.create({
     },
     noDataText: {
         textAlign: 'center',
-        color: '#666',
+        color: COLORS.textSecondary,
         marginVertical: 20,
     },
     seeAllButton: {
-        color: '#2E7D32',
+        color: COLORS.primary,
         fontWeight: '500',
     },
     transactionAmount: {
         fontSize: 16,
         fontWeight: '500',
         marginBottom: 4,
+        color: COLORS.text,
     },
 });
