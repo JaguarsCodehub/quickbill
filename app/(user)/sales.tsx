@@ -3,6 +3,7 @@ import { View, ScrollView, Text, StyleSheet, TouchableOpacity, ActivityIndicator
 import { PieChart } from 'react-native-gifted-charts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 // Define TypeScript interfaces
 interface SalesData {
@@ -28,25 +29,37 @@ interface PerformanceViewProps {
 }
 
 const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions }) => {
+    const [showAll, setShowAll] = React.useState(false);
+
+    // Function to truncate PartyName
+    const truncateName = (name: string, length: number) => {
+        return name.length > length ? `${name.substring(0, length)}...` : name;
+    };
+
+    // Get the transactions to display
+    const displayedTransactions = showAll ? transactions : transactions.slice(0, 5);
+
     return (
         <View style={styles.transactionsCard}>
             <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>Recent Transactions</Text>
-                <TouchableOpacity>
-                    <Text style={styles.seeAllButton}>See All</Text>
+                <Text style={styles.cardTitle}>Latest Transactions</Text>
+                <TouchableOpacity onPress={() => setShowAll(!showAll)}>
+                    <Text style={styles.seeAllButton}>{showAll ? 'Show Less' : 'View All'}</Text>
                 </TouchableOpacity>
             </View>
 
-            {transactions.map((transaction, index) => (
+            {displayedTransactions.map((transaction, index) => (
                 <View key={index} style={styles.transactionItem}>
                     <View style={styles.transactionLeft}>
                         <View style={styles.transactionIcon}>
-                            <Text>₹</Text>
+                            <Ionicons name="cash" size={24} color="#fff" />
                         </View>
-                        <View>
-                            <Text style={styles.transactionTitle}>{transaction.PartyName ? transaction.PartyName : 'Demo Customer'}</Text>
+                        <View style={styles.transactionDetails}>
+                            <Text style={styles.transactionTitle}>
+                                {truncateName(transaction.PartyName ? transaction.PartyName : 'Demo Customer', 15)}
+                            </Text>
                             <Text style={styles.transactionDate}>
-                                {new Date(transaction.DocDate).toLocaleDateString()}
+                                {new Date(transaction.DocDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(transaction.DocDate).toLocaleDateString()}
                             </Text>
                         </View>
                     </View>
@@ -54,12 +67,12 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
                         <Text style={styles.transactionAmount}>
                             ₹{transaction.BillAmt.toLocaleString('en-IN')}
                         </Text>
-                        <Text style={[
+                        <View style={[
                             styles.transactionStatus,
                             transaction.Status === 'Completed' ? styles.statusCompleted : styles.statusPending
                         ]}>
-                            {transaction.Status || 'Pending'}
-                        </Text>
+                            <Text style={styles.statusText}>{transaction.Status || 'Pending'}</Text>
+                        </View>
                     </View>
                 </View>
             ))}
@@ -119,6 +132,7 @@ const PerformanceView: React.FC<PerformanceViewProps> = ({ salesData }) => {
                     innerRadius={60}
                     textSize={12}
                     focusOnPress
+                    animationDuration={1000}
                     centerLabelComponent={() => (
                         <View style={styles.centerLabel}>
                             <Text style={styles.centerLabelText}>Total</Text>
@@ -295,9 +309,13 @@ const styles = StyleSheet.create({
     transactionsCard: {
         backgroundColor: COLORS.surface,
         margin: 10,
-        borderRadius: 12,
+        borderRadius: 16,
         padding: 16,
-        elevation: 2,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
     },
     cardHeader: {
         flexDirection: 'row',
@@ -305,17 +323,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 16,
     },
-    // cardTitle: {
-    //     fontSize: 18,
-    //     fontWeight: 'bold',
-    // },
+    cardTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: COLORS.text,
+    },
+    seeAllButton: {
+        color: COLORS.primary,
+        fontWeight: '500',
+    },
     transactionItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        borderRadius: 12,
+        backgroundColor: COLORS.surfaceLight,
+        marginBottom: 10,
+        paddingHorizontal: 16,
     },
     transactionLeft: {
         flexDirection: 'row',
@@ -324,15 +349,22 @@ const styles = StyleSheet.create({
     transactionIcon: {
         width: 40,
         height: 40,
-        backgroundColor: COLORS.surfaceLight,
+        backgroundColor: COLORS.secondary,
         borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
     },
+    transactionCurrency: {
+        fontSize: 18,
+        color: '#fff',
+    },
+    transactionDetails: {
+        marginLeft: 8,
+    },
     transactionTitle: {
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: '600',
         color: COLORS.text,
     },
     transactionDate: {
@@ -343,24 +375,27 @@ const styles = StyleSheet.create({
     transactionRight: {
         alignItems: 'flex-end',
     },
+    transactionAmount: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: COLORS.text,
+    },
     transactionStatus: {
-        fontSize: 12,
         paddingHorizontal: 8,
         paddingVertical: 4,
-        borderRadius: 12,
+        borderRadius: 4,
+        marginTop: 4,
     },
     statusCompleted: {
         backgroundColor: '#E8F5E9',
-        color: '#2E7D32',
     },
     statusPending: {
-        backgroundColor: '#FFF3E0',
-        color: '#E65100',
+        backgroundColor: COLORS.secondary,
     },
-    transactionId: {
-        fontSize: 12,
-        color: '#666',
-        marginTop: 2,
+    statusText: {
+        fontSize: 8,
+        fontWeight: '500',
+        color: '#FFF', // For completed
     },
     performanceCard: {
         backgroundColor: COLORS.surface,
@@ -368,12 +403,6 @@ const styles = StyleSheet.create({
         padding: 16,
         margin: 10,
         elevation: 2,
-    },
-    cardTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: COLORS.text,
     },
     chartContainer: {
         alignItems: 'center',
@@ -459,15 +488,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: COLORS.textSecondary,
         marginVertical: 20,
-    },
-    seeAllButton: {
-        color: COLORS.primary,
-        fontWeight: '500',
-    },
-    transactionAmount: {
-        fontSize: 16,
-        fontWeight: '500',
-        marginBottom: 4,
-        color: COLORS.text,
     },
 });
