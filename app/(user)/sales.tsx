@@ -4,6 +4,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon } from 'lucide-react-native';
 
 // Define TypeScript interfaces
 interface SalesData {
@@ -223,13 +224,60 @@ export default function SalesScreen() {
 
     return (
         <ScrollView style={styles.container}>
-            <Stack.Screen options={{ headerShown: false }} />
+            <Stack.Screen
+                options={{
+                    title: "Sales",
+                    headerStyle: {
+                        backgroundColor: COLORS.background,
+                    },
+                    headerTitleStyle: {
+                        color: COLORS.text,
+                        fontSize: 20,
+                        fontWeight: '600',
+                    },
+                    headerShadowVisible: false, // removes the bottom border
+                    headerTintColor: COLORS.primary, // for back button and other icons
+                    headerRight: () => (
+                        <TouchableOpacity
+                            style={styles.headerButton}
+                            onPress={() => {/* handle press */ }}
+                        >
+                            <Ionicons name="notifications" size={24} color={COLORS.primary} />
+                        </TouchableOpacity>
+                    ),
+                    headerLeft: () => null
+                }}
+            />
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Sales Dashboard</Text>
-                <Text style={styles.headerSubtitle}>An easy way to manage sales with care and precision.</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={styles.headerTitle}>Sales Dashboard</Text>
+                    <TouchableOpacity style={{
+                        width: 40,
+                        height: 40,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginHorizontal: 8,
+                        borderRadius: 20,
+                        backgroundColor: '#000',
+                    }}>
+                        <Ionicons name="add" size={24} color={COLORS.primary} />
+                    </TouchableOpacity>
+                </View>
+                {/* <Text style={styles.headerSubtitle}>An easy way to manage sales with care and precision.</Text> */}
             </View>
 
             <PerformanceView salesData={salesData.recentTransactions} />
+
+            <View style={{ margin: 10, padding: 20, backgroundColor: COLORS.surface, borderRadius: 16, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 }}>
+                <View style={{ gap: 10 }}>
+                    <Text style={{ fontSize: 20, fontWeight: '600' }}>New Invoice</Text>
+                    <Text style={{ fontSize: 16, color: COLORS.textSecondary }}>Create a new invoice for your customer.</Text>
+                    <View style={{ backgroundColor: '#000', padding: 12, borderRadius: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={{ color: '#fff', fontWeight: '600', textAlign: 'center', fontSize: 16 }}>Create Invoice</Text>
+                        <Ionicons name="add" size={24} color="#fff" />
+                    </View>
+                </View>
+            </View>
             <TransactionList transactions={salesData.recentTransactions} />
         </ScrollView>
     );
@@ -256,15 +304,25 @@ const styles = StyleSheet.create({
         // paddingTop: 20,
     },
     header: {
-        padding: 20,
+        paddingHorizontal: 20,
+        marginTop: 20
+    },
+    headerButton: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginHorizontal: 8,
+        borderRadius: 20,
+        backgroundColor: 'rgba(120, 104, 229, 0.1)',
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         color: COLORS.text,
     },
     headerSubtitle: {
-        fontSize: 14,
+        fontSize: 16,
         color: COLORS.textSecondary,
         marginTop: 4,
     },
@@ -403,6 +461,7 @@ const styles = StyleSheet.create({
         padding: 16,
         margin: 10,
         elevation: 2,
+        marginTop: 30
     },
     chartContainer: {
         alignItems: 'center',

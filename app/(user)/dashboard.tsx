@@ -181,14 +181,7 @@ const Dashboard = () => {
               <Ionicons name="notifications-outline" size={24} color={COLORS.primary} />
             </TouchableOpacity>
           ),
-          headerLeft: () => (
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => {/* handle press */ }}
-            >
-              <Ionicons name="menu-outline" size={24} color={COLORS.primary} />
-            </TouchableOpacity>
-          ),
+          headerLeft: () => null
         }}
       />
       <ScrollView>
@@ -331,7 +324,7 @@ const Dashboard = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'linear-gradient(to bottom, #F8F9FE, #E0E7FF)', // Gradient background
+    backgroundColor: COLORS.background,
   },
   statsCard: {
     margin: 16,
