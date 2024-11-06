@@ -247,8 +247,8 @@ const Dashboard = () => {
             <TouchableOpacity onPress={() => router.push('/(user)/sales')} style={styles.navigationButton}>
               <Text style={styles.navigationButtonText}>Sales</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/(user)/purchase')} style={styles.navigationButton}>
-              <Text style={styles.navigationButtonText}>Purchases</Text>
+            <TouchableOpacity onPress={() => router.push('/(user)/purchase')} style={styles.PurchasenavigationButton}>
+              <Text style={styles.PurchasenavigationButtonText}>Purchases</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -522,8 +522,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10
   },
+  PurchasenavigationButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#433878',
+    alignItems: 'center',
+    marginBottom: 10
+  },
   navigationButtonText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  PurchasenavigationButtonText: {
+    color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
   },
