@@ -60,7 +60,7 @@ const TransactionList: React.FC<{ transactions: PurchaseData[] }> = ({ transacti
                                 {truncateName(transaction.PartyName ? transaction.PartyName : 'Demo Customer', 15)}
                             </Text>
                             <Text style={styles.transactionDate}>
-                                {new Date(transaction.DocDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(transaction.DocDate).toLocaleDateString()}
+                                {transaction.DocNo} - {new Date(transaction.DocDate).toLocaleDateString()}
                             </Text>
                         </View>
                     </View>

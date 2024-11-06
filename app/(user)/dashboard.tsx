@@ -246,19 +246,6 @@ const Dashboard = () => {
           </View>
         </View>
 
-        {/* Quick Actions Section */}
-        <View style={styles.quickActionsSection}>
-          <Text style={styles.sectionHeaderText}>Quick Actions</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.quickActionsRow}>
-              <QuickActionButton title="E-way Bill" icon="car" onPress={() => { }} />
-              <QuickActionButton title="E-Invoice" icon="document" onPress={() => { }} />
-              <QuickActionButton title="Payments" icon="cash" onPress={() => { }} />
-              <QuickActionButton title="Online Store" icon="storefront" onPress={() => { }} />
-            </View>
-          </ScrollView>
-        </View>
-
         <View style={styles.mainContainer}>
           <CollapsibleSection title="Sales">
             <ActionButton
@@ -314,6 +301,21 @@ const Dashboard = () => {
             />
           </CollapsibleSection>
         </View>
+
+        {/* Quick Actions Section */}
+        <View style={styles.quickActionsSection}>
+          <Text style={styles.sectionHeaderText}>Quick Actions</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.quickActionsRow}>
+              <QuickActionButton title="E-way Bill" icon="car" onPress={() => { }} />
+              <QuickActionButton title="E-Invoice" icon="document" onPress={() => { }} />
+              <QuickActionButton title="Payments" icon="cash" onPress={() => { }} />
+              <QuickActionButton title="Online Store" icon="storefront" onPress={() => { }} />
+            </View>
+          </ScrollView>
+        </View>
+
+
       </ScrollView>
 
 

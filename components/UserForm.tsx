@@ -18,7 +18,7 @@ import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { router } from 'expo-router';
-import LoadingScreen from './LoadingScreen'; // Assuming you have this component
+import LoadingScreen from './LoadingScreen';
 
 const UserForm: React.FC = () => {
   const [username, setUsername] = useState<string>('');
