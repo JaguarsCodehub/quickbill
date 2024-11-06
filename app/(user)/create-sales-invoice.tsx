@@ -238,7 +238,7 @@ const CreateSalesInvoice = () => {
       const companyId = await AsyncStorage.getItem('CompanyID');
       const prefix = await AsyncStorage.getItem('SelectedYear');
 
-      const response = await axios.get('http://192.168.1.9:3000/invoice-items', {
+      const response = await axios.get('https://quickbill-backlend.vercel.app/invoice-items', {
         headers: {
           'UserID': userId,
           'CompanyID': companyId,
@@ -509,7 +509,7 @@ const CreateSalesInvoice = () => {
     };
 
     try {
-      const response = await fetch('http://192.168.1.9:3000/api/create-invoice', {
+      const response = await fetch('https://quickbill-backlend.vercel.app/api/create-invoice', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
