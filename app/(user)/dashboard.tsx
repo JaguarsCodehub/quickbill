@@ -268,19 +268,10 @@ const Dashboard = () => {
               icon='return-up-back-outline'
               onPress={() => router.push('/(user)/create-sales-return')}
             />
-            <ActionButton
-              title='Delivery Challan'
-              icon='car-outline'
-              onPress={() => router.push('/(user)/create-sales-return')}
-            />
+          
           </CollapsibleSection>
 
           <CollapsibleSection title='Purchase'>
-            <ActionButton
-              title='Purchase Order'
-              icon='cart-outline'
-              onPress={() => router.push('/(user)/create-order')}
-            />
             <ActionButton
               title='Purchase Invoice'
               icon='receipt-outline'

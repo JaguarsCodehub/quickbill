@@ -614,7 +614,7 @@ const CreatePurchaseReturn = () => {
                             <View style={styles.headerItem}>
                                 <Ionicons name="document-text-outline" size={20} color="#7868e5" />
                                 <Text style={styles.headerText}>No:</Text>
-                                <Text style={styles.headerValue}>PUR/{nextSerial}</Text>
+                                <Text style={styles.headerValue}>PIR/{nextSerial}</Text>
                             </View>
                         </View>
                     </View>

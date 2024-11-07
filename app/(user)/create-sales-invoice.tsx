@@ -599,7 +599,7 @@ const CreateSalesInvoice = () => {
       <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.gradient}>
         <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
-            <Text style={styles.title}>New Invoice</Text>
+            <Text style={styles.title}>New Sales Invoice</Text>
             <Ionicons name="cart" size={24} color="#7868e5" />
           </View>
 
