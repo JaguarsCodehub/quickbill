@@ -146,9 +146,11 @@ const Dashboard = () => {
     totalSales: 0,
     totalPurchases: 0
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSalesVsPurchases = async () => {
+      setLoading(true);
       try {
         const userId = await AsyncStorage.getItem('UserID');
         const companyId = await AsyncStorage.getItem('CompanyID');
@@ -195,6 +197,8 @@ const Dashboard = () => {
           totalSales: 0,
           totalPurchases: 0
         });
+      } finally {
+        setLoading(false);
       }
     };
 

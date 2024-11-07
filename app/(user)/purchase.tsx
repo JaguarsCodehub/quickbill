@@ -164,6 +164,38 @@ const PerformanceView: React.FC<PerformanceViewProps> = ({ purchaseData }) => {
     );
 };
 
+// Add this new component after your TransactionList component
+const QuickActionsGrid = () => {
+  const actions = [
+    { id: 1, title: 'Purchase Invoice', icon: 'receipt-outline' },
+    { id: 2, title: 'Purchase Return', icon: 'return-down-back-outline' },
+    { id: 3, title: 'Purchase Order', icon: 'cart-outline' },
+    { id: 4, title: 'Check Status', icon: 'checkmark-circle-outline' },
+    { id: 5, title: 'Run Analysis', icon: 'analytics-outline' },
+    { id: 6, title: 'View Reports', icon: 'document-text-outline' },
+  ];
+
+  return (
+    <View style={styles.quickActionsWrapper}>
+      <Text style={styles.quickActionsTitle}>What would you like to do?</Text>
+      <View style={styles.quickActionsGrid}>
+        {actions.map((action) => (
+          <TouchableOpacity 
+            key={action.id} 
+            style={styles.actionButton}
+            onPress={() => {/* handle action */}}
+          >
+            <View style={styles.actionIconContainer}>
+              <Ionicons name={action.icon as any} size={24} color={COLORS.primary} />
+            </View>
+            <Text style={styles.actionText}>{action.title}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+};
+
 export default function PurchaseScreen() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [purchaseData, setPurchaseData] = React.useState<{
@@ -221,36 +253,45 @@ export default function PurchaseScreen() {
     }
 
     return (
-        <ScrollView style={styles.container}>
-            <Stack.Screen
-                options={{
-                    title: "Purchases",
-                    headerStyle: {
-                        backgroundColor: COLORS.background,
-                    },
-                    headerTitleStyle: {
-                        color: COLORS.text,
-                        fontSize: 20,
-                        fontWeight: '600',
-                    },
-                    headerShadowVisible: false, // removes the bottom border
-                    headerTintColor: COLORS.primary, // for back button and other icons
-                    headerRight: () => (
-                        <TouchableOpacity
-                            style={styles.headerButton}
-                            onPress={() => {/* handle press */ }}
-                        >
-                            <Ionicons name="notifications" size={24} color={COLORS.primary} />
-                        </TouchableOpacity>
-                    ),
-                    headerLeft: () => null
+      <ScrollView style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: 'Purchases',
+            headerStyle: {
+              backgroundColor: COLORS.background,
+            },
+            headerTitleStyle: {
+              color: COLORS.text,
+              fontSize: 20,
+              fontWeight: '600',
+            },
+            headerShadowVisible: false, // removes the bottom border
+            headerTintColor: COLORS.primary, // for back button and other icons
+            headerRight: () => (
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={() => {
+                  /* handle press */
                 }}
-            />
-            <View style={styles.header}>
-                <View style={{ gap: 10 }}>
-                    <Text style={styles.headerTitle}>Purchase Dashboard</Text>
-                    <Text style={styles.headerSubtitle}>Check your purchase performance and manage your purchases with ease.</Text>
-                    {/* <TouchableOpacity style={{
+              >
+                <Ionicons
+                  name='notifications'
+                  size={24}
+                  color={COLORS.primary}
+                />
+              </TouchableOpacity>
+            ),
+            headerLeft: () => null,
+          }}
+        />
+        <View style={styles.header}>
+          <View style={{ gap: 10 }}>
+            <Text style={styles.headerTitle}>Purchase Dashboard</Text>
+            <Text style={styles.headerSubtitle}>
+              Check your purchase performance and manage your purchases with
+              ease.
+            </Text>
+            {/* <TouchableOpacity style={{
                         width: 40,
                         height: 40,
                         justifyContent: 'center',
@@ -261,23 +302,59 @@ export default function PurchaseScreen() {
                     }}>
                         <Ionicons name="add" size={24} color={COLORS.background} />
                     </TouchableOpacity> */}
-                </View>
-            </View>
+          </View>
+        </View>
 
-            <PerformanceView purchaseData={purchaseData.recentTransactions} />
+        <QuickActionsGrid />
 
-            <View style={{ margin: 10, padding: 20, backgroundColor: COLORS.surface, borderRadius: 16, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 }}>
-                <View style={{ gap: 10 }}>
-                    <Text style={{ fontSize: 20, fontWeight: '600' }}>New Purchase Invoice</Text>
-                    <Text style={{ fontSize: 16, color: COLORS.textSecondary }}>Create a new purchase invoice for your customer.</Text>
-                    <TouchableOpacity style={{ backgroundColor: '#000', padding: 12, borderRadius: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={{ color: '#fff', fontWeight: '600', textAlign: 'center', fontSize: 16 }}>Create Invoice</Text>
-                        <Ionicons name="add" size={24} color="#fff" />
-                    </TouchableOpacity>
-                </View>
-            </View>
-            <TransactionList transactions={purchaseData.recentTransactions} />
-        </ScrollView>
+        <PerformanceView purchaseData={purchaseData.recentTransactions} />
+
+        <View
+          style={{
+            margin: 10,
+            padding: 20,
+            backgroundColor: COLORS.surface,
+            borderRadius: 16,
+            elevation: 2,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+          }}
+        >
+          <View style={{ gap: 10 }}>
+            <Text style={{ fontSize: 20, fontWeight: '600' }}>
+              New Purchase Invoice
+            </Text>
+            <Text style={{ fontSize: 16, color: COLORS.textSecondary }}>
+              Create a new purchase invoice for your customer.
+            </Text>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#000',
+                padding: 12,
+                borderRadius: 8,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  color: '#fff',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  fontSize: 16,
+                }}
+              >
+                Create Invoice
+              </Text>
+              <Ionicons name='add' size={24} color='#fff' />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <TransactionList transactions={purchaseData.recentTransactions} />
+      </ScrollView>
     );
 }
 
@@ -369,9 +446,9 @@ const styles = StyleSheet.create({
         padding: 16,
         elevation: 4,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 18,
     },
     cardHeader: {
         flexDirection: 'row',
@@ -537,6 +614,51 @@ const styles = StyleSheet.create({
     },
     updateButtonText: {
         color: 'white',
+        fontWeight: '500',
+    },
+    quickActionsWrapper: {
+        padding: 20,
+        backgroundColor: COLORS.surface,
+        margin: 10,
+        borderRadius: 16,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    quickActionsTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: COLORS.text,
+        marginBottom: 20,
+    },
+    quickActionsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: 16,
+    },
+    actionButton: {
+        width: '30%', // Approximately 3 buttons per row with spacing
+        alignItems: 'center',
+        gap: 8,
+    },
+    actionIconContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: `${COLORS.primary}10`,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    actionText: {
+        fontSize: 12,
+        color: COLORS.text,
+        textAlign: 'center',
         fontWeight: '500',
     },
 });

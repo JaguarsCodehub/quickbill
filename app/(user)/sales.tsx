@@ -166,6 +166,37 @@ const PerformanceView: React.FC<PerformanceViewProps> = ({ salesData }) => {
     );
 };
 
+const QuickActionsGrid = () => {
+  const actions = [
+    { id: 1, title: 'Sales Invoice', icon: 'receipt-outline' },
+    { id: 2, title: 'Sales Return', icon: 'return-down-back-outline' },
+    { id: 3, title: 'Sales Order', icon: 'cart-outline' },
+    { id: 4, title: 'Check Status', icon: 'checkmark-circle-outline' },
+    { id: 5, title: 'Run Analysis', icon: 'analytics-outline' },
+    { id: 6, title: 'View Reports', icon: 'document-text-outline' },
+  ];
+
+  return (
+    <View style={styles.quickActionsWrapper}>
+      <Text style={styles.quickActionsTitle}>What would you like to do?</Text>
+      <View style={styles.quickActionsGrid}>
+        {actions.map((action) => (
+          <TouchableOpacity 
+            key={action.id} 
+            style={styles.actionButton}
+            onPress={() => {/* handle action */}}
+          >
+            <View style={styles.actionIconContainer}>
+              <Ionicons name={action.icon as any} size={24} color={COLORS.primary} />
+            </View>
+            <Text style={styles.actionText}>{action.title}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+};
+
 export default function SalesScreen() {
     const [isLoading, setIsLoading] = React.useState(true);
     const [salesData, setSalesData] = React.useState<{
@@ -223,35 +254,45 @@ export default function SalesScreen() {
     }
 
     return (
-        <ScrollView style={styles.container}>
-            <Stack.Screen
-                options={{
-                    title: "Sales",
-                    headerStyle: {
-                        backgroundColor: COLORS.background,
-                    },
-                    headerTitleStyle: {
-                        color: COLORS.text,
-                        fontSize: 20,
-                        fontWeight: '600',
-                    },
-                    headerShadowVisible: false, // removes the bottom border
-                    headerTintColor: COLORS.primary, // for back button and other icons
-                    headerRight: () => (
-                        <TouchableOpacity
-                            style={styles.headerButton}
-                            onPress={() => {/* handle press */ }}
-                        >
-                            <Ionicons name="notifications" size={24} color={COLORS.primary} />
-                        </TouchableOpacity>
-                    ),
-                    headerLeft: () => null
+      <ScrollView style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: 'Sales',
+            headerStyle: {
+              backgroundColor: COLORS.background,
+            },
+            headerTitleStyle: {
+              color: COLORS.text,
+              fontSize: 20,
+              fontWeight: '600',
+            },
+            headerShadowVisible: false, // removes the bottom border
+            headerTintColor: COLORS.primary, // for back button and other icons
+            headerRight: () => (
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={() => {
+                  /* handle press */
                 }}
-            />
-            <View style={styles.header}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={styles.headerTitle}>Sales Dashboard</Text>
-                    <TouchableOpacity style={{
+              >
+                <Ionicons
+                  name='notifications'
+                  size={24}
+                  color={COLORS.primary}
+                />
+              </TouchableOpacity>
+            ),
+            headerLeft: () => null,
+          }}
+        />
+        <View style={styles.header}>
+          <View style={{ gap: 10 }}>
+            <Text style={styles.headerTitle}>Sales Dashboard</Text>
+            <Text style={styles.headerSubtitle}>
+              Check your sales performance and manage your sales with
+              ease.
+            </Text>
+            {/* <TouchableOpacity style={{
                         width: 40,
                         height: 40,
                         justifyContent: 'center',
@@ -261,25 +302,57 @@ export default function SalesScreen() {
                         backgroundColor: '#000',
                     }}>
                         <Ionicons name="add" size={24} color={COLORS.background} />
-                    </TouchableOpacity>
-                </View>
-                {/* <Text style={styles.headerSubtitle}>An easy way to manage sales with care and precision.</Text> */}
-            </View>
+                    </TouchableOpacity> */}
+          </View>
+        </View>
 
-            <PerformanceView salesData={salesData.recentTransactions} />
+        <PerformanceView salesData={salesData.recentTransactions} />
 
-            <View style={{ margin: 10, padding: 20, backgroundColor: COLORS.surface, borderRadius: 16, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 }}>
-                <View style={{ gap: 10 }}>
-                    <Text style={{ fontSize: 20, fontWeight: '600' }}>New Invoice</Text>
-                    <Text style={{ fontSize: 16, color: COLORS.textSecondary }}>Create a new invoice for your customer.</Text>
-                    <View style={{ backgroundColor: '#000', padding: 12, borderRadius: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={{ color: '#fff', fontWeight: '600', textAlign: 'center', fontSize: 16 }}>Create Invoice</Text>
-                        <Ionicons name="add" size={24} color="#fff" />
-                    </View>
-                </View>
+        <View
+          style={{
+            margin: 10,
+            padding: 20,
+            backgroundColor: COLORS.surface,
+            borderRadius: 16,
+            elevation: 2,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+          }}
+        >
+          <View style={{ gap: 10 }}>
+            <Text style={{ fontSize: 20, fontWeight: '600' }}>New Invoice</Text>
+            <Text style={{ fontSize: 16, color: COLORS.textSecondary }}>
+              Create a new invoice for your customer.
+            </Text>
+            <View
+              style={{
+                backgroundColor: '#000',
+                padding: 12,
+                borderRadius: 8,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  color: '#fff',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  fontSize: 16,
+                }}
+              >
+                Create Invoice
+              </Text>
+              <Ionicons name='add' size={24} color='#fff' />
             </View>
-            <TransactionList transactions={salesData.recentTransactions} />
-        </ScrollView>
+          </View>
+        </View>
+        <TransactionList transactions={salesData.recentTransactions} />
+        <QuickActionsGrid />
+      </ScrollView>
     );
 }
 
@@ -547,5 +620,50 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: COLORS.textSecondary,
         marginVertical: 20,
+    },
+    quickActionsWrapper: {
+        padding: 20,
+        backgroundColor: COLORS.surface,
+        margin: 10,
+        borderRadius: 16,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    quickActionsTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: COLORS.text,
+        marginBottom: 20,
+    },
+    quickActionsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: 16,
+    },
+    actionButton: {
+        width: '30%', // Approximately 3 buttons per row with spacing
+        alignItems: 'center',
+        gap: 8,
+    },
+    actionIconContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: `${COLORS.primary}10`,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    actionText: {
+        fontSize: 12,
+        color: COLORS.text,
+        textAlign: 'center',
+        fontWeight: '500',
     },
 });
