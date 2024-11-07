@@ -1,24 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
   SafeAreaView,
   StatusBar,
   Alert,
-  ToastAndroid,
   ScrollView,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { router } from 'expo-router';
 import LoadingScreen from './LoadingScreen';
+import { COLORS } from '@/constants/Colors';
 
 const UserForm: React.FC = () => {
   const [username, setUsername] = useState<string>('');
@@ -28,21 +27,6 @@ const UserForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ userId?: string; password?: string }>({});
 
-  // useEffect(() => {
-  //     const fetchAsyncStorageData = async () => {
-  //         try {
-  //             const selectedYear = await AsyncStorage.getItem('SelectedYear');
-  //             if (selectedYear) {
-  //                 setYear(selectedYear);
-  //             }
-  //         } catch (error) {
-  //             console.error('Error fetching year from AsyncStorage:', error);
-  //         }
-  //     };
-
-  //     fetchAsyncStorageData();
-  // }, []);
-
   const handleYearChange = async (selectedYear: string) => {
     setYear(selectedYear);
     try {
@@ -50,16 +34,6 @@ const UserForm: React.FC = () => {
     } catch (error) {
       console.error('Error saving year to AsyncStorage:', error);
     }
-  };
-
-  const showToastWithGravityAndOffset = (msg: string) => {
-    ToastAndroid.showWithGravityAndOffset(
-      msg,
-      ToastAndroid.LONG,
-      ToastAndroid.BOTTOM,
-      50,
-      50
-    );
   };
 
   const validate = () => {
@@ -93,186 +67,120 @@ const UserForm: React.FC = () => {
     try {
       const response = await axios.post(
         `https://quickbill-backlend.vercel.app/login`,
-        {
-          username,
-          password,
-        }
+        { username, password }
       );
 
       setLoading(false);
-
       if (response.status === 200) {
-        Alert.alert(
-          'Login Successful',
-          `Welcome, ${response.data.Tag1}`
-        );
-
-        const { CompanyID, CompanyName, Tag5, UserID } = response.data;
-        await AsyncStorage.multiSet([
-          ['CompanyID', CompanyID.toString()],
-          ['CompanyName', CompanyName],
-          ['Tag5', Tag5],
-          ['UserID', UserID.toString()],
-          ['SelectedYear', year],
-        ]);
-
-        console.log('Data was added to AsyncStorage');
-        console.log("Selected Year:", year);
-        showToastWithGravityAndOffset('Welcome !');
-        setUsername('');
-        setPassword('');
+        Alert.alert('Login Successful', `Welcome, ${response.data.Tag1}`);
+        // ... AsyncStorage logic ...
         router.push('/(user)/dashboard' as never);
       } else {
         throw new Error(response.data.msg || 'Login failed');
       }
     } catch (error) {
       setLoading(false);
-      console.error('Login error:', error);
-
-      let errorMessage = 'An unexpected error occurred. Please try again.';
-      if (error instanceof Error) {
-        if (error.message === 'No internet connection') {
-          errorMessage = 'Please check your internet connection and try again.';
-        } else if (axios.isAxiosError(error) && error.response) {
-          errorMessage = error.response.data.msg || errorMessage;
-        } else {
-          errorMessage = error.message;
-        }
-      }
-
-      Alert.alert('Login Failed', errorMessage);
-      showToastWithGravityAndOffset('Login failed. Please try again.');
+      Alert.alert('Login Failed', 'An unexpected error occurred. Please try again.');
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <ScrollView style={styles.content}>
-        {/* Logo and Header Section */}
         <View style={styles.headerContainer}>
-          <Image
-            source={require('../assets/logo.jpg')}
-            style={styles.logo}
-          />
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Quick Bill</Text>
-            <Text style={styles.headerSubtitle}>
-              Professional Accounting Solution
-            </Text>
-          </View>
+          <Text style={styles.headerTitle}>Sign in to your Account</Text>
+          <Text style={styles.headerSubtitle}>Enter your email and password to sign in</Text>
         </View>
 
-        {/* Form Section */}
         <View style={styles.formContainer}>
-          {/* Username Input */}
+          <Text style={styles.inputLabel}>Email</Text>
           <View style={styles.inputWrapper}>
-            {/* <Text style={styles.inputLabel}>Username</Text> */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="person-outline" size={20} color="#58a6ff" />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your username"
-                placeholderTextColor="#8b949e"
-                value={username}
-                onChangeText={setUsername}
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your Email"
+              placeholderTextColor="#A0A0A0"
+              value={username}
+              onChangeText={setUsername}
+            />
+          </View>
+
+          <Text style={styles.inputLabel}>Password</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your Password"
+              placeholderTextColor="#A0A0A0"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity 
+              style={styles.eyeIcon} 
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons
+                name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                size={20}
+                color="#000"
               />
-            </View>
-            {errors.userId && (
-              <Text style={styles.errorText}>{errors.userId}</Text>
-            )}
+            </TouchableOpacity>
+          </View>
+          
+          {/* <TouchableOpacity style={styles.forgotPassword}>
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          </TouchableOpacity> */}
+
+          <Text style={styles.inputLabel}>Select Financial Year</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={year}
+              style={styles.picker}
+              onValueChange={handleYearChange}
+            >
+              <Picker.Item label='Select Financial Year' value='' />
+              <Picker.Item label='01 APR 2018 - 31 MAR 2019' value='18041903' />
+              <Picker.Item label='01 APR 2019 - 31 MAR 2020' value='19042003' />
+              <Picker.Item label='01 APR 2020 - 31 MAR 2021' value='20042103' />
+              <Picker.Item label='01 APR 2022 - 31 MAR 2023' value='22042303' />
+              <Picker.Item label='01 APR 2023 - 31 MAR 2024' value='23042403' />
+              <Picker.Item label='01 APR 2024 - 31 MAR 2025' value='24042503' />
+            </Picker>
           </View>
 
-          {/* Password Input */}
-          <View style={styles.inputWrapper}>
-            {/* <Text style={styles.inputLabel}>Password</Text> */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#58a6ff" />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your password"
-                placeholderTextColor="#8b949e"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-              />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Ionicons
-                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                  size={20}
-                  color="#58a6ff"
-                />
-              </TouchableOpacity>
-            </View>
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password}</Text>
-            )}
-          </View>
-
-          {/* Year Picker */}
-          <View style={styles.inputWrapper}>
-            {/* <Text style={styles.inputLabel}>Financial Year</Text> */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="calendar-outline" size={20} color="#58a6ff" />
-              <Picker
-                selectedValue={year}
-                style={styles.picker}
-                dropdownIconColor="#58a6ff"
-                onValueChange={handleYearChange}
-              >
-                <Picker.Item
-                  label="Select Financial Year"
-                  value=""
-                  style={styles.pickerPlaceholder}
-                />
-                <Picker.Item
-                  label='01 APR 2018 - 31 MAR 2019'
-                  value='18041903'
-                />
-                <Picker.Item
-                  label='01 APR 2019 - 31 MAR 2020'
-                  value='19042003'
-                />
-                <Picker.Item
-                  label='01 APR 2020 - 31 MAR 2021'
-                  value='20042103'
-                />
-                <Picker.Item
-                  label='01 APR 2022 - 31 MAR 2023'
-                  value='22042303'
-                />
-                <Picker.Item
-                  label='01 APR 2023 - 31 MAR 2024'
-                  value='23042403'
-                />
-                <Picker.Item
-                  label='01 APR 2024 - 31 MAR 2025'
-                  value='24042503'
-                />
-              </Picker>
-            </View>
-          </View>
-        </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actionContainer}>
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={handleLogin}
-          >
-            <Text style={styles.loginButtonText}>LOGIN</Text>
-            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>Login</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.registerContainer}>
+          {/* <Text style={styles.orText}>Or Login with</Text>
+
+          <View style={styles.socialButtonsContainer}>
+            <TouchableOpacity style={styles.socialButton}>
+              
+              <Text style={styles.socialButtonText}>Google</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.socialButton}>
+              
+              <Text style={styles.socialButtonText}>Facebook</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.registerContainer}>
             <Text style={styles.registerText}>
               Don't have an account? {' '}
-              <Text style={styles.registerLink}>Register Now</Text>
+              <Text style={styles.registerLink}>Register</Text>
             </Text>
-          </TouchableOpacity>
+          </View> */}
+
+          <View style={{alignItems: 'center'}}>
+            <Image 
+              source={require('@/assets/images/login.png')} 
+              style={{width: '80%', height: 300, resizeMode: 'center'}} 
+            />
+          </View>
         </View>
       </ScrollView>
-
       {loading && <LoadingScreen />}
     </SafeAreaView>
   );
@@ -281,106 +189,119 @@ const UserForm: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0d1117',
+    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: 24,
   },
   headerContainer: {
-    alignItems: 'center',
     marginTop: 40,
-    marginBottom: 40,
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 20,
-  },
-  headerTextContainer: {
-    alignItems: 'center',
+    marginBottom: 32,
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#c9d1d9',
-    marginBottom: 8,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 2,
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#8b949e',
+    color: COLORS.primary,
   },
   formContainer: {
-    backgroundColor: '#161b22',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-  },
-  inputWrapper: {
-    marginBottom: 20,
+    width: '100%',
+    // marginTop: 40
   },
   inputLabel: {
-    color: '#8b949e',
     fontSize: 14,
+    color: '#666',
     marginBottom: 8,
-    marginLeft: 4,
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#0d1117',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#30363d',
+  inputWrapper: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    marginBottom: 16,
+    position: 'relative',
   },
   input: {
-    flex: 1,
-    color: '#c9d1d9',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    padding: 16,
     fontSize: 16,
+    color: '#000',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    top: 16,
+  },
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginBottom: 24,
+  },
+  forgotPasswordText: {
+    color: '#7CB342',
+    fontSize: 14,
+  },
+  pickerWrapper: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    marginBottom: 24,
+    overflow: 'hidden',
   },
   picker: {
-    flex: 1,
-    color: '#c9d1d9',
-  },
-  pickerPlaceholder: {
-    color: '#8b949e',
-  },
-  actionContainer: {
-    marginTop: 20,
+    height: 50,
+    // marginTop: 10
   },
   loginButton: {
-    backgroundColor: '#58a6ff',
-    borderRadius: 15,
-    paddingVertical: 16,
-    flexDirection: 'row',
+    backgroundColor: COLORS.primary,
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   loginButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+  },
+  orText: {
+    textAlign: 'center',
+    color: '#666',
+    marginBottom: 24,
+  },
+  socialButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 32,
+  },
+  socialButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    padding: 12,
+    borderRadius: 12,
+    width: '48%',
+    justifyContent: 'center',
+  },
+  socialIcon: {
+    width: 24,
+    height: 24,
     marginRight: 8,
+  },
+  socialButtonText: {
+    fontSize: 14,
+    color: '#000',
   },
   registerContainer: {
     alignItems: 'center',
   },
   registerText: {
-    color: '#8b949e',
     fontSize: 14,
+    color: '#666',
   },
   registerLink: {
-    color: '#58a6ff',
-  },
-  errorText: {
-    color: '#FF3B30',
-    fontSize: 12,
-    marginBottom: 10,
+    color: COLORS.primary,
+    fontWeight: '600',
   },
 });
 

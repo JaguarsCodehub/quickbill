@@ -187,7 +187,7 @@ export default function SalesScreen() {
             const companyId = await AsyncStorage.getItem('CompanyID');
             const prefix = await AsyncStorage.getItem('SelectedYear');
 
-            const response = await fetch('http://192.168.1.11:3000/api/total-sales', {
+            const response = await fetch('https://quickbill-backlend.vercel.app/api/total-sales', {
                 headers: {
                     'UserID': userId || '',
                     'CompanyID': companyId || '',

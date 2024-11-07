@@ -159,7 +159,7 @@ const Dashboard = () => {
           'Prefix': prefix
         });
 
-        const response = await fetch('http://192.168.1.11:3000/api/sales-vs-purchases', {
+        const response = await fetch('https://quickbill-backlend.vercel.app/api/sales-vs-purchases', {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
