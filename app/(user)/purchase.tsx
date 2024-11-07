@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Touchable } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Touchable, Modal } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
@@ -29,8 +29,15 @@ interface PerformanceViewProps {
     purchaseData: PurchaseData[];
 }
 
+// First, add this interface for the modal state
+interface SelectedTransaction extends PurchaseData {
+    // Add any additional fields you want to show in the modal
+}
+
 const TransactionList: React.FC<{ transactions: PurchaseData[] }> = ({ transactions }) => {
     const [showAll, setShowAll] = React.useState(false);
+    const [selectedTransaction, setSelectedTransaction] = React.useState<SelectedTransaction | null>(null);
+    const [modalVisible, setModalVisible] = React.useState(false);
 
     // Function to truncate PartyName
     const truncateName = (name: string, length: number) => {
@@ -39,6 +46,159 @@ const TransactionList: React.FC<{ transactions: PurchaseData[] }> = ({ transacti
 
     // Get the transactions to display
     const displayedTransactions = showAll ? transactions : transactions.slice(0, 5);
+
+    const handleTransactionPress = (transaction: PurchaseData) => {
+        setSelectedTransaction(transaction);
+        setModalVisible(true);
+    };
+
+    const TransactionDetailsModal = () => {
+        const isCompleted = selectedTransaction?.Status === 'Completed';
+
+        return (
+          <Modal
+            animationType='fade'
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                {/* Header */}
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Transaction Details</Text>
+                  <TouchableOpacity
+                    onPress={() => setModalVisible(false)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Ionicons
+                      name='close'
+                      size={20}
+                      color={COLORS.textSecondary}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Status Info Bar */}
+                <View
+                  style={[
+                    styles.infoBar,
+                    isCompleted ? styles.infoBarSuccess : styles.infoBarPending,
+                  ]}
+                >
+                  <Ionicons
+                    name={isCompleted ? 'checkmark-circle' : 'warning'}
+                    size={20}
+                    color={isCompleted ? '#0F672E' : '#946300'}
+                  />
+                  <Text
+                    style={[
+                      styles.infoBarText,
+                      isCompleted
+                        ? styles.infoBarTextSuccess
+                        : styles.infoBarTextPending,
+                    ]}
+                  >
+                    {isCompleted
+                      ? 'Transaction completed successfully!'
+                      : 'Payment not confirmed yet'}
+                  </Text>
+                </View>
+
+                {/* Amount Section */}
+                <View style={styles.amountSection}>
+                  <View style={styles.amountIcon}>
+                    <Ionicons
+                      name='receipt-outline'
+                      size={24}
+                      color={COLORS.primary}
+                    />
+                  </View>
+                  <View style={styles.amountDetails}>
+                    <Text style={styles.amountLabel}>Amount</Text>
+                    <Text style={styles.amountValue}>
+                      ₹{selectedTransaction?.BillAmt.toLocaleString('en-IN')}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Transaction Info Card */}
+                <View style={styles.infoCard}>
+                  <InfoRow
+                    label='Party Name'
+                    value={selectedTransaction?.PartyName || '-'}
+                  />
+                  <InfoRow
+                    label='Document No'
+                    value={selectedTransaction?.DocNo || '-'}
+                  />
+                  <InfoRow
+                    label='Net Amount'
+                    value={`₹${selectedTransaction?.NetAmt.toLocaleString(
+                      'en-IN'
+                    )}`}
+                  />
+                  <InfoRow
+                    label='Tax Amount'
+                    value={`₹${selectedTransaction?.TaxAmt.toLocaleString(
+                      'en-IN'
+                    )}`}
+                  />
+
+                  {/* Dotted Separator */}
+                  <View style={styles.dottedSeparator}>
+                    <Text style={styles.separatorLine}>
+                      - - - - - - - - - - - - - - - - - - - - - - - - -
+                    </Text>
+                  </View>
+
+                  <InfoRow
+                    label='Created on'
+                    value={new Date(
+                      selectedTransaction?.DocDate || ''
+                    ).toLocaleString()}
+                  />
+                  <InfoRow
+                    label='Reference ID'
+                    value={selectedTransaction?.DocNo || '-'}
+                  />
+                </View>
+
+                {/* Action Buttons */}
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={[styles.modalActionBtn, styles.secondaryButton]}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={styles.secondaryButtonText}>Close</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalActionBtn, styles.primaryButton]}
+                    onPress={() => {
+                      /* Handle print */
+                    }}
+                  >
+                    <Ionicons
+                      name='print-outline'
+                      size={20}
+                      color='#FFF'
+                      style={styles.buttonIcon}
+                    />
+                    <Text style={styles.primaryButtonText}>Print Invoice</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        );
+    };
+
+    const InfoRow = ({ label, value }: { label: string; value: string }) => (
+        <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>{label}</Text>
+            <Text style={styles.infoValue}>{value}</Text>
+        </View>
+    );
 
     return (
         <View style={styles.transactionsCard}>
@@ -50,7 +210,11 @@ const TransactionList: React.FC<{ transactions: PurchaseData[] }> = ({ transacti
             </View>
 
             {displayedTransactions.map((transaction, index) => (
-                <View key={index} style={styles.transactionItem}>
+                <TouchableOpacity 
+                    key={index} 
+                    style={styles.transactionItem}
+                    onPress={() => handleTransactionPress(transaction)}
+                >
                     <View style={styles.transactionLeft}>
                         <View style={styles.transactionIcon}>
                             <Ionicons name="cash" size={24} color="#fff" />
@@ -75,8 +239,10 @@ const TransactionList: React.FC<{ transactions: PurchaseData[] }> = ({ transacti
                             <Text style={styles.statusText}>{transaction.Status || 'Pending'}</Text>
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
             ))}
+
+            <TransactionDetailsModal />
         </View>
     );
 };
@@ -656,6 +822,170 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     actionText: {
+        fontSize: 12,
+        color: COLORS.text,
+        textAlign: 'center',
+        fontWeight: '500',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContainer: {
+        width: '90%',
+        maxWidth: 400,
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 24,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: COLORS.text,
+    },
+    infoBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 20,
+        gap: 8,
+    },
+    infoBarSuccess: {
+        backgroundColor: '#E7F3EE',
+    },
+    infoBarPending: {
+        backgroundColor: '#FFF4E5',
+    },
+    infoBarText: {
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    infoBarTextSuccess: {
+        color: '#0F672E',
+    },
+    infoBarTextPending: {
+        color: '#946300',
+    },
+    amountSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    amountIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: `${COLORS.primary}15`,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    amountDetails: {
+        flex: 1,
+    },
+    amountLabel: {
+        fontSize: 14,
+        color: COLORS.textSecondary,
+        marginBottom: 4,
+    },
+    amountValue: {
+        fontSize: 24,
+        fontWeight: '600',
+        color: COLORS.text,
+    },
+    infoCard: {
+        backgroundColor: '#F8F9FA',
+        borderRadius: 12,
+        padding: 16,
+    },
+    infoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    infoLabel: {
+        fontSize: 14,
+        color: '#71767A',
+    },
+    infoValue: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: COLORS.text,
+        maxWidth: '60%',
+        textAlign: 'right',
+    },
+    dottedSeparator: {
+        alignItems: 'center',
+        marginVertical: 16,
+    },
+    separatorLine: {
+        color: '#DDE1E6',
+        letterSpacing: 2,
+    },
+    modalActions: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 24,
+    },
+    modalActionBtn: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 14,
+        borderRadius: 8,
+        gap: 8,
+    },
+    primaryButton: {
+        backgroundColor: COLORS.primary,
+    },
+    secondaryButton: {
+        backgroundColor: '#F8F9FA',
+        borderWidth: 1,
+        borderColor: '#DDE1E6',
+    },
+    buttonIcon: {
+        marginRight: 4,
+    },
+    primaryButtonText: {
+        color: '#FFF',
+        fontSize: 15,
+        fontWeight: '600',
+    },
+    secondaryButtonText: {
+        color: COLORS.text,
+        fontSize: 15,
+        fontWeight: '600',
+    },
+    quickActionBtn: {  // Changed from actionButton
+        width: '30%',
+        alignItems: 'center',
+        gap: 8,
+    },
+    quickActionIcon: {  // Changed from actionIconContainer
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: `${COLORS.primary}10`,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    quickActionText: {  // Changed from actionText
         fontSize: 12,
         color: COLORS.text,
         textAlign: 'center',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
@@ -29,8 +29,15 @@ interface PerformanceViewProps {
     salesData: SalesData[];
 }
 
+// First, add this interface for the modal state
+interface SelectedTransaction extends SalesData {
+    // Add any additional fields you want to show in the modal
+}
+
 const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions }) => {
     const [showAll, setShowAll] = React.useState(false);
+    const [selectedTransaction, setSelectedTransaction] = React.useState<SelectedTransaction | null>(null);
+    const [modalVisible, setModalVisible] = React.useState(false);
 
     // Function to truncate PartyName
     const truncateName = (name: string, length: number) => {
@@ -39,6 +46,175 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
 
     // Get the transactions to display
     const displayedTransactions = showAll ? transactions : transactions.slice(0, 5);
+
+    const handleTransactionPress = (transaction: SalesData) => {
+        setSelectedTransaction(transaction);
+        setModalVisible(true);
+    };
+
+    const TransactionDetailsModal = () => {
+        const isCompleted = selectedTransaction?.Status === 'Completed';
+
+        return (
+          <Modal
+            animationType='fade'
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                {/* Header */}
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Transaction Details</Text>
+                  <TouchableOpacity
+                    onPress={() => setModalVisible(false)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Ionicons
+                      name='close'
+                      size={20}
+                      color={COLORS.textSecondary}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Status Info Bar */}
+                <View
+                  style={[
+                    styles.infoBar,
+                    isCompleted ? styles.infoBarSuccess : styles.infoBarPending,
+                  ]}
+                >
+                  <Ionicons
+                    name={isCompleted ? 'checkmark-circle' : 'warning'}
+                    size={20}
+                    color={isCompleted ? '#0F672E' : '#946300'}
+                  />
+                  <Text
+                    style={[
+                      styles.infoBarText,
+                      isCompleted
+                        ? styles.infoBarTextSuccess
+                        : styles.infoBarTextPending,
+                    ]}
+                  >
+                    {isCompleted
+                      ? 'Transaction completed successfully!'
+                      : 'Payment not confirmed yet'}
+                  </Text>
+                </View>
+
+                {/* Amount Section */}
+                <View style={styles.amountSection}>
+                  <View style={styles.amountIcon}>
+                    <Ionicons
+                      name='receipt-outline'
+                      size={24}
+                      color={COLORS.primary}
+                    />
+                  </View>
+                  <View style={styles.amountDetails}>
+                    <Text style={styles.amountLabel}>Amount</Text>
+                    <Text style={styles.amountValue}>
+                      ₹{selectedTransaction?.BillAmt.toLocaleString('en-IN')}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Transaction Info Card */}
+                <View style={styles.infoCard}>
+                  <InfoRow
+                    label='Party Name'
+                    value={selectedTransaction?.PartyName || '-'}
+                  />
+                  <InfoRow
+                    label='Document No'
+                    value={selectedTransaction?.DocNo || '-'}
+                  />
+                  <InfoRow
+                    label='Net Amount'
+                    value={`₹${selectedTransaction?.NetAmt.toLocaleString(
+                      'en-IN'
+                    )}`}
+                  />
+                  <InfoRow
+                    label='Tax Amount'
+                    value={`₹${selectedTransaction?.TaxAmt.toLocaleString(
+                      'en-IN'
+                    )}`}
+                  />
+
+                  {/* Dotted Separator */}
+                  <View style={styles.dottedSeparator}>
+                    <Text style={styles.separatorLine}>
+                      - - - - - - - - - - - - - - - - - - - - - - - - -
+                    </Text>
+                  </View>
+
+                  <InfoRow
+                    label='Created on'
+                    value={new Date(
+                      selectedTransaction?.DocDate || ''
+                    ).toLocaleString()}
+                  />
+                  <InfoRow
+                    label='Bill No'
+                    value={selectedTransaction?.DocNo || '-'}
+                  />
+                </View>
+
+                {/* Action Buttons */}
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={[styles.modalActionBtn, styles.secondaryButton]}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={styles.secondaryButtonText}>Close</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalActionBtn, styles.primaryButton]}
+                    onPress={() => {
+                      /* Handle print */
+                    }}
+                  >
+                    <Ionicons
+                      name='print-outline'
+                      size={20}
+                      color='#FFF'
+                      style={styles.buttonIcon}
+                    />
+                    <Text style={styles.primaryButtonText}>Print Invoice</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        );
+    };
+
+    const InfoRow = ({ label, value, isStatus = false }: { 
+        label: string; 
+        value: string; 
+        isStatus?: boolean;
+    }) => (
+        <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>{label}</Text>
+            {isStatus ? (
+                <View style={[
+                    styles.statusBadge,
+                    value === 'Completed' ? styles.statusCompleted : styles.statusPending
+                ]}>
+                    <Text style={[
+                        styles.statusText,
+                        value === 'Completed' ? styles.statusCompletedText : styles.statusPendingText
+                    ]}>{value}</Text>
+                </View>
+            ) : (
+                <Text style={styles.infoValue}>{value}</Text>
+            )}
+        </View>
+    );
 
     return (
         <View style={styles.transactionsCard}>
@@ -50,14 +226,18 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
             </View>
 
             {displayedTransactions.map((transaction, index) => (
-                <View key={index} style={styles.transactionItem}>
+                <TouchableOpacity 
+                    key={index} 
+                    style={styles.transactionItem}
+                    onPress={() => handleTransactionPress(transaction)}
+                >
                     <View style={styles.transactionLeft}>
                         <View style={styles.transactionIcon}>
                             <Ionicons name="cash" size={24} color="#fff" />
                         </View>
                         <View style={styles.transactionDetails}>
                             <Text style={styles.transactionTitle}>
-                                {truncateName(transaction.PartyName ? transaction.PartyName : 'Demo Customer', 15)}
+                                {truncateName(transaction.PartyName ? transaction.PartyName : 'Dummy Person', 15)}
                             </Text>
                             <Text style={styles.transactionDate}>
                                 {transaction.DocNo} - {new Date(transaction.DocDate).toLocaleDateString()}
@@ -75,8 +255,10 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
                             <Text style={styles.statusText}>{transaction.Status || 'Pending'}</Text>
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
             ))}
+
+            <TransactionDetailsModal />
         </View>
     );
 };
@@ -183,13 +365,13 @@ const QuickActionsGrid = () => {
         {actions.map((action) => (
           <TouchableOpacity 
             key={action.id} 
-            style={styles.actionButton}
+            style={styles.quickAction}
             onPress={() => {/* handle action */}}
           >
-            <View style={styles.actionIconContainer}>
+            <View style={styles.quickActionIcon}>
               <Ionicons name={action.icon as any} size={24} color={COLORS.primary} />
             </View>
-            <Text style={styles.actionText}>{action.title}</Text>
+            <Text style={styles.quickActionText}>{action.title}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -647,12 +829,12 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: 16,
     },
-    actionButton: {
-        width: '30%', // Approximately 3 buttons per row with spacing
+    quickAction: {
+        width: '30%',
         alignItems: 'center',
         gap: 8,
     },
-    actionIconContainer: {
+    quickActionIcon: {
         width: 50,
         height: 50,
         borderRadius: 25,
@@ -660,10 +842,176 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    actionText: {
+    quickActionText: {
         fontSize: 12,
         color: COLORS.text,
         textAlign: 'center',
         fontWeight: '500',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContainer: {
+        width: '90%',
+        maxWidth: 400,
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 24,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: COLORS.text,
+    },
+    amountSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    amountIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: `${COLORS.primary}15`,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    amountDetails: {
+        flex: 1,
+    },
+    amountLabel: {
+        fontSize: 14,
+        color: COLORS.textSecondary,
+        marginBottom: 4,
+    },
+    amountValue: {
+        fontSize: 24,
+        fontWeight: '600',
+        color: COLORS.text,
+    },
+    infoList: {
+        borderRadius: 12,
+        backgroundColor: '#F8F9FA',
+        padding: 16,
+        gap: 16,
+        marginBottom: 24,
+    },
+    infoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    infoLabel: {
+        fontSize: 14,
+        color: '#71767A',
+    },
+    infoValue: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: COLORS.text,
+    },
+    statusBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+    },
+    // statusCompleted: {
+    //     backgroundColor: '#E8F5E9',
+    // },
+    // statusPending: {
+    //     backgroundColor: '#FFF3E0',
+    // },
+    // statusText: {
+    //     fontSize: 12,
+    //     fontWeight: '500',
+    // },
+    statusCompletedText: {
+        color: '#2E7D32',
+    },
+    statusPendingText: {
+        color: '#ED6C02',
+    },
+    modalActions: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 24,
+    },
+    modalActionBtn: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 14,
+        borderRadius: 8,
+        gap: 8,
+    },
+    primaryButton: {
+        backgroundColor: COLORS.primary,
+    },
+    secondaryButton: {
+        backgroundColor: '#F8F9FA',
+        borderWidth: 1,
+        borderColor: '#DDE1E6',
+    },
+    buttonIcon: {
+        marginRight: 4,
+    },
+    primaryButtonText: {
+        color: '#FFF',
+        fontSize: 15,
+        fontWeight: '600',
+    },
+    secondaryButtonText: {
+        color: COLORS.text,
+        fontSize: 15,
+        fontWeight: '600',
+    },
+    infoBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 20,
+        gap: 8,
+    },
+    infoBarSuccess: {
+        backgroundColor: '#E7F3EE',
+    },
+    infoBarPending: {
+        backgroundColor: '#FFF4E5',
+    },
+    infoBarText: {
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    infoBarTextSuccess: {
+        color: '#0F672E',
+    },
+    infoBarTextPending: {
+        color: '#946300',
+    },
+    infoCard: {
+        backgroundColor: '#F8F9FA',
+        borderRadius: 12,
+        padding: 16,
+    },
+    dottedSeparator: {
+        alignItems: 'center',
+        marginVertical: 16,
+    },
+    separatorLine: {
+        color: '#DDE1E6',
+        letterSpacing: 2,
     },
 });
