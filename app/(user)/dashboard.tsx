@@ -36,23 +36,24 @@ const COLORS = {
   success: '#7868e5',
   error: '#FF5252',
   secondary: '#aba0f3', // New secondary color
+  gray: '#C5D3E8',
 };
 
-const QuickActionButton = ({ title, icon, onPress }: { title: string; icon: string; onPress: () => void }) => (
+const QuickAction = ({ title, icon, onPress, color = COLORS.primary }: { 
+  title: string; 
+  icon: string; 
+  onPress: () => void;
+  color?: string;
+}) => (
   <TouchableOpacity
-    style={styles.quickActionButton}
+    style={styles.quickAction}
     onPress={onPress}
     activeOpacity={0.7}
   >
-    <LinearGradient
-      colors={['#7868e5', '#6354d9']}
-      style={styles.quickActionGradient}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
-      <Ionicons name={icon as any} size={24} color="#fff" />
-      <Text style={styles.quickActionText}>{title}</Text>
-    </LinearGradient>
+    <View style={[styles.quickActionIcon, { backgroundColor: `${color}15` }]}>
+      <Ionicons name={icon as any} size={24} color={color} />
+    </View>
+    <Text style={[styles.quickActionTitle, { color }]}>{title}</Text>
   </TouchableOpacity>
 );
 
@@ -76,7 +77,7 @@ const CollapsibleSection = ({ title, children }: SectionProps) => {
       transition={{ type: 'timing', duration: 300 }}
     >
       <LinearGradient
-        colors={isExpanded ? ['#7868e5', '#6354d9'] : ['#FFFFFF', '#F4F6FA']}
+        colors={isExpanded ? ['#7868e5', '#6354d9'] : ['#FFFFFF', '#FFFFFF']}
         style={styles.sectionGradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -212,7 +213,7 @@ const Dashboard = () => {
     <SafeAreaView style={styles.container}>
       <Stack.Screen
         options={{
-          title: "Dashboard",
+          title: 'Dashboard',
           headerStyle: {
             backgroundColor: COLORS.surface,
           },
@@ -226,21 +227,94 @@ const Dashboard = () => {
           headerRight: () => (
             <TouchableOpacity
               style={styles.headerButton}
-              onPress={() => {/* handle press */ }}
+              onPress={() => {
+                /* handle press */
+              }}
             >
-              <Ionicons name="notifications-outline" size={24} color={COLORS.primary} />
+              <Ionicons
+                name='notifications-outline'
+                size={24}
+                color={COLORS.primary}
+              />
             </TouchableOpacity>
           ),
-          headerLeft: () => null
+          headerLeft: () => null,
         }}
       />
       <ScrollView>
         {/* Stats Card */}
+        <View style={styles.mainContainer}>
+          <Text style={styles.infoTitle}>Manage Your Business</Text>
+          <Text style={styles.infoDescription}>
+            Efficiently manage your sales, purchases, and products.
+          </Text>
+          <CollapsibleSection title='Sales'>
+            <ActionButton
+              title='Sales Order'
+              icon='document-text-outline'
+              onPress={() => router.push('/(user)/create-order')}
+            />
+            <ActionButton
+              title='Sales Invoice'
+              icon='receipt-outline'
+              onPress={() => router.push('/(user)/create-sales-invoice')}
+            />
+            <ActionButton
+              title='Sales Return'
+              icon='return-up-back-outline'
+              onPress={() => router.push('/(user)/create-sales-return')}
+            />
+            <ActionButton
+              title='Delivery Challan'
+              icon='car-outline'
+              onPress={() => router.push('/(user)/create-sales-return')}
+            />
+          </CollapsibleSection>
+
+          <CollapsibleSection title='Purchase'>
+            <ActionButton
+              title='Purchase Order'
+              icon='cart-outline'
+              onPress={() => router.push('/(user)/create-order')}
+            />
+            <ActionButton
+              title='Purchase Invoice'
+              icon='receipt-outline'
+              onPress={() => router.push('/(user)/create-purchase-invoice')}
+            />
+            <ActionButton
+              title='Purchase Return'
+              icon='return-down-back-outline'
+              onPress={() => router.push('/(user)/create-purchase-return')}
+            />
+          </CollapsibleSection>
+
+          <CollapsibleSection title='Product'>
+            <ActionButton
+              title='Add Product'
+              icon='add-circle-outline'
+              onPress={() => router.push('/')}
+            />
+            <ActionButton
+              title='Product List'
+              icon='list-outline'
+              onPress={() => router.push('/')}
+            />
+          </CollapsibleSection>
+        </View>
         <View style={styles.statsCard}>
           <View style={styles.periodSelector}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                justifyContent: 'space-between',
+                width: '100%',
+              }}
+            >
               <Text style={styles.periodText}>{selectedPeriod}</Text>
-              <TouchableOpacity onPress={() => { }}>
+              <TouchableOpacity onPress={() => {}}>
                 <Text style={styles.viewBills}>View Bills</Text>
               </TouchableOpacity>
             </View>
@@ -268,13 +342,23 @@ const Dashboard = () => {
                 {
                   value: salesVsPurchases.totalSales,
                   color: COLORS.primary,
-                  text: `${((salesVsPurchases.totalSales / (salesVsPurchases.totalSales + salesVsPurchases.totalPurchases)) * 100).toFixed(0)}%`,
+                  text: `${(
+                    (salesVsPurchases.totalSales /
+                      (salesVsPurchases.totalSales +
+                        salesVsPurchases.totalPurchases)) *
+                    100
+                  ).toFixed(0)}%`,
                 },
                 {
                   value: salesVsPurchases.totalPurchases,
                   color: COLORS.secondary,
-                  text: `${((salesVsPurchases.totalPurchases / (salesVsPurchases.totalSales + salesVsPurchases.totalPurchases)) * 100).toFixed(0)}%`,
-                }
+                  text: `${(
+                    (salesVsPurchases.totalPurchases /
+                      (salesVsPurchases.totalSales +
+                        salesVsPurchases.totalPurchases)) *
+                    100
+                  ).toFixed(0)}%`,
+                },
               ]}
               donut
               radius={120}
@@ -282,14 +366,17 @@ const Dashboard = () => {
               innerCircleColor={'#fff'}
               // labelPosition="onBorder"
               showText
-              textColor="#000"
+              textColor='#000'
               textSize={12}
               showValuesAsLabels={true}
               centerLabelComponent={() => (
                 <View style={styles.centerLabel}>
                   <Text style={styles.centerLabelText}>Total</Text>
                   <Text style={styles.centerLabelAmount}>
-                    {formatCurrency(salesVsPurchases.totalSales + salesVsPurchases.totalPurchases)}
+                    {formatCurrency(
+                      salesVsPurchases.totalSales +
+                        salesVsPurchases.totalPurchases
+                    )}
                   </Text>
                 </View>
               )}
@@ -298,14 +385,28 @@ const Dashboard = () => {
             {/* Legend */}
             <View style={styles.legendContainer}>
               <View style={styles.legendRow}>
-                <View style={[styles.legendDot, { backgroundColor: COLORS.primary }]} />
+                <View
+                  style={[
+                    styles.legendDot,
+                    { backgroundColor: COLORS.primary },
+                  ]}
+                />
                 <Text style={styles.legendText}>Sales</Text>
-                <Text style={styles.legendAmount}>{formatCurrency(salesVsPurchases.totalSales)}</Text>
+                <Text style={styles.legendAmount}>
+                  {formatCurrency(salesVsPurchases.totalSales)}
+                </Text>
               </View>
               <View style={styles.legendRow}>
-                <View style={[styles.legendDot, { backgroundColor: COLORS.secondary }]} />
+                <View
+                  style={[
+                    styles.legendDot,
+                    { backgroundColor: COLORS.secondary },
+                  ]}
+                />
                 <Text style={styles.legendText}>Purchases</Text>
-                <Text style={styles.legendAmount}>{formatCurrency(salesVsPurchases.totalPurchases)}</Text>
+                <Text style={styles.legendAmount}>
+                  {formatCurrency(salesVsPurchases.totalPurchases)}
+                </Text>
               </View>
             </View>
           </View>
@@ -314,90 +415,56 @@ const Dashboard = () => {
         {/* New Section Above Quick Actions */}
         <View style={styles.newSection}>
           <Text style={styles.newSectionTitle}>Individual Dashboards</Text>
-          <Text style={styles.newSectionContent}>This is the content of the new section.</Text>
+          <Text style={styles.newSectionContent}>
+            This is the content of the new section.
+          </Text>
           <View style={styles.navigationButtonsContainer}>
-            <TouchableOpacity onPress={() => router.push('/(user)/sales')} style={styles.navigationButton}>
+            <TouchableOpacity
+              onPress={() => router.push('/(user)/sales')}
+              style={styles.navigationButton}
+            >
               <Text style={styles.navigationButtonText}>Sales</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/(user)/purchase')} style={styles.PurchasenavigationButton}>
+            <TouchableOpacity
+              onPress={() => router.push('/(user)/purchase')}
+              style={styles.PurchasenavigationButton}
+            >
               <Text style={styles.PurchasenavigationButtonText}>Purchases</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.mainContainer}>
-          <CollapsibleSection title="Sales">
-            <ActionButton
-              title="Sales Order"
-              icon="document-text-outline"
-              onPress={() => router.push('/(user)/create-order')}
-            />
-            <ActionButton
-              title="Sales Invoice"
-              icon="receipt-outline"
-              onPress={() => router.push('/(user)/create-sales-invoice')}
-            />
-            <ActionButton
-              title="Sales Return"
-              icon="return-up-back-outline"
-              onPress={() => router.push('/(user)/create-sales-return')}
-            />
-            <ActionButton
-              title="Delivery Challan"
-              icon="car-outline"
-              onPress={() => router.push('/(user)/create-sales-return')}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection title="Purchase">
-            <ActionButton
-              title="Purchase Order"
-              icon="cart-outline"
-              onPress={() => router.push('/(user)/create-order')}
-            />
-            <ActionButton
-              title="Purchase Invoice"
-              icon="receipt-outline"
-              onPress={() => router.push('/(user)/create-purchase-invoice')}
-            />
-            <ActionButton
-              title="Purchase Return"
-              icon="return-down-back-outline"
-              onPress={() => router.push('/(user)/create-purchase-return')}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection title="Product">
-            <ActionButton
-              title="Add Product"
-              icon="add-circle-outline"
-              onPress={() => router.push('/')}
-            />
-            <ActionButton
-              title="Product List"
-              icon="list-outline"
-              onPress={() => router.push('/')}
-            />
-          </CollapsibleSection>
-        </View>
-
         {/* Quick Actions Section */}
         <View style={styles.quickActionsSection}>
-          <Text style={styles.sectionHeaderText}>Quick Actions</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.quickActionsRow}>
-              <QuickActionButton title="E-way Bill" icon="car" onPress={() => { }} />
-              <QuickActionButton title="E-Invoice" icon="document" onPress={() => { }} />
-              <QuickActionButton title="Payments" icon="cash" onPress={() => { }} />
-              <QuickActionButton title="Online Store" icon="storefront" onPress={() => { }} />
-            </View>
-          </ScrollView>
+          <Text style={styles.quickActionsHeader}>Quick Actions</Text>
+          <View style={styles.quickActionsList}>
+            <QuickAction
+              title='E-Invoice'
+              icon='receipt-outline'
+              onPress={() => {}}
+              color={COLORS.primary}
+            />
+            <QuickAction
+              title='Print Preview'
+              icon='print-outline'
+              onPress={() => {}}
+              color={COLORS.primary}
+            />
+            <QuickAction
+              title='E-way Bill'
+              icon='car-outline'
+              onPress={() => {}}
+              color={COLORS.primary}
+            />
+            <QuickAction
+              title='Export Data'
+              icon='download-outline'
+              onPress={() => {}}
+              color={COLORS.primary}
+            />
+          </View>
         </View>
-
-
       </ScrollView>
-
-
     </SafeAreaView>
   );
 };
@@ -410,18 +477,18 @@ const styles = StyleSheet.create({
   statsCard: {
     margin: 16,
     backgroundColor: COLORS.surface,
-    borderRadius: 20, // Increased border radius
+    borderRadius: 10,
     padding: 20,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    shadowColor: "#000", // Shadow for elevation
+    borderColor: 'rgba(120, 104, 229, 0.2)',
+    shadowColor: COLORS.primary,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5, // Elevation for Android
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   periodSelector: {
     flexDirection: 'row',
@@ -472,7 +539,8 @@ const styles = StyleSheet.create({
   },
   centerLabelText: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: '#000',
+    fontWeight: '600',
   },
   centerLabelAmount: {
     fontSize: 16,
@@ -506,41 +574,54 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   quickActionsSection: {
-    marginVertical: 16,
-    paddingHorizontal: 16,
+    padding: 16,
+    backgroundColor: COLORS.background,
   },
-  sectionHeaderText: {
+  quickActionsHeader: {
     fontSize: 18,
     fontWeight: '600',
     color: COLORS.text,
     marginBottom: 16,
   },
-  quickActionsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingRight: 16,
-  },
-  quickActionButton: {
-    width: 100,
-    height: 100,
-    borderRadius: 20,
+  quickActionsList: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: `${COLORS.primary}15`,
+    shadowColor: COLORS.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  quickActionGradient: {
-    flex: 1,
+  quickAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: `${COLORS.primary}15`,
+  },
+  quickActionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 12,
+    marginRight: 12,
+    backgroundColor: `${COLORS.primary}10`,
   },
-  quickActionText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 8,
-    textAlign: 'center',
+  quickActionTitle: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COLORS.text,
+    letterSpacing: 0.3,
   },
   sectionContainer: {
-    marginBottom: 12,
+    // marginBottom: 8,
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
@@ -611,7 +692,11 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     padding: 16,
-    gap: 8,
+    backgroundColor: '#efecff',
+    borderRadius: 10,
+    gap: 12,
+    marginHorizontal: 10,
+    marginTop: 16,
   },
   headerButton: {
     width: 40,
@@ -623,23 +708,39 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(120, 104, 229, 0.1)',
   },
   navigationButtonsContainer: {
-    // flexDirection: 'row',
-    // justifyContent: 'space-around',
     marginVertical: 16,
+    flexDirection: 'row',
+    gap: 12,
   },
   navigationButton: {
-    padding: 12,
-    borderRadius: 8,
+    flex: 1,
+    padding: 16,
+    borderRadius: 10,
     backgroundColor: COLORS.primary,
     alignItems: 'center',
-    marginBottom: 10
+    shadowColor: COLORS.primary,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   PurchasenavigationButton: {
-    padding: 12,
-    borderRadius: 8,
+    flex: 1,
+    padding: 16,
+    borderRadius: 10,
     backgroundColor: '#433878',
     alignItems: 'center',
-    marginBottom: 10
+    shadowColor: '#433878',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   navigationButtonText: {
     color: '#fff',
@@ -664,6 +765,32 @@ const styles = StyleSheet.create({
   newSectionContent: {
     fontSize: 16,
     color: COLORS.textSecondary,
+  },
+  infoContainer: {
+    padding: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: 10,
+    margin: 16,
+    shadowColor: COLORS.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  infoTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: COLORS.text,
+    // marginBottom: 4,
+  },
+  infoDescription: {
+    fontSize: 14,
+    color: COLORS.primaryDark,
+    marginBottom: 16,
+    marginTop: -10
   },
 });
 

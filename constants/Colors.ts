@@ -10,4 +10,5 @@ export const COLORS = {
   success: '#7868e5',
   error: '#FF5252',
   secondary: '#aba0f3',
+  gray: '#C5D3E8',
 };
