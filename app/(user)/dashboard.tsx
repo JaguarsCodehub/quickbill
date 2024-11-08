@@ -39,9 +39,9 @@ const COLORS = {
   gray: '#C5D3E8',
 };
 
-const QuickAction = ({ title, icon, onPress, color = COLORS.primary }: { 
-  title: string; 
-  icon: string; 
+const QuickAction = ({ title, icon, onPress, color = COLORS.primary }: {
+  title: string;
+  icon: string;
   onPress: () => void;
   color?: string;
 }) => (
@@ -268,7 +268,7 @@ const Dashboard = () => {
               icon='return-up-back-outline'
               onPress={() => router.push('/(user)/create-sales-return')}
             />
-          
+
           </CollapsibleSection>
 
           <CollapsibleSection title='Purchase'>
@@ -309,7 +309,7 @@ const Dashboard = () => {
               }}
             >
               <Text style={styles.periodText}>{selectedPeriod}</Text>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => { }}>
                 <Text style={styles.viewBills}>View Bills</Text>
               </TouchableOpacity>
             </View>
@@ -370,7 +370,7 @@ const Dashboard = () => {
                   <Text style={styles.centerLabelAmount}>
                     {formatCurrency(
                       salesVsPurchases.totalSales +
-                        salesVsPurchases.totalPurchases
+                      salesVsPurchases.totalPurchases
                     )}
                   </Text>
                 </View>
@@ -436,25 +436,25 @@ const Dashboard = () => {
             <QuickAction
               title='E-Invoice'
               icon='receipt-outline'
-              onPress={() => {}}
+              onPress={() => { }}
               color={COLORS.primary}
             />
             <QuickAction
               title='Print Preview'
               icon='print-outline'
-              onPress={() => {}}
+              onPress={() => { }}
               color={COLORS.primary}
             />
             <QuickAction
               title='E-way Bill'
               icon='car-outline'
-              onPress={() => {}}
+              onPress={() => { }}
               color={COLORS.primary}
             />
             <QuickAction
               title='Export Data'
               icon='download-outline'
-              onPress={() => {}}
+              onPress={() => { }}
               color={COLORS.primary}
             />
           </View>
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   statAmount: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: COLORS.text,
   },
