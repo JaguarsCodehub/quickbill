@@ -662,8 +662,8 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    margin: 6,
+    padding: 12,
+    margin: 10,
     borderRadius: 12,
     marginBottom: 8,
     backgroundColor: COLORS.surfaceLight,

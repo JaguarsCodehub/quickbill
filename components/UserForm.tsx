@@ -90,15 +90,15 @@ const UserForm: React.FC = () => {
       <ScrollView style={styles.content}>
         <View style={styles.headerContainer}>
           <Text style={styles.headerTitle}>Sign in to your Account</Text>
-          <Text style={styles.headerSubtitle}>Enter your email and password to sign in</Text>
+          <Text style={styles.headerSubtitle}>Enter your Username and Password to sign in</Text>
         </View>
 
         <View style={styles.formContainer}>
-          <Text style={styles.inputLabel}>Email</Text>
+          <Text style={styles.inputLabel}>Username</Text>
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="Enter your Email"
+              placeholder="Enter your Username"
               placeholderTextColor="#A0A0A0"
               value={username}
               onChangeText={setUsername}
@@ -115,8 +115,8 @@ const UserForm: React.FC = () => {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
             />
-            <TouchableOpacity 
-              style={styles.eyeIcon} 
+            <TouchableOpacity
+              style={styles.eyeIcon}
               onPress={() => setShowPassword(!showPassword)}
             >
               <Ionicons
@@ -126,7 +126,7 @@ const UserForm: React.FC = () => {
               />
             </TouchableOpacity>
           </View>
-          
+
           {/* <TouchableOpacity style={styles.forgotPassword}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity> */}
@@ -173,10 +173,10 @@ const UserForm: React.FC = () => {
             </Text>
           </View> */}
 
-          <View style={{alignItems: 'center'}}>
-            <Image 
-              source={require('@/assets/images/login.png')} 
-              style={{width: '80%', height: 300, resizeMode: 'center'}} 
+          <View style={{ alignItems: 'center' }}>
+            <Image
+              source={require('@/assets/images/login.png')}
+              style={{ width: '80%', height: 300, resizeMode: 'center' }}
             />
           </View>
         </View>
@@ -189,7 +189,7 @@ const UserForm: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   content: {
     flex: 1,
