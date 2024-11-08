@@ -31,7 +31,7 @@ New Taks:
 
 - TaxCode Done✅
 - Texts should be independent in each Screens Done✅
-- Quantity - > Rate -> Discount -> Tax Code -> Amount
+- Quantity - > Rate -> Discount -> Tax Code -> Amount Done✅
 - HSN Code Text Input
 - UserMaster Table Login in UserForm -> Admin/User dropdown
 - Register Link will take to quickbillbook.com Done✅

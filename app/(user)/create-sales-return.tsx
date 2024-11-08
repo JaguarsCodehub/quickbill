@@ -829,6 +829,10 @@ const CreateSalesReturn = () => {
                   <Text style={styles.itemDetailValue}>{selectedItem.ItemName}</Text>
 
                   <View style={styles.detailSection}>
+                    <Text style={styles.itemDetailLabel}>HSN Code</Text>
+                    <Text style={[styles.detailValue, styles.hsnCode]}>{selectedItem.HSNCode || 'Not Available'}</Text>
+                  </View>
+                  <View style={styles.detailSection}>
                     <Text style={styles.itemDetailLabel}>Stock</Text>
                     <Text style={styles.stockValue}>0 Pcs</Text>
                   </View>
@@ -1739,5 +1743,13 @@ const styles = StyleSheet.create({
     color: '#2e7d32', // Slightly darker green for value
     fontWeight: '600',
     marginTop: 4,
+  },
+  hsnCode: {
+    backgroundColor: '#F5F5F5',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E6ED',
+    fontFamily: 'monospace',
   },
 });
