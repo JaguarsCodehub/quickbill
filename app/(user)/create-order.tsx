@@ -22,7 +22,7 @@ interface Item {
   ItemName: string;
   SalRate: number;
   HSNCode: string;
-  TaxCode: string;
+  GSTTaxCode: string;
   // Add other fields as needed
 }
 
@@ -275,7 +275,7 @@ const CreateOrder = () => {
       'Disc(%)': discPercent.toFixed(2),
       'Disc(₹)': discAmount.toFixed(2),
       Taxable: taxable.toFixed(2),
-      TaxCode: selectedItem.TaxCode || 'N/A',
+      GSTTaxCode: selectedItem.GSTTaxCode || 'N/A',
       TaxAmt: taxAmount.toFixed(2),
       Amount: totalAmount.toFixed(2),
     };
@@ -468,7 +468,7 @@ const CreateOrder = () => {
         discAmt: item.Disc,
         mrp: item.Rate, // Adjust if MRP is different from Rate
         newRate: item.Rate,
-        taxCode: item.TaxCode || '',
+        taxCode: item.GSTTaxCode || '',
         taxAmt: item.TaxAmt,
         cessAmt: 0, // Add cess amount if applicable
         taxable: item.Taxable,
@@ -876,6 +876,11 @@ const CreateOrder = () => {
                       multiline
                       numberOfLines={3}
                     />
+                  </View>
+
+                  <View style={styles.gstCodeSection}>
+                    <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
+                    <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'} %</Text>
                   </View>
 
                   <View style={styles.totalSection}>
@@ -1694,5 +1699,24 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#7868e5', // Kept the purple accent
     fontWeight: '700',
+  },
+  gstCodeSection: {
+    backgroundColor: '#f0fff0', // Very light green background
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#c8e6c9', // Light green border
+    marginTop: 10,
+  },
+  gstCodeLabel: {
+    fontSize: 14,
+    color: '#388e3c', // Dark green for label
+    fontWeight: '500',
+  },
+  gstCodeValue: {
+    fontSize: 16,
+    color: '#2e7d32', // Slightly darker green for value
+    fontWeight: '600',
+    marginTop: 4,
   },
 });

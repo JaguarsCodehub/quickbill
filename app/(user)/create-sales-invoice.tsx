@@ -21,7 +21,7 @@ interface Item {
   ItemName: string;
   SalRate: number;
   HSNCode: string;
-  TaxCode: string;
+  GSTTaxCode: string;
 }
 
 interface OrderItem extends Item {
@@ -198,6 +198,7 @@ const CreateSalesInvoice = () => {
   const [discountPercentage, setDiscountPercentage] = useState<string>('0');
   const [discountAmount, setDiscountAmount] = useState<string>('0');
   const [itemNotes, setItemNotes] = useState<string>('');
+  const [gstTaxCode, setGstTaxCode] = useState<string[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -247,7 +248,10 @@ const CreateSalesInvoice = () => {
       });
       setItems(response.data.items);
       setNextSerial(response.data.nextSerial);
-      console.log("Response:", response.data.nextSerial)
+      const gstTaxCode = response.data.items.map((item: any) => item.GSTTaxCode);
+      console.log("GST Tax Code:", gstTaxCode)
+      setGstTaxCode(gstTaxCode);
+      console.log("Response:", response.data.items.length)
     } catch (error) {
       console.error('Error fetching items:', error);
       throw error;
@@ -274,7 +278,7 @@ const CreateSalesInvoice = () => {
       'Disc(%)': discPercent.toFixed(2),
       'Disc(₹)': discAmount.toFixed(2),
       Taxable: taxable.toFixed(2),
-      TaxCode: selectedItem.TaxCode || 'N/A',
+      TaxCode: selectedItem.GSTTaxCode || 'N/A',
       TaxAmt: taxAmount.toFixed(2),
       Amount: totalAmount.toFixed(2),
     };
@@ -481,7 +485,7 @@ const CreateSalesInvoice = () => {
         discAmt: item.discountAmount || 0,
         mrp: item.Rate,
         newRate: item.Rate,
-        taxCode: item.TaxCode || '',
+        taxCode: item.GSTTaxCode || '',
         taxAmt: item.TaxAmt,
         cessAmt: 0,
         taxable: item.Taxable,
@@ -834,18 +838,6 @@ const CreateSalesInvoice = () => {
                   </View>
 
                   <View style={styles.detailSection}>
-                    <Text style={styles.itemDetailLabel}>Rate</Text>
-                    <TextInput
-                      style={styles.detailInput}
-                      value={rate}
-                      onChangeText={updateRate}
-                      keyboardType="numeric"
-                      placeholder="Enter rate"
-                      placeholderTextColor="#888888"
-                    />
-                  </View>
-
-                  <View style={styles.detailSection}>
                     <Text style={styles.itemDetailLabel}>Quantity</Text>
                     <TextInput
                       style={styles.detailInput}
@@ -856,6 +848,18 @@ const CreateSalesInvoice = () => {
                       }}
                       keyboardType="numeric"
                       placeholder="Enter quantity"
+                      placeholderTextColor="#888888"
+                    />
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <Text style={styles.itemDetailLabel}>Rate</Text>
+                    <TextInput
+                      style={styles.detailInput}
+                      value={rate}
+                      onChangeText={updateRate}
+                      keyboardType="numeric"
+                      placeholder="Enter rate"
                       placeholderTextColor="#888888"
                     />
                   </View>
@@ -887,17 +891,9 @@ const CreateSalesInvoice = () => {
                     </View>
                   </View>
 
-                  <View style={styles.detailSection}>
-                    <Text style={styles.itemDetailLabel}>Notes</Text>
-                    <TextInput
-                      style={styles.notesInput}
-                      value={itemNotes}
-                      onChangeText={setItemNotes}
-                      placeholder="Add notes"
-                      placeholderTextColor="#888888"
-                      multiline
-                      numberOfLines={3}
-                    />
+                  <View style={styles.gstCodeSection}>
+                    <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
+                    <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'} %</Text>
                   </View>
 
                   <View style={styles.totalSection}>
@@ -1716,5 +1712,24 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#7868e5', // Kept the purple accent
     fontWeight: '700',
+  },
+  gstCodeSection: {
+    backgroundColor: '#f0fff0', // Very light green background
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#c8e6c9', // Light green border
+    marginTop: 10,
+  },
+  gstCodeLabel: {
+    fontSize: 14,
+    color: '#388e3c', // Dark green for label
+    fontWeight: '500',
+  },
+  gstCodeValue: {
+    fontSize: 16,
+    color: '#2e7d32', // Slightly darker green for value
+    fontWeight: '600',
+    marginTop: 4,
   },
 });

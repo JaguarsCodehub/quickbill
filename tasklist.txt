@@ -29,7 +29,7 @@ New Taks:
 
 - Purchase Vs Bill
 
-- TaxCode
+- TaxCode Done✅
 - Texts should be independent in each Screens Done✅
 - Quantity - > Rate -> Discount -> Tax Code -> Amount
 - HSN Code Text Input
