@@ -28,3 +28,10 @@ New Taks:
 
 
 - Purchase Vs Bill
+
+- TaxCode
+- Texts should be independent in each Screens Done✅
+- Quantity - > Rate -> Discount -> Tax Code -> Amount
+- HSN Code Text Input
+- UserMaster Table Login in UserForm -> Admin/User dropdown
+- Register Link will take to quickbillbook.com Done✅

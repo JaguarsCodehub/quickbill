@@ -648,7 +648,7 @@ const CreatePurchaseReturn = () => {
 
                     <View style={styles.card}>
                         <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>Order Items</Text>
+                            <Text style={styles.sectionTitle}>Purchase Return Items</Text>
                             {orderItems.length > 0 && (
                                 <View style={styles.orderTotal}>
                                     <Text style={styles.orderTotalText}>
@@ -751,7 +751,7 @@ const CreatePurchaseReturn = () => {
                                 </View>
                             </View>
                         ) : (
-                            <Text style={styles.noItemsText}>No items added to the order yet.</Text>
+                            <Text style={styles.noItemsText}>No items added to purchase return yet.</Text>
                         )}
                     </View>
 

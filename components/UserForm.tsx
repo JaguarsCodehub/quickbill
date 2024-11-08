@@ -164,14 +164,14 @@ const UserForm: React.FC = () => {
               
               <Text style={styles.socialButtonText}>Facebook</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
-          <View style={styles.registerContainer}>
+          <TouchableOpacity onPress={() => router.push('https://quickbillbook.com')} style={styles.registerContainer}>
             <Text style={styles.registerText}>
               Don't have an account? {' '}
               <Text style={styles.registerLink}>Register</Text>
             </Text>
-          </View> */}
+          </TouchableOpacity>
 
           <View style={{ alignItems: 'center' }}>
             <Image

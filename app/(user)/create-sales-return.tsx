@@ -648,7 +648,7 @@ const CreateSalesReturn = () => {
 
           <View style={styles.card}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Order Items</Text>
+              <Text style={styles.sectionTitle}>Return Items</Text>
               {orderItems.length > 0 && (
                 <View style={styles.orderTotal}>
                   <Text style={styles.orderTotalText}>
@@ -751,7 +751,7 @@ const CreateSalesReturn = () => {
                 </View>
               </View>
             ) : (
-              <Text style={styles.noItemsText}>No items added to the order yet.</Text>
+              <Text style={styles.noItemsText}>No items added to the sales return yet.</Text>
             )}
           </View>
 
