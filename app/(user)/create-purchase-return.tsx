@@ -198,6 +198,7 @@ const CreatePurchaseReturn = () => {
     const [discountPercentage, setDiscountPercentage] = useState<string>('0');
     const [discountAmount, setDiscountAmount] = useState<string>('0');
     const [itemNotes, setItemNotes] = useState<string>('');
+    const [customerCode, setCustomerCode] = useState<string>('');
 
     useEffect(() => {
         fetchData();
@@ -300,6 +301,15 @@ const CreatePurchaseReturn = () => {
                 setRate((parseFloat(newValue) / qty).toFixed(2));
             }
         }
+    };
+
+    const handleCustomerSelect = async (customer: Customer) => {
+        setSelectedCustomer(customer);
+        setCustomerCode(customer.Code);
+        console.log("Inside Handle Customer Select Customer Code:", customer.Code)
+        const customerCode = await AsyncStorage.setItem('CustomerCode', customer.Code);
+        const asyncCustomerCode = await AsyncStorage.getItem('CustomerCode');
+        console.log("AsyncStorage Customer Code:", asyncCustomerCode)
     };
 
     const addItemToOrder = () => {
@@ -410,8 +420,19 @@ const CreatePurchaseReturn = () => {
         const userId = await AsyncStorage.getItem('UserID');
         const companyId = await AsyncStorage.getItem('CompanyID');
         const prefix = await AsyncStorage.getItem('SelectedYear');
+        const asyncCustomerCode = await AsyncStorage.getItem('CustomerCode');
+
+        console.log('--- API Request Data ---');
+        console.log('User ID:', userId);
+        console.log('Company ID:', companyId);
+        console.log('Prefix:', prefix);
+        console.log('Customer Code:', asyncCustomerCode);
+        console.log('Selected Customer:', selectedCustomer);
+        console.log('Order Items:', orderItems);
+        console.log('Order Summary:', orderSummary);
 
         const invoiceSubmit = {
+            customerCode: asyncCustomerCode,
             docNo: nextSerial,
             docDate: currentDate,
             billNo: `PIR/${nextSerial}`,
@@ -508,8 +529,11 @@ const CreatePurchaseReturn = () => {
             }))
         };
 
+        console.log('--- Final Invoice Submit Data ---');
+        console.log(JSON.stringify(invoiceSubmit, null, 2));
+
         try {
-            const response = await fetch('https://quickbill-backlend.vercel.app/api/create-purchase', {
+            const response = await fetch('http://192.168.1.11:3000/api/create-purchase-return', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -517,7 +541,9 @@ const CreatePurchaseReturn = () => {
                 body: JSON.stringify(invoiceSubmit),
             });
 
+            console.log('--- API Response ---');
             const responseData = await response.json();
+            console.log('Response:', responseData);
 
             if (!response.ok) {
                 throw new Error(responseData.error || 'Failed to create invoice');
@@ -623,7 +649,7 @@ const CreatePurchaseReturn = () => {
                         <Text style={styles.sectionTitle}>Customer</Text>
                         <SearchablePicker
                             items={customers}
-                            onSelect={setSelectedCustomer}
+                            onSelect={handleCustomerSelect}
                             placeholder="Search customers..."
                             labelKey="CustomerName"
                             valueKey="CustomerID"
@@ -980,7 +1006,7 @@ const styles = StyleSheet.create({
         // marginLeft: 5
     },
     sectionTitle: {
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: '600',
         color: '#333333', // Darker text
         marginTop: 8,
