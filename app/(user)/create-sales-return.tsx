@@ -198,10 +198,12 @@ const CreateSalesReturn = () => {
   const [discountPercentage, setDiscountPercentage] = useState<string>('0');
   const [discountAmount, setDiscountAmount] = useState<string>('0');
   const [itemNotes, setItemNotes] = useState<string>('');
+  const [customerCode, setCustomerCode] = useState<string>('');
 
   useEffect(() => {
     fetchData();
   }, []);
+
 
 
   const fetchData = async () => {
@@ -410,11 +412,13 @@ const CreateSalesReturn = () => {
     const userId = await AsyncStorage.getItem('UserID');
     const companyId = await AsyncStorage.getItem('CompanyID');
     const prefix = await AsyncStorage.getItem('SelectedYear');
+    const asyncCustomerCode = await AsyncStorage.getItem('CustomerCode');
 
     const invoiceSubmit = {
+      customerCode: asyncCustomerCode,
       docNo: nextSerial,
       docDate: currentDate,
-      billNo: `${nextSerial}`,
+      billNo: `SRT/${nextSerial}`,
       billDate: currentDate,
       partyCode: selectedCustomer.Code,
       billAmt: orderSummary.totalAmount,
@@ -509,7 +513,7 @@ const CreateSalesReturn = () => {
     };
 
     try {
-      const response = await fetch('https://quickbill-backlend.vercel.app/api/create-return', {
+      const response = await fetch('http://192.168.1.11:3000/api/create-return', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -542,6 +546,15 @@ const CreateSalesReturn = () => {
     setRate(item.SalRate.toString());
     setIsItemSelectModalVisible(false);
     setIsItemDetailsModalVisible(true); // Open item details modal
+  };
+
+  const handleCustomerSelect = async (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setCustomerCode(customer.Code);
+    console.log("Inside Handle Customer Select Customer Code:", customer.Code)
+    const customerCode = await AsyncStorage.setItem('CustomerCode', customer.Code);
+    const asyncCustomerCode = await AsyncStorage.getItem('CustomerCode');
+    console.log("AsyncStorage Customer Code:", asyncCustomerCode)
   };
 
   const handleAddItemToOrder = () => {
@@ -623,7 +636,7 @@ const CreateSalesReturn = () => {
             <Text style={styles.sectionTitle}>Customer</Text>
             <SearchablePicker
               items={customers}
-              onSelect={setSelectedCustomer}
+              onSelect={handleCustomerSelect}
               placeholder="Search customers..."
               labelKey="CustomerName"
               valueKey="CustomerID"
@@ -833,23 +846,6 @@ const CreateSalesReturn = () => {
                     <Text style={[styles.detailValue, styles.hsnCode]}>{selectedItem.HSNCode || 'Not Available'}</Text>
                   </View>
                   <View style={styles.detailSection}>
-                    <Text style={styles.itemDetailLabel}>Stock</Text>
-                    <Text style={styles.stockValue}>0 Pcs</Text>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <Text style={styles.itemDetailLabel}>Rate</Text>
-                    <TextInput
-                      style={styles.detailInput}
-                      value={rate}
-                      onChangeText={updateRate}
-                      keyboardType="numeric"
-                      placeholder="Enter rate"
-                      placeholderTextColor="#888888"
-                    />
-                  </View>
-
-                  <View style={styles.detailSection}>
                     <Text style={styles.itemDetailLabel}>Quantity</Text>
                     <TextInput
                       style={styles.detailInput}
@@ -860,6 +856,18 @@ const CreateSalesReturn = () => {
                       }}
                       keyboardType="numeric"
                       placeholder="Enter quantity"
+                      placeholderTextColor="#888888"
+                    />
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <Text style={styles.itemDetailLabel}>Rate</Text>
+                    <TextInput
+                      style={styles.detailInput}
+                      value={rate}
+                      onChangeText={updateRate}
+                      keyboardType="numeric"
+                      placeholder="Enter rate"
                       placeholderTextColor="#888888"
                     />
                   </View>
@@ -891,18 +899,6 @@ const CreateSalesReturn = () => {
                     </View>
                   </View>
 
-                  <View style={styles.detailSection}>
-                    <Text style={styles.itemDetailLabel}>Notes</Text>
-                    <TextInput
-                      style={styles.notesInput}
-                      value={itemNotes}
-                      onChangeText={setItemNotes}
-                      placeholder="Add notes"
-                      placeholderTextColor="#888888"
-                      multiline
-                      numberOfLines={3}
-                    />
-                  </View>
                   <View style={styles.gstCodeSection}>
                     <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
                     <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'}</Text>

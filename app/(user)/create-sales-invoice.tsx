@@ -199,23 +199,19 @@ const CreateSalesInvoice = () => {
   const [discountAmount, setDiscountAmount] = useState<string>('0');
   const [itemNotes, setItemNotes] = useState<string>('');
   const [gstTaxCode, setGstTaxCode] = useState<string[]>([]);
+  const [customerCode, setCustomerCode] = useState<string>('');
 
   useEffect(() => {
     fetchData();
   }, []);
 
-
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      await Promise.all([fetchCustomers(), fetchItems()]);
-      setCurrentDate(new Date().toISOString().split('T')[0]);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      // You might want to show an error message to the user here
-    } finally {
-      setIsLoading(false);
-    }
+  const handleCustomerSelect = async (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setCustomerCode(customer.Code);
+    console.log("Inside Handle Customer Select Customer Code:", customer.Code)
+    const customerCode = await AsyncStorage.setItem('CustomerCode', customer.Code);
+    const asyncCustomerCode = await AsyncStorage.getItem('CustomerCode');
+    console.log("AsyncStorage Customer Code:", asyncCustomerCode)
   };
 
   const fetchCustomers = async () => {
@@ -227,9 +223,26 @@ const CreateSalesInvoice = () => {
         }
       });
       setCustomers(response.data);
+      if (response.data.length > 0) {
+        setCustomerCode(response.data[0].Code);
+        console.log("Inside Fetch Customers Customer Code:", response.data[0].Code)
+      }
     } catch (error) {
       console.error('Error fetching customers:', error);
       throw error;
+    }
+  };
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      await Promise.all([fetchCustomers(), fetchItems()]);
+      setCurrentDate(new Date().toISOString().split('T')[0]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -249,9 +262,9 @@ const CreateSalesInvoice = () => {
       setItems(response.data.items);
       setNextSerial(response.data.nextSerial);
       const gstTaxCode = response.data.items.map((item: any) => item.GSTTaxCode);
-      console.log("GST Tax Code:", gstTaxCode)
+      // console.log("GST Tax Code:", gstTaxCode)
       setGstTaxCode(gstTaxCode);
-      console.log("Response:", response.data.items)
+      // console.log("Response:", response.data.items)
     } catch (error) {
       console.error('Error fetching items:', error);
       throw error;
@@ -414,8 +427,10 @@ const CreateSalesInvoice = () => {
     const userId = await AsyncStorage.getItem('UserID');
     const companyId = await AsyncStorage.getItem('CompanyID');
     const prefix = await AsyncStorage.getItem('SelectedYear');
+    const asyncCustomerCode = await AsyncStorage.getItem('CustomerCode');
 
     const invoiceSubmit = {
+      customerCode: asyncCustomerCode,
       docNo: nextSerial,
       docDate: currentDate,
       billNo: `SAL/${nextSerial}`,
@@ -513,7 +528,7 @@ const CreateSalesInvoice = () => {
     };
 
     try {
-      const response = await fetch('https://quickbill-backlend.vercel.app/api/create-invoice', {
+      const response = await fetch('http://192.168.1.11:3000/api/create-invoice', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -627,7 +642,7 @@ const CreateSalesInvoice = () => {
             <Text style={styles.sectionTitle}>Customer</Text>
             <SearchablePicker
               items={customers}
-              onSelect={setSelectedCustomer}
+              onSelect={handleCustomerSelect}
               placeholder="Search customers..."
               labelKey="CustomerName"
               valueKey="CustomerID"
