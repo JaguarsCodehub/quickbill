@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TextInput, FlatList, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -10,6 +10,8 @@ interface SearchablePickerProps {
   valueKey: string;
   icon: string;
   selectedItem: any;
+  disabled?: boolean;
+  value?: string;
 }
 
 const SearchablePicker = ({
@@ -20,27 +22,35 @@ const SearchablePicker = ({
   valueKey,
   icon,
   selectedItem
-}: SearchablePickerProps) => {
+}: {
+  items: any[],
+  onSelect: (item: any) => void,
+  placeholder: string,
+  labelKey: string,
+  valueKey: string,
+  icon: string,
+  selectedItem: any
+}) => {
   const [query, setQuery] = useState(selectedItem ? selectedItem[labelKey] : '');
   const [showDropdown, setShowDropdown] = useState(false);
 
+  useEffect(() => {
+    setQuery(selectedItem ? selectedItem[labelKey] : '');
+  }, [selectedItem]);
+
   const filteredItems = items.filter((item) =>
-    item[labelKey].toLowerCase().includes(query.toLowerCase())
+    (item[labelKey] && item[labelKey].toString().toLowerCase().includes(query.toLowerCase())) ||
+    (item[valueKey] && item[valueKey].toString().toLowerCase().includes(query.toLowerCase()))
   );
 
-  // Add touch handler for the background
-  const handleBackgroundPress = () => {
-    setShowDropdown(false);
-  };
-
   return (
-    <View style={styles.container}>
+    <View style={styles.pickerContainer}>
       <View style={styles.inputContainer}>
-        <Ionicons name={icon as any} size={24} color="#7868e5" style={styles.icon} />
+        <Ionicons name={icon as any} size={24} color="#7868e5" style={styles.inputIcon} />
         <TextInput
-          style={styles.input}
+          style={styles.searchInput}
           placeholder={placeholder}
-          placeholderTextColor="#808080"
+          placeholderTextColor="#7868e5"
           value={query}
           onChangeText={(text) => {
             setQuery(text);
@@ -50,33 +60,24 @@ const SearchablePicker = ({
         />
       </View>
       {showDropdown && (
-        <>
-          <TouchableOpacity
-            style={styles.backdrop}
-            onPress={handleBackgroundPress}
-            activeOpacity={1}
-          />
-          <View style={styles.dropdownContainer}>
-            <FlatList
-              data={filteredItems}
-              keyExtractor={(item) => item[valueKey].toString()}
-              style={styles.dropdown}
-              keyboardShouldPersistTaps="handled"
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => {
-                    onSelect(item);
-                    setQuery(item[labelKey]);
-                    setShowDropdown(false);
-                  }}
-                >
-                  <Text style={styles.dropdownText}>{item[labelKey]}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </>
+        <FlatList
+          data={filteredItems}
+          keyExtractor={(item) => item[valueKey]?.toString() || item[labelKey]?.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                onSelect(item);
+                setQuery(item[labelKey]?.toString() || '');
+                setShowDropdown(false);
+              }}
+            >
+              <Text style={styles.dropdownItemText}>{item[labelKey]} - {item[valueKey]}</Text>
+            </TouchableOpacity>
+          )}
+          style={styles.dropdown}
+          nestedScrollEnabled={true}
+        />
       )}
     </View>
   );
@@ -85,42 +86,41 @@ const SearchablePicker = ({
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
+    marginBottom: 15,
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#262647',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    zIndex: 1,
+
+  inputContainerDisabled: {
+    opacity: 0.7,
   },
   icon: {
-    marginRight: 8,
+    marginRight: 12,
   },
   input: {
     flex: 1,
-    height: 40,
     color: '#FFFFFF',
     fontSize: 16,
+    height: 24,
+    padding: 0,
   },
   backdrop: {
     position: 'absolute',
-    top: 45,
-    left: -20, // Extend beyond the container
-    right: -20,
-    bottom: -1000, // Large enough to cover the screen
+    top: 48,
+    left: 0,
+    right: 0,
+    bottom: -1000,
     backgroundColor: 'rgba(0,0,0,0.5)',
     zIndex: 998,
   },
   dropdownContainer: {
     position: 'absolute',
-    top: 45,
+    top: 60,
     left: 0,
     right: 0,
-    backgroundColor: '#262647',
-    borderRadius: 10,
-    maxHeight: 200, // Set a fixed maximum height
-    zIndex: 9999,
+    backgroundColor: '#1f1f3d',
+    borderRadius: 12,
+    maxHeight: 200,
+    zIndex: 999,
+    overflow: 'hidden',
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: {
@@ -130,17 +130,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
-  dropdown: {
+  dropdownText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  pickerContainer: {
+    marginBottom: 12,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f1f1', // Light input background
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  inputIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
     flex: 1,
+    height: 40,
+    fontSize: 16,
+    color: '#333333', // Darker text
+  },
+  dropdown: {
+    maxHeight: 200,
+    backgroundColor: '#E0E6ED', // Light dropdown background
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
   dropdownItem: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333',
+    borderBottomColor: '#D1D9E6', // Light border
   },
-  dropdownText: {
-    color: '#FFFFFF',
+  dropdownItemText: {
     fontSize: 16,
+    color: '#333333', // Darker text
   },
 });
 

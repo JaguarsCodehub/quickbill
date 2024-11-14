@@ -296,6 +296,18 @@ const Dashboard = () => {
               onPress={() => router.push('/')}
             />
           </CollapsibleSection>
+          <CollapsibleSection title='Account'>
+            <ActionButton
+              title='Create Receipt'
+              icon='add-circle-outline'
+              onPress={() => router.push('/(user)/create-receipt')}
+            />
+            <ActionButton
+              title='Create Payment'
+              icon='add-circle-outline'
+              onPress={() => router.push('/')}
+            />
+          </CollapsibleSection>
         </View>
         <View style={styles.statsCard}>
           <View style={styles.periodSelector}>

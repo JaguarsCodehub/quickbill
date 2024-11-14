@@ -33,3 +33,6 @@ New Taks:
 - HSN Code Text Input Done✅
 - UserMaster Table Login in UserForm -> Admin/User dropdown
 - Register Link will take to quickbillbook.com Done✅
+
+
+- Customer Master: Creating Customers just like Product
