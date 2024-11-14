@@ -859,22 +859,6 @@ const CreatePurchaseInvoice = () => {
                                         <Text style={styles.itemDetailLabel}>HSN Code</Text>
                                         <Text style={[styles.detailValue, styles.hsnCode]}>{selectedItem.HSNCode || 'N/A'}</Text>
                                     </View>
-                                    <View style={styles.detailSection}>
-                                        <Text style={styles.itemDetailLabel}>Stock</Text>
-                                        <Text style={styles.stockValue}>0 Pcs</Text>
-                                    </View>
-
-                                    <View style={styles.detailSection}>
-                                        <Text style={styles.itemDetailLabel}>Rate</Text>
-                                        <TextInput
-                                            style={styles.detailInput}
-                                            value={rate}
-                                            onChangeText={updateRate}
-                                            keyboardType="numeric"
-                                            placeholder="Enter rate"
-                                            placeholderTextColor="#888888"
-                                        />
-                                    </View>
 
                                     <View style={styles.detailSection}>
                                         <Text style={styles.itemDetailLabel}>Quantity</Text>
@@ -890,6 +874,20 @@ const CreatePurchaseInvoice = () => {
                                             placeholderTextColor="#888888"
                                         />
                                     </View>
+
+                                    <View style={styles.detailSection}>
+                                        <Text style={styles.itemDetailLabel}>Rate</Text>
+                                        <TextInput
+                                            style={styles.detailInput}
+                                            value={rate}
+                                            onChangeText={updateRate}
+                                            keyboardType="numeric"
+                                            placeholder="Enter rate"
+                                            placeholderTextColor="#888888"
+                                        />
+                                    </View>
+
+
 
                                     <View style={styles.detailSection}>
                                         <Text style={styles.itemDetailLabel}>Discount</Text>
@@ -918,6 +916,11 @@ const CreatePurchaseInvoice = () => {
                                         </View>
                                     </View>
 
+                                    <View style={styles.gstCodeSection}>
+                                        <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
+                                        <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'}</Text>
+                                    </View>
+
                                     <View style={styles.detailSection}>
                                         <Text style={styles.itemDetailLabel}>Notes</Text>
                                         <TextInput
@@ -931,10 +934,6 @@ const CreatePurchaseInvoice = () => {
                                         />
                                     </View>
 
-                                    <View style={styles.gstCodeSection}>
-                                        <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
-                                        <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'}</Text>
-                                    </View>
 
                                     <View style={styles.totalSection}>
                                         <Text style={styles.totalLabel}>Item Total</Text>
@@ -1007,7 +1006,7 @@ const styles = StyleSheet.create({
         // marginLeft: 5
     },
     sectionTitle: {
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: '600',
         color: '#333333', // Darker text
         marginTop: 8,

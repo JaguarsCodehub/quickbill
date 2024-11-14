@@ -854,25 +854,10 @@ const CreatePurchaseReturn = () => {
                                     <Text style={styles.itemDetailLabel}>Selected Item</Text>
                                     <Text style={styles.itemDetailValue}>{selectedItem.ItemName}</Text>
 
+
                                     <View style={styles.detailSection}>
                                         <Text style={styles.itemDetailLabel}>HSN Code</Text>
                                         <Text style={[styles.detailValue, styles.hsnCode]}>{selectedItem.HSNCode || 'N/A'}</Text>
-                                    </View>
-                                    <View style={styles.detailSection}>
-                                        <Text style={styles.itemDetailLabel}>Stock</Text>
-                                        <Text style={styles.stockValue}>0 Pcs</Text>
-                                    </View>
-
-                                    <View style={styles.detailSection}>
-                                        <Text style={styles.itemDetailLabel}>Rate</Text>
-                                        <TextInput
-                                            style={styles.detailInput}
-                                            value={rate}
-                                            onChangeText={updateRate}
-                                            keyboardType="numeric"
-                                            placeholder="Enter rate"
-                                            placeholderTextColor="#888888"
-                                        />
                                     </View>
 
                                     <View style={styles.detailSection}>
@@ -889,6 +874,20 @@ const CreatePurchaseReturn = () => {
                                             placeholderTextColor="#888888"
                                         />
                                     </View>
+
+                                    <View style={styles.detailSection}>
+                                        <Text style={styles.itemDetailLabel}>Rate</Text>
+                                        <TextInput
+                                            style={styles.detailInput}
+                                            value={rate}
+                                            onChangeText={updateRate}
+                                            keyboardType="numeric"
+                                            placeholder="Enter rate"
+                                            placeholderTextColor="#888888"
+                                        />
+                                    </View>
+
+
 
                                     <View style={styles.detailSection}>
                                         <Text style={styles.itemDetailLabel}>Discount</Text>
@@ -917,6 +916,11 @@ const CreatePurchaseReturn = () => {
                                         </View>
                                     </View>
 
+                                    <View style={styles.gstCodeSection}>
+                                        <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
+                                        <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'}</Text>
+                                    </View>
+
                                     <View style={styles.detailSection}>
                                         <Text style={styles.itemDetailLabel}>Notes</Text>
                                         <TextInput
@@ -930,10 +934,6 @@ const CreatePurchaseReturn = () => {
                                         />
                                     </View>
 
-                                    <View style={styles.gstCodeSection}>
-                                        <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
-                                        <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'}</Text>
-                                    </View>
 
                                     <View style={styles.totalSection}>
                                         <Text style={styles.totalLabel}>Item Total</Text>

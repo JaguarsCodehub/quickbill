@@ -904,6 +904,19 @@ const CreateSalesReturn = () => {
                     <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'}</Text>
                   </View>
 
+                  <View style={styles.detailSection}>
+                    <Text style={styles.itemDetailLabel}>Notes</Text>
+                    <TextInput
+                      style={styles.notesInput}
+                      value={itemNotes}
+                      onChangeText={setItemNotes}
+                      placeholder="Add notes"
+                      placeholderTextColor="#888888"
+                      multiline
+                      numberOfLines={3}
+                    />
+                  </View>
+
                   <View style={styles.totalSection}>
                     <Text style={styles.totalLabel}>Item Total</Text>
                     <Text style={styles.totalValue}>₹ {itemValues?.Amount || '0.00'}</Text>
@@ -975,7 +988,7 @@ const styles = StyleSheet.create({
     // marginLeft: 5
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '600',
     color: '#333333', // Darker text
     marginTop: 8,
