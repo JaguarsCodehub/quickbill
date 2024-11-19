@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Href, router, Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BarChart, LineChart, PieChart } from "react-native-gifted-charts";
 import Animated, {

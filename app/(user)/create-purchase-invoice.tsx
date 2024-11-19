@@ -547,13 +547,13 @@ const CreatePurchaseInvoice = () => {
             console.log('Response:', responseData);
 
             if (!response.ok) {
-                throw new Error(responseData.error || 'Failed to create invoice');
+                throw new Error(responseData.error || 'Failed to create purchase invoice');
             }
 
-            Alert.alert('Success', 'Invoice created successfully!');
+            Alert.alert('Success', 'Purchase Invoice created successfully!');
         } catch (error: any) {
-            console.error('Error creating invoice:', error);
-            Alert.alert('Error', `Failed to create invoice. ${error.message}`);
+            console.error('Error creating purchase invoice:', error);
+            Alert.alert('Error', `Failed to create purchase invoice. ${error.message}`);
         } finally {
             setIsSubmitting(false);
         }

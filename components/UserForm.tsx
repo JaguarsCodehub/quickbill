@@ -72,8 +72,21 @@ const UserForm: React.FC = () => {
 
       setLoading(false);
       if (response.status === 200) {
+                const { CompanyID, CompanyName, Tag5, UserID } = response.data;
+                await AsyncStorage.multiSet([
+                  ['CompanyID', CompanyID.toString()],
+                  ['CompanyName', CompanyName],
+                  ['Tag5', Tag5],
+                  ['UserID', UserID.toString()],
+                  ['SelectedYear', year],
+                ]);
+                console.log('Data was added to AsyncStorage');
+                console.log('Selected Year:', year);
+                // showToastWithGravityAndOffset('Welcome !');
+                setUsername('');
+                setPassword('');
         Alert.alert('Login Successful', `Welcome, ${response.data.Tag1}`);
-        // ... AsyncStorage logic ...
+        
         router.push('/(user)/dashboard' as never);
       } else {
         throw new Error(response.data.msg || 'Login failed');

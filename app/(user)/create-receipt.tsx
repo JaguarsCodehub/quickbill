@@ -137,6 +137,7 @@ const CreateReceipt = () => {
     const handleSubmit = () => {
         setIsSubmitting(true);
         // Add your submit logic here
+        Alert.alert('Partial Submit', 'Feature Under Development!');
         console.log(selectedParty, selectedAccount, amount, chequeDate, refNo);
         setTimeout(() => setIsSubmitting(false), 2000);
     };

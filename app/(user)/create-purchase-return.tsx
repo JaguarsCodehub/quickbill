@@ -546,14 +546,14 @@ const CreatePurchaseReturn = () => {
             console.log('Response:', responseData);
 
             if (!response.ok) {
-                throw new Error(responseData.error || 'Failed to create invoice');
+                throw new Error(responseData.error || 'Failed to create purchase return');
             }
 
-            Alert.alert('Success', 'Invoice created successfully!');
+            Alert.alert('Success', 'Purchase Return created successfully!');
             // router.push('/invoices');
         } catch (error: any) {
-            console.error('Error creating invoice:', error);
-            Alert.alert('Error', `Failed to create invoice. ${error.message}`);
+            console.error('Error creating purchase return:', error);
+            Alert.alert('Error', `Failed to create purchase return. ${error.message}`);
         } finally {
             setIsSubmitting(false);
         }

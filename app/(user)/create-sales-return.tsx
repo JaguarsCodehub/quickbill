@@ -524,14 +524,14 @@ const CreateSalesReturn = () => {
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(responseData.error || 'Failed to create invoice');
+        throw new Error(responseData.error || 'Failed to create return');
       }
 
       Alert.alert('Success', 'Return created successfully!');
       // router.push('/invoices');
     } catch (error: any) {
-      console.error('Error creating invoice:', error);
-      Alert.alert('Error', `Failed to create invoice. ${error.message}`);
+      console.error('Error creating Sales Return:', error);
+      Alert.alert('Error', `Failed to create Sales Return. ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
