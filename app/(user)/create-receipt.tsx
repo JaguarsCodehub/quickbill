@@ -61,7 +61,7 @@ const CreateReceipt = () => {
     const fetchCashAccounts = async () => {
         try {
             const userId = await AsyncStorage.getItem('UserID');
-            const response = await axios.get('http://192.168.1.9:3000/api/accounts/cash', {
+            const response = await axios.get('https://quickbill-backlend.vercel.app/api/accounts/cash', {
                 headers: {
                     'UserID': userId,
                 }
@@ -76,7 +76,7 @@ const CreateReceipt = () => {
     const fetchBankAccounts = async () => {
         try {
             const userId = await AsyncStorage.getItem('UserID');
-            const response = await axios.get('http://192.168.1.9:3000/api/accounts/bank', {
+            const response = await axios.get('https://quickbill-backlend.vercel.app/api/accounts/bank', {
                 headers: {
                     'UserID': userId,
                 }
@@ -177,7 +177,7 @@ const CreateReceipt = () => {
                 return;
             }
 
-            const response = await axios.get('http://192.168.1.9:3000/api/bills', {
+            const response = await axios.get('https://quickbill-backlend.vercel.app/api/bills', {
                 headers: {
                     'UserID': userId,
                     'CompanyID': companyId,
