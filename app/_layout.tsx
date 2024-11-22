@@ -6,27 +6,37 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import axios from 'axios';
+import OnboardingScreen from '@/components/OnBoardingScreen';
 
 export default function Layout() {
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
 
-  const [initialRoute, setInitialRoute] = useState<string | null>(null);
-  const router = useRouter();
+  useEffect(() => {
+    checkOnboardingStatus();
+  }, []);
 
-  // if (!initialRoute) {
-  //   return (
-  //     <View style={styles.container}>
-  //       <ActivityIndicator size="large" color="#0000ff" />
-  //       <Text>Loading...</Text>
-  //     </View>
-  //   );
-  // }
+  const checkOnboardingStatus = async () => {
+    try {
+      const value = await AsyncStorage.getItem('hasSeenOnboarding');
+      setHasSeenOnboarding(value === 'true');
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+      setHasSeenOnboarding(false);
+    }
+  };
+
+  if (hasSeenOnboarding === null) {
+    return null; // Or a loading screen
+  }
+
+  if (!hasSeenOnboarding) {
+    return <OnboardingScreen />;
+  }
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      {/* <Stack.Screen name="(user)" options={{ headerShown: false }} /> */}
-      </Stack>
-    </GestureHandlerRootView>
+    </Stack>
   );
 }
 
