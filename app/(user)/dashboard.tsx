@@ -12,6 +12,7 @@ import Animated, {
 import { BlurView } from 'expo-blur';
 import { MotiView } from 'moti';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import GridBackground from '@/components/GridBackground';
 
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -72,7 +73,14 @@ const CollapsibleSection = ({ title, children }: SectionProps) => {
 
   return (
     <MotiView
-      style={styles.sectionContainer}
+      style={[styles.sectionContainer, {
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        borderWidth: 2,
+        borderColor: '#ececec',
+        borderRadius: 10,
+        overflow: 'hidden',
+        marginBottom: 16,
+      }]}
       animate={{ scale: isExpanded ? 1.02 : 1 }}
       transition={{ type: 'timing', duration: 300 }}
     >
@@ -215,6 +223,7 @@ const Dashboard = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <GridBackground />
       <Stack.Screen
         options={{
           title: 'Dashboard',
@@ -224,7 +233,7 @@ const Dashboard = () => {
           headerTitleStyle: {
             color: COLORS.text,
             fontSize: 20,
-            fontWeight: '600',
+            fontFamily: 'MontserratSemibold',
           },
           headerShadowVisible: false,
           headerTintColor: COLORS.primary,
@@ -505,13 +514,13 @@ const styles = StyleSheet.create({
   },
   periodText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
     color: COLORS.text,
   },
   viewBills: {
     color: COLORS.primary,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
   },
   statsRow: {
     flexDirection: 'row',
@@ -529,7 +538,7 @@ const styles = StyleSheet.create({
   },
   statAmount: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
   },
   statDivider: {
@@ -547,11 +556,11 @@ const styles = StyleSheet.create({
   centerLabelText: {
     fontSize: 14,
     color: '#000',
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
   },
   centerLabelAmount: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
   },
   legendContainer: {
@@ -577,7 +586,7 @@ const styles = StyleSheet.create({
   },
   legendAmount: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
     color: COLORS.text,
   },
   quickActionsSection: {
@@ -586,7 +595,7 @@ const styles = StyleSheet.create({
   },
   quickActionsHeader: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
     color: COLORS.text,
     marginBottom: 16,
   },
@@ -623,7 +632,7 @@ const styles = StyleSheet.create({
   },
   quickActionTitle: {
     fontSize: 15,
-    fontWeight: '500',
+    fontFamily: 'MontserratSemibold',
     color: COLORS.text,
     letterSpacing: 0.3,
   },
@@ -661,7 +670,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
     color: COLORS.text,
   },
   sectionTitleExpanded: {
@@ -695,11 +704,11 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 16, // Increased font size
     color: COLORS.text,
-    fontWeight: '600', // Bolder text
+    fontFamily: 'MontserratSemibold', // Bolder text
   },
   mainContainer: {
     padding: 16,
-    backgroundColor: '#efecff',
+    // backgroundColor: '#efecff',
     borderRadius: 10,
     gap: 12,
     marginHorizontal: 10,
@@ -752,12 +761,12 @@ const styles = StyleSheet.create({
   navigationButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
   },
   PurchasenavigationButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
   },
   newSection: {
     marginVertical: 16,
@@ -765,7 +774,7 @@ const styles = StyleSheet.create({
   },
   newSectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
     color: COLORS.text,
     marginBottom: 6,
   },
@@ -789,12 +798,13 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 24,
-    fontWeight: '600',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
     // marginBottom: 4,
   },
   infoDescription: {
     fontSize: 14,
+    fontFamily: 'MontserratSemibold',
     color: COLORS.primaryDark,
     marginBottom: 16,
     marginTop: -10
