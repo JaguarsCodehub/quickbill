@@ -8,6 +8,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SearchablePicker from '@/components/SearchablePicker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import GridBackground from '@/components/GridBackground';
 
 interface Customer {
     CustomerID: string;
@@ -404,9 +405,11 @@ const CreateReceipt = () => {
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
-            <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.gradient}>
+            <GridBackground />
+            <View style={styles.gradient}>
+                {/* <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.gradient}> */}
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <View style={styles.header}>
+                <View style={styles.header}>
                         <Text style={styles.title}>New Receipt</Text>
                         <Ionicons name="receipt-outline" size={24} color="#4e41a8" />
                     </View>
@@ -588,7 +591,8 @@ const CreateReceipt = () => {
                         )}
                     </TouchableOpacity>
                 </ScrollView>
-            </LinearGradient>
+            </View>
+            {/* </LinearGradient> */}
         </SafeAreaView>
     );
 };
