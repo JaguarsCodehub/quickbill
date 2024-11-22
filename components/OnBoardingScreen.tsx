@@ -9,7 +9,7 @@ import {
   SafeAreaView,
   Image,
 } from 'react-native';
-import { router } from 'expo-router';
+import { Href, router } from 'expo-router';
 import GridBackground from './GridBackground';
 
 const { width, height } = Dimensions.get('window');
@@ -60,7 +60,7 @@ const OnboardingScreen = () => {
   };
 
   const handleGetStarted = () => {
-    router.replace('/');
+    router.push('/(user)/main' as Href);
   };
 
   const Slide = ({ item }: { item: (typeof slides)[0] }) => {

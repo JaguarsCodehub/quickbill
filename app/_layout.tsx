@@ -1,6 +1,6 @@
 // import 'react-native-gesture-handler'; // Import at the top of the file
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SplashScreen, Stack, useRouter } from 'expo-router';
+import { Slot, SplashScreen, Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
@@ -20,9 +20,9 @@ export default function Layout() {
   });
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    checkOnboardingStatus();
-  }, []);
+  // useEffect(() => {
+  //   checkOnboardingStatus();
+  // }, []);
 
   useEffect(() => {
     if (loaded) {
@@ -30,27 +30,28 @@ export default function Layout() {
     }
   }, [loaded]);
 
-  const checkOnboardingStatus = async () => {
-    try {
-      const value = await AsyncStorage.getItem('hasSeenOnboarding');
-      setHasSeenOnboarding(value === 'true');
-    } catch (error) {
-      console.error('Error checking onboarding status:', error);
-      setHasSeenOnboarding(false);
-    }
-  };
+  // const checkOnboardingStatus = async () => {
+  //   try {
+  //     const value = await AsyncStorage.getItem('hasSeenOnboarding');
+  //     setHasSeenOnboarding(value === 'true');
+  //   } catch (error) {
+  //     console.error('Error checking onboarding status:', error);
+  //     setHasSeenOnboarding(false);
+  //   }
+  // };
 
-  if (hasSeenOnboarding === null) {
-    return null; // Or a loading screen
-  }
+  // if (hasSeenOnboarding === null) {
+  //   return null; // Or a loading screen
+  // }
 
-  if (!hasSeenOnboarding) {
-    return <OnboardingScreen />;
-  }
+  // if (!hasSeenOnboarding) {
+  //   return <OnboardingScreen />;
+  // }
 
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Slot />
     </Stack>
   );
 }
