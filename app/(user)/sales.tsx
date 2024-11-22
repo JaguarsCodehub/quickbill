@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Icon } from 'lucide-react-native';
+import GridBackground from '@/components/GridBackground';
 
 // Define TypeScript interfaces
 interface SalesData {
@@ -437,6 +438,7 @@ export default function SalesScreen() {
 
     return (
       <ScrollView style={styles.container}>
+        <GridBackground />
         <Stack.Screen
           options={{
             title: 'Sales',
@@ -446,7 +448,7 @@ export default function SalesScreen() {
             headerTitleStyle: {
               color: COLORS.text,
               fontSize: 20,
-              fontWeight: '600',
+              fontFamily: 'MontserratBold',
             },
             headerShadowVisible: false, // removes the bottom border
             headerTintColor: COLORS.primary, // for back button and other icons
@@ -490,7 +492,7 @@ export default function SalesScreen() {
 
         <PerformanceView salesData={salesData.recentTransactions} />
 
-        <View
+        {/* <View
           style={{
             margin: 10,
             padding: 20,
@@ -531,7 +533,7 @@ export default function SalesScreen() {
               <Ionicons name='add' size={24} color='#fff' />
             </View>
           </View>
-        </View>
+        </View> */}
         <TransactionList transactions={salesData.recentTransactions} />
         <QuickActionsGrid />
       </ScrollView>
@@ -556,7 +558,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
-        // paddingTop: 20,
+        marginBottom: 60,
     },
     header: {
         paddingHorizontal: 20,
@@ -573,11 +575,12 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: 28,
-        fontWeight: 'bold',
+        fontFamily: 'MontserratBold',
         color: COLORS.text,
     },
     headerSubtitle: {
         fontSize: 16,
+        fontFamily: 'MontserratRegular',
         color: COLORS.textSecondary,
         marginTop: 4,
     },
@@ -601,10 +604,11 @@ const styles = StyleSheet.create({
     statTitle: {
         fontSize: 16,
         color: '#666',
+        fontFamily: 'MontserratRegular',
     },
     statAmount: {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontFamily: 'MontserratBold',
         marginVertical: 10,
     },
     growthIndicator: {
@@ -638,12 +642,12 @@ const styles = StyleSheet.create({
     },
     cardTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontFamily: 'MontserratBold',
         color: COLORS.text,
     },
     seeAllButton: {
         color: COLORS.primary,
-        fontWeight: '500',
+        fontFamily: 'MontserratSemibold',
     },
     transactionItem: {
         flexDirection: 'row',
@@ -677,7 +681,7 @@ const styles = StyleSheet.create({
     },
     transactionTitle: {
         fontSize: 16,
-        fontWeight: '600',
+        fontFamily: 'MontserratSemibold',
         color: COLORS.text,
     },
     transactionDate: {
@@ -690,7 +694,7 @@ const styles = StyleSheet.create({
     },
     transactionAmount: {
         fontSize: 16,
-        fontWeight: '600',
+        fontFamily: 'MontserratSemibold',
         color: COLORS.text,
     },
     transactionStatus: {
@@ -707,7 +711,7 @@ const styles = StyleSheet.create({
     },
     statusText: {
         fontSize: 8,
-        fontWeight: '500',
+        fontFamily: 'MontserratSemibold',
         color: '#FFF', // For completed
     },
     performanceCard: {
@@ -733,7 +737,7 @@ const styles = StyleSheet.create({
     },
     centerLabelAmount: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'MontserratBold',
     },
     legendContainer: {
         marginTop: 20,
@@ -754,7 +758,7 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     legendValue: {
-        fontWeight: '500',
+        fontFamily: 'MontserratSemibold',
     },
     guideCard: {
         backgroundColor: '#F5F5F5',
@@ -764,7 +768,7 @@ const styles = StyleSheet.create({
     },
     guideTitle: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'MontserratBold',
         marginBottom: 8,
     },
     guideSubtitle: {
@@ -780,7 +784,7 @@ const styles = StyleSheet.create({
     },
     updateButtonText: {
         color: 'white',
-        fontWeight: '500',
+        fontFamily: 'MontserratSemibold',
     },
     loadingContainer: {
         flex: 1,
@@ -819,7 +823,7 @@ const styles = StyleSheet.create({
     },
     quickActionsTitle: {
         fontSize: 18,
-        fontWeight: '600',
+        fontFamily: 'MontserratBold',
         color: COLORS.text,
         marginBottom: 20,
     },
@@ -846,7 +850,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: COLORS.text,
         textAlign: 'center',
-        fontWeight: '500',
+        fontFamily: 'MontserratSemibold',
     },
     modalOverlay: {
         flex: 1,
@@ -869,7 +873,7 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         fontSize: 18,
-        fontWeight: '600',
+        fontFamily: 'MontserratSemibold',
         color: COLORS.text,
     },
     amountSection: {
@@ -896,7 +900,7 @@ const styles = StyleSheet.create({
     },
     amountValue: {
         fontSize: 24,
-        fontWeight: '600',
+        fontFamily: 'MontserratBold',
         color: COLORS.text,
     },
     infoList: {
@@ -918,7 +922,7 @@ const styles = StyleSheet.create({
     },
     infoValue: {
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'MontserratSemibold',
         color: COLORS.text,
     },
     statusBadge: {
@@ -970,7 +974,7 @@ const styles = StyleSheet.create({
     primaryButtonText: {
         color: '#FFF',
         fontSize: 15,
-        fontWeight: '600',
+        fontFamily: 'MontserratSemibold',
     },
     secondaryButtonText: {
         color: COLORS.text,

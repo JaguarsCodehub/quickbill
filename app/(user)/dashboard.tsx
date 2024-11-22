@@ -226,32 +226,7 @@ const Dashboard = () => {
       <GridBackground />
       <Stack.Screen
         options={{
-          title: 'Dashboard',
-          headerStyle: {
-            backgroundColor: COLORS.surface,
-          },
-          headerTitleStyle: {
-            color: COLORS.text,
-            fontSize: 20,
-            fontFamily: 'MontserratSemibold',
-          },
-          headerShadowVisible: false,
-          headerTintColor: COLORS.primary,
-          headerRight: () => (
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => {
-                /* handle press */
-              }}
-            >
-              <Ionicons
-                name='notifications-outline'
-                size={24}
-                color={COLORS.primary}
-              />
-            </TouchableOpacity>
-          ),
-          headerLeft: () => null,
+          headerShown: false,
         }}
       />
       <ScrollView>
