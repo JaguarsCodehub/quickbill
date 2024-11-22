@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import GridBackground from './GridBackground';
 
 const LoadingScreen = () => {
     return (
         <View style={styles.container}>
+            <GridBackground />
             <View style={styles.background} />
             <ActivityIndicator size="large" color="#00A25B" />
             <Text style={styles.loadingText}>Please wait, loading...</Text>
@@ -36,6 +38,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
         fontSize: 30,
         color: '#000',
+        fontFamily: 'MontserratSemibold',
     },
 });
 

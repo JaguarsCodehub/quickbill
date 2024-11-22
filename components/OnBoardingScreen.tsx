@@ -10,7 +10,6 @@ import {
   Image,
 } from 'react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import GridBackground from './GridBackground';
 
 const { width, height } = Dimensions.get('window');
@@ -60,13 +59,8 @@ const OnboardingScreen = () => {
     }
   };
 
-  const handleGetStarted = async () => {
-    try {
-      await AsyncStorage.setItem('hasSeenOnboarding', 'true');
-      router.replace('/(user)');
-    } catch (error) {
-      console.error('Error saving onboarding status:', error);
-    }
+  const handleGetStarted = () => {
+    router.replace('/');
   };
 
   const Slide = ({ item }: { item: (typeof slides)[0] }) => {
