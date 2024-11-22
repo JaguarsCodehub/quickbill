@@ -120,7 +120,7 @@ const OnboardingScreen = () => {
               style={styles.button}
               onPress={goToNextSlide}
             >
-              <Text style={styles.buttonText}>NEXT</Text>
+              <Text style={styles.buttonText}>Proceed</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
-    fontWeight: '700',
+    fontFamily: 'MontserratBold',
     color: '#1a1a1a',
     textAlign: 'center',
     marginTop: 20,
@@ -168,6 +168,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
+    fontFamily: 'MontserratRegular',
     color: '#666',
     textAlign: 'center',
     marginTop: 10,
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'MontserratSemibold',
     letterSpacing: 1,
   },
 });
