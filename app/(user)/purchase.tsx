@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Icon } from 'lucide-react-native';
+import GridBackground from '@/components/GridBackground';
 
 // Define TypeScript interfaces
 interface PurchaseData {
@@ -412,6 +413,7 @@ export default function PurchaseScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
+        <GridBackground />
         <ActivityIndicator size="large" color="#2E7D32" />
         <Text style={styles.loadingText}>Loading purchase data...</Text>
       </View>
@@ -420,6 +422,7 @@ export default function PurchaseScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <GridBackground />
       <Stack.Screen
         options={{
           title: 'Purchases',
@@ -429,7 +432,7 @@ export default function PurchaseScreen() {
           headerTitleStyle: {
             color: COLORS.text,
             fontSize: 20,
-            fontWeight: '600',
+            fontFamily: 'MontserratBold',
           },
           headerShadowVisible: false, // removes the bottom border
           headerTintColor: COLORS.primary, // for back button and other icons
@@ -475,7 +478,7 @@ export default function PurchaseScreen() {
 
       <PerformanceView purchaseData={purchaseData.recentTransactions} />
 
-      <View
+      {/* <View
         style={{
           margin: 10,
           padding: 20,
@@ -518,7 +521,7 @@ export default function PurchaseScreen() {
             <Ionicons name='add' size={24} color='#fff' />
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
       <TransactionList transactions={purchaseData.recentTransactions} />
     </ScrollView>
   );
@@ -543,6 +546,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+    marginBottom: 60
   },
   header: {
     paddingHorizontal: 20,
@@ -559,12 +563,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
   },
   headerSubtitle: {
     fontSize: 16,
     color: COLORS.textSecondary,
+    fontFamily: 'MontserratRegular',
     // marginTop: 4,
   },
   statsContainer: {
@@ -590,7 +595,7 @@ const styles = StyleSheet.create({
   },
   statAmount: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: 'MontserratBold',
     marginVertical: 10,
   },
   growthIndicator: {
@@ -624,7 +629,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
   },
   seeAllButton: {
@@ -658,7 +663,7 @@ const styles = StyleSheet.create({
   },
   transactionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
   },
   transactionDate: {
@@ -671,7 +676,7 @@ const styles = StyleSheet.create({
   },
   transactionAmount: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
   },
   transactionStatus: {
@@ -688,7 +693,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 8,
-    fontWeight: '500',
+    fontFamily: 'MontserratSemibold',
     color: '#FFF', // For completed
   },
   noDataText: {
@@ -705,8 +710,9 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 16,
+    fontSize: 22,
     color: COLORS.text,
+    fontFamily: 'MontserratBold',
   },
   performanceCard: {
     backgroundColor: COLORS.surface,
@@ -732,7 +738,7 @@ const styles = StyleSheet.create({
   },
   centerLabelAmount: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: 'MontserratBold',
     color: '#000', // Center label color
   },
   legendContainer: {
@@ -754,7 +760,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   legendValue: {
-    fontWeight: '500',
+    fontFamily: 'MontserratSemibold',
   },
   guideCard: {
     backgroundColor: '#F5F5F5',
@@ -764,7 +770,7 @@ const styles = StyleSheet.create({
   },
   guideTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'MontserratBold',
     marginBottom: 8,
   },
   guideSubtitle: {
@@ -780,7 +786,7 @@ const styles = StyleSheet.create({
   },
   updateButtonText: {
     color: 'white',
-    fontWeight: '500',
+    fontFamily: 'MontserratSemibold',
   },
   quickActionsWrapper: {
     padding: 20,
@@ -798,7 +804,7 @@ const styles = StyleSheet.create({
   },
   quickActionsTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
     marginBottom: 20,
   },
@@ -825,7 +831,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.text,
     textAlign: 'center',
-    fontWeight: '500',
+    fontFamily: 'MontserratSemibold',
   },
   modalOverlay: {
     flex: 1,
@@ -853,7 +859,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
   },
   infoBar: {
@@ -872,7 +878,7 @@ const styles = StyleSheet.create({
   },
   infoBarText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'MontserratSemibold',
   },
   infoBarTextSuccess: {
     color: '#0F672E',
@@ -904,7 +910,7 @@ const styles = StyleSheet.create({
   },
   amountValue: {
     fontSize: 24,
-    fontWeight: '600',
+    fontFamily: 'MontserratBold',
     color: COLORS.text,
   },
   infoCard: {
@@ -924,7 +930,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'MontserratSemibold',
     color: COLORS.text,
     maxWidth: '60%',
     textAlign: 'right',
@@ -965,12 +971,12 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#FFF',
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: 'MontserratBold',
   },
   secondaryButtonText: {
     color: COLORS.text,
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: 'MontserratBold',
   },
   quickActionBtn: {  // Changed from actionButton
     width: '30%',
@@ -989,7 +995,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.text,
     textAlign: 'center',
-    fontWeight: '500',
+    fontFamily: 'MontserratSemibold',
   },
 });
 
