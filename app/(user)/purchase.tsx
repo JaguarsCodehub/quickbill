@@ -6,6 +6,7 @@ import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Icon } from 'lucide-react-native';
 import GridBackground from '@/components/GridBackground';
+import RippleLoader from '@/components/RippleLoader';
 
 // Define TypeScript interfaces
 interface PurchaseData {
@@ -414,7 +415,7 @@ export default function PurchaseScreen() {
     return (
       <View style={styles.loadingContainer}>
         <GridBackground />
-        <ActivityIndicator size="large" color="#2E7D32" />
+        <RippleLoader size={24} color={COLORS.primary} />
         <Text style={styles.loadingText}>Loading purchase data...</Text>
       </View>
     );

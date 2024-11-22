@@ -24,6 +24,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SearchablePicker from '@/components/SearchablePicker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import GridBackground from '@/components/GridBackground';
+import RippleLoader from '@/components/RippleLoader';
+import { COLORS } from '@/constants/Colors';
 
 interface Customer {
   CustomerID: string;
@@ -478,7 +480,7 @@ const CreatePayment = () => {
           </View>
 
           {isLoading ? (
-            <ActivityIndicator size='large' color='#4e41a8' />
+            <RippleLoader size={24} color={COLORS.primary} />
           ) : (
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>Party Details</Text>

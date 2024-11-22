@@ -5,6 +5,9 @@ import { Stack, useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import SearchablePicker from '@/components/SearchablePicker'
+import RippleLoader from '@/components/RippleLoader';
+import { COLORS } from '@/constants/Colors';
+import GridBackground from '@/components/GridBackground';
 // import { OrderSubmit, OrderItemSubmit } from './path/to/types'; // Import the types if they are in a separate file
 
 interface OrderItem {
@@ -557,7 +560,8 @@ const CreateSalesOrder = () => {
             {/* Show loading indicator or items list */}
             {isProductsLoading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#58a6ff" />
+                <GridBackground />
+                <RippleLoader size={24} color={COLORS.primary} />
                 <Text style={styles.loadingText}>Loading products...</Text>
               </View>
             ) : (

@@ -8,6 +8,8 @@ import { Table, Row } from 'react-native-table-component';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import GridBackground from '@/components/GridBackground';
+import RippleLoader from '@/components/RippleLoader';
+import { COLORS } from '@/constants/Colors';
 
 interface Customer {
   CustomerID: number;
@@ -609,7 +611,7 @@ const CreateSalesInvoice = () => {
       // <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.loadingContainer}>
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <GridBackground />
-        <ActivityIndicator size="large" color="#7868e5" />
+        <RippleLoader size={24} color={COLORS.primary} />
         <Text style={styles.loadingText}>Loading order data...</Text>
       </View>
       // </LinearGradient>

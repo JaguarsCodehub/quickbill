@@ -9,6 +9,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SearchablePicker from '@/components/SearchablePicker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import GridBackground from '@/components/GridBackground';
+import { COLORS } from '@/constants/Colors';
+import RippleLoader from '@/components/RippleLoader';
 
 interface Customer {
     CustomerID: string;
@@ -415,7 +417,7 @@ const CreateReceipt = () => {
                     </View>
 
                     {isLoading ? (
-                        <ActivityIndicator size="large" color="#4e41a8" />
+                        <RippleLoader size={24} color={COLORS.primary} />
                     ) : (
                         <View style={styles.card}>
                             <Text style={styles.sectionTitle}>Party Details</Text>
@@ -543,7 +545,7 @@ const CreateReceipt = () => {
                                         disabled={isLoadingBills}
                                     >
                                         {isLoadingBills ? (
-                                            <ActivityIndicator size="small" color="#FFFFFF" />
+                                            <RippleLoader size={24} color={COLORS.primary} />
                                         ) : (
                                             <>
                                                 <Ionicons name="document-text-outline" size={20} color="#FFFFFF" style={styles.buttonIcon} />

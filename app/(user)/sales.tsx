@@ -6,6 +6,7 @@ import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Icon } from 'lucide-react-native';
 import GridBackground from '@/components/GridBackground';
+import RippleLoader from '@/components/RippleLoader';
 
 // Define TypeScript interfaces
 interface SalesData {
@@ -430,7 +431,8 @@ export default function SalesScreen() {
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#2E7D32" />
+                <GridBackground />
+                <RippleLoader size={24} color={COLORS.primary} />
                 <Text style={styles.loadingText}>Loading sales data...</Text>
             </View>
         );
@@ -552,6 +554,7 @@ const COLORS = {
     success: '#7868e5',
     error: '#FF5252',
     secondary: '#aba0f3',
+    green: '#4CAF50',
 };
 
 const styles = StyleSheet.create({
@@ -790,11 +793,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        padding: 40,
         backgroundColor: COLORS.background,
     },
     loadingText: {
         marginTop: 10,
-        color: COLORS.textSecondary,
+        color: COLORS.primary,
+        fontFamily: 'MontserratBold',
+        fontSize: 24,
     },
     chartWrapper: {
         alignItems: 'center',

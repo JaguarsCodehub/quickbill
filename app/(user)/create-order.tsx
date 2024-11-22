@@ -7,6 +7,8 @@ import { Stack } from 'expo-router';
 import { Table, Row } from 'react-native-table-component';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import RippleLoader from '@/components/RippleLoader';
+import { COLORS } from '@/constants/Colors';
 
 
 interface Customer {
@@ -565,7 +567,7 @@ const CreateOrder = () => {
   if (isLoading) {
     return (
       <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#7868e5" />
+        <RippleLoader size={24} color={COLORS.primary} />
         <Text style={styles.loadingText}>Loading order data...</Text>
       </LinearGradient>
     );
