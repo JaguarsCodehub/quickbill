@@ -289,7 +289,7 @@ const Dashboard = () => {
             <ActionButton
               title='Create Payment'
               icon='add-circle-outline'
-              onPress={() => router.push('/')}
+              onPress={() => router.push('/(user)/create-payment')}
             />
           </CollapsibleSection>
         </View>

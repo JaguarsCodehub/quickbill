@@ -7,6 +7,7 @@ import { Stack } from 'expo-router';
 import { Table, Row } from 'react-native-table-component';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import GridBackground from '@/components/GridBackground';
 
 interface Customer {
   CustomerID: number;
@@ -605,15 +606,19 @@ const CreateSalesInvoice = () => {
 
   if (isLoading) {
     return (
-      <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.loadingContainer}>
+      // <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.loadingContainer}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <GridBackground />
         <ActivityIndicator size="large" color="#7868e5" />
         <Text style={styles.loadingText}>Loading order data...</Text>
-      </LinearGradient>
+      </View>
+      // </LinearGradient>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
+      <GridBackground />
       <Stack.Screen options={{ headerShown: false }} />
       <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.gradient}>
         <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
@@ -1127,7 +1132,8 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 16,
+    fontSize: 24,
+    fontFamily: 'MontserratBold',
     color: '#7868e5', // Green text
   },
   tableContainer: {
