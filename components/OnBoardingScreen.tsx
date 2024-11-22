@@ -18,20 +18,23 @@ const { width, height } = Dimensions.get('window');
 const slides = [
   {
     id: '1',
-    title: 'Boost your\nproductivity',
-    description: 'Discover tools that help you work smarter, not harder.',
+    title: 'Simplify Your Invoicing',
+    description:
+      'Create professional invoices in seconds, ensuring you get paid faster and more efficiently.',
     image: require('@/assets/images/1.png'),
   },
   {
     id: '2',
-    title: 'Your messages,\nall in one place',
-    description: 'Stay organized and never miss an important message.',
+    title: 'Manage Orders Effortlessly',
+    description:
+      'Track and manage your orders seamlessly, keeping your business organized and your customers happy.',
     image: require('@/assets/images/2.png'),
   },
   {
     id: '3',
-    title: 'Collaborate in\nreal time',
-    description: 'Work together seamlessly with your team.',
+    title: 'Instant Receipts at Your Fingertips',
+    description:
+      'Generate and send receipts instantly, making transactions hassle-free for you and your clients.',
     image: require('@/assets/images/3.png'),
   },
 ];
@@ -113,14 +116,14 @@ const OnboardingScreen = () => {
               style={styles.button}
               onPress={handleGetStarted}
             >
-              <Text style={styles.buttonText}>GET STARTED</Text>
+              <Text style={styles.buttonText}>Get Started</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               style={styles.button}
               onPress={goToNextSlide}
             >
-              <Text style={styles.buttonText}>Proceed</Text>
+              <Text style={styles.buttonText}>Next</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -157,13 +160,14 @@ const styles = StyleSheet.create({
     width: width * 0.8,
     height: width * 0.8,
     resizeMode: 'contain',
+    borderRadius: 10,
   },
   title: {
     fontSize: 36,
     fontFamily: 'MontserratBold',
     color: '#1a1a1a',
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 40,
     lineHeight: 44,
   },
   description: {
@@ -197,25 +201,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   button: {
-    height: 56,
-    backgroundColor: '#7868e5',
-    borderRadius: 12,
+    backgroundColor: '#e0aaf3',
+    borderColor: '#300042',
+    borderWidth: 2,
+    borderRadius: 10,
+    boxShadow: '#300042 4px 4px 0 0',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    height: 60,
+    paddingHorizontal: 18,
+    marginTop: 20,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#300042',
     fontFamily: 'MontserratSemibold',
-    letterSpacing: 1,
+    fontSize: 18,
   },
 });
 
