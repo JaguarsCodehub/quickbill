@@ -18,6 +18,12 @@ interface Customer {
     Code: string;
 }
 
+interface Account {
+    AccountID: string;
+    AccountName: string;
+    Code: string;
+}
+
 interface Bill {
     SRL: string;
     Date: string;
@@ -32,17 +38,24 @@ interface Bill {
     Sno: number;
 }
 
+const paymentTypes = [
+    { id: '1', name: 'Cheque' },
+    { id: '2', name: 'NEFT/RTGS' },
+    { id: '3', name: 'UPI' }
+];
+
 const CreateReceipt = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [modeType, setModeType] = useState<'BANK' | 'CASH' | null>(null);
     const [selectedParty, setSelectedParty] = useState<Customer | null>(null);
     const [customerCode, setCustomerCode] = useState<string>('');
-    const [selectedAccount, setSelectedAccount] = useState(null);
+    const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
     const [amount, setAmount] = useState('');
     const [chequeDate, setChequeDate] = useState(new Date());
     const [refNo, setRefNo] = useState('');
     const [customers, setCustomers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCreatingReceipt, setIsCreatingReceipt] = useState(false);
 
     const [cashAccounts, setCashAccounts] = useState([]);
     const [bankAccounts, setBankAccounts] = useState([]);
@@ -70,6 +83,9 @@ const CreateReceipt = () => {
                 }
             });
             setCashAccounts(response.data);
+            const cashAccountCode = await AsyncStorage.setItem('CashAccountCode', response.data[0].Code);
+            console.log("Cash Account Code:", cashAccountCode);
+            // console.log("Cash Accounts:", response.data);
         } catch (error) {
             console.error('Error fetching cash accounts:', error);
             Alert.alert('Error', 'Failed to fetch cash accounts.');
@@ -84,7 +100,13 @@ const CreateReceipt = () => {
                     'UserID': userId,
                 }
             });
-            setBankAccounts(response.data);
+            const mappedAccounts = response.data.map((account: any) => ({
+                AccountID: account.CustomerID.toString(),
+                AccountName: account.CustomerName,
+                Code: account.Code
+            }));
+            setBankAccounts(mappedAccounts);
+            console.log("Mapped Bank Accounts:", mappedAccounts);
         } catch (error) {
             console.error('Error fetching bank accounts:', error);
             Alert.alert('Error', 'Failed to fetch bank accounts.');
@@ -93,10 +115,24 @@ const CreateReceipt = () => {
 
     const handleModeChange = (mode: 'BANK' | 'CASH') => {
         setModeType(mode);
-        if (mode === 'CASH') {
-            fetchCashAccounts();
-        } else if (mode === 'BANK') {
+        setSelectedAccount(null);
+        if (mode === 'BANK') {
             fetchBankAccounts();
+        } else {
+            fetchCashAccounts();
+        }
+    };
+
+    const handleAccountSelect = async (account: Account) => {
+        setSelectedAccount(account);
+        try {
+            const storageKey = modeType === 'BANK' ? 'BankAccountCode' : 'CashAccountCode';
+            await AsyncStorage.setItem(storageKey, account.Code);
+            console.log(`${modeType} Account Code:`, account.Code);
+            const storedCode = await AsyncStorage.getItem(storageKey);
+            console.log(`AsyncStorage ${modeType} Account Code:`, storedCode);
+        } catch (error) {
+            console.error('Error storing account code:', error);
         }
     };
 
@@ -136,22 +172,6 @@ const CreateReceipt = () => {
         const asyncCustomerCode = await AsyncStorage.getItem('CustomerCode');
         console.log("AsyncStorage Customer Code:", asyncCustomerCode)
     };
-
-    const handleSubmit = () => {
-        setIsSubmitting(true);
-        // Add your submit logic here
-        Alert.alert('Partial Submit', 'Feature Under Development!');
-        console.log(selectedParty, selectedAccount, amount, chequeDate, refNo);
-        setTimeout(() => setIsSubmitting(false), 2000);
-    };
-
-    const paymentTypes = [
-        { id: '1', name: 'CHEQUE' },
-        { id: '2', name: 'UPI' },
-        { id: '3', name: 'IMPS' },
-        { id: '4', name: 'RTGS' },
-        { id: '5', name: 'TRANSFER' },
-    ];
 
     const handleDateChange = (event: any, selectedDate: Date | undefined) => {
         const currentDate = selectedDate || chequeDate;
@@ -404,6 +424,129 @@ const CreateReceipt = () => {
         );
     };
 
+    const createReceipt = async () => {
+        console.log('Starting receipt creation...');
+
+        // if (!validateForm()) {
+        //     console.log('Form validation failed');
+        //     Alert.alert('Error', 'Please fill in all required fields');
+        //     return;
+        // }
+
+        try {
+            setIsCreatingReceipt(true);
+            setIsSubmitting(true);
+
+            // Get stored values
+            const userId = await AsyncStorage.getItem('UserID');
+            const companyId = await AsyncStorage.getItem('CompanyID');
+            const prefix = await AsyncStorage.getItem('SelectedYear');
+
+            console.log('Retrieved values:', { userId, companyId, prefix });
+
+            if (!userId || !companyId || !prefix) {
+                Alert.alert('Error', 'Missing required data');
+                return;
+            }
+
+            // // Generate unique doc number
+            // const docNo = `REC${Date.now().toString().slice(-6)}`;
+
+            // Log the data being sent
+            console.log('Selected Party:', selectedParty);
+            console.log('Selected Account:', selectedAccount);
+            console.log('Adjusted Bills:', adjustedBills);
+
+            const receiptData = {
+
+                docDate: new Date().toISOString(),
+                bankCode: selectedAccount?.Code,
+                billNo: adjustedBills[0].billNo,
+                billDate: new Date().toISOString(),
+                amount: adjustedBills.reduce((sum, bill) => sum + bill.adjustedAmount, 0),
+                narration: `Receipt against ${adjustedBills.length} bills`,
+                prefix,
+                customerCode: selectedParty?.Code,
+                partyCode: selectedAccount?.Code,
+                userId: parseInt(userId),
+                companyId: parseInt(companyId),
+                createdBy: parseInt(userId),
+                modifiedBy: parseInt(userId),
+                ...(modeType === 'BANK' && {
+                    cheque: refNo,
+                    chequeDate: chequeDate.toISOString(),
+                    draweeBranch: '',
+                    accountName: selectedAccount?.AccountName || ''
+                })
+            };
+
+            console.log('Receipt Data:', receiptData);
+
+            const response = await axios.post(
+                'http://192.168.1.9:3000/api/create-receipts',
+                receiptData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'UserID': userId,
+                        'CompanyID': companyId
+                    }
+                }
+            );
+
+            console.log('API Response:', response.data);
+
+            if (response.status === 201) {
+                Alert.alert('Success', 'Receipt created successfully');
+                // Reset form
+                setSelectedParty(null);
+                setSelectedAccount(null);
+                setAdjustedBills([]);
+                setBills([]);
+                setAmount('');
+                setChequeDate(new Date());
+                setRefNo('');
+                setModeType(null);
+            }
+
+        } catch (error) {
+            console.error('Error creating receipt:', error);
+            if (axios.isAxiosError(error)) {
+                console.log('API Error Response:', error.response?.data);
+                Alert.alert(
+                    'Error',
+                    error.response?.data?.details || 'Failed to create receipt'
+                );
+            } else {
+                Alert.alert('Error', 'Failed to create receipt');
+            }
+        } finally {
+            setIsCreatingReceipt(false);
+            setIsSubmitting(false);
+        }
+    };
+
+    // Update validateForm to show alerts for specific validation failures
+    const validateForm = () => {
+        if (!selectedParty?.Code) {
+            Alert.alert('Error', 'Please select a party');
+            return false;
+        }
+        if (!selectedAccount?.Code) {
+            Alert.alert('Error', 'Please select an account');
+            return false;
+        }
+        if (adjustedBills.length === 0) {
+            Alert.alert('Error', 'Please adjust at least one bill');
+            return false;
+        }
+        if (modeType === 'BANK' && !refNo) {
+            Alert.alert('Error', 'Please enter a reference number');
+            return false;
+        }
+        return true;
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
@@ -411,7 +554,7 @@ const CreateReceipt = () => {
             <View style={styles.gradient}>
                 {/* <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.gradient}> */}
                 <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.header}>
+                    <View style={styles.header}>
                         <Text style={styles.title}>New Receipt</Text>
                         <Ionicons name="receipt-outline" size={24} color="#4e41a8" />
                     </View>
@@ -474,13 +617,21 @@ const CreateReceipt = () => {
                                     <Text style={styles.sectionTitle}>Account</Text>
                                     <SearchablePicker
                                         items={modeType === 'BANK' ? bankAccounts : cashAccounts}
-                                        onSelect={setSelectedAccount}
+                                        onSelect={handleAccountSelect}
                                         placeholder="Select account..."
-                                        labelKey="CustomerName"
-                                        valueKey="CustomerID"
+                                        labelKey="AccountName"
+                                        valueKey="AccountID"
                                         icon="wallet-outline"
                                         selectedItem={selectedAccount}
                                     />
+                                    {selectedAccount && (
+                                        <View style={styles.selectedInfo}>
+                                            <Ionicons name="checkmark-circle" size={24} color="#00c06c" />
+                                            <Text style={styles.selectedInfoText}>
+                                                {selectedAccount.AccountName}
+                                            </Text>
+                                        </View>
+                                    )}
 
                                     {modeType === 'BANK' && (
                                         <>
@@ -582,12 +733,15 @@ const CreateReceipt = () => {
                     )}
 
                     <TouchableOpacity
-                        style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-                        onPress={handleSubmit}
-                        disabled={isSubmitting}
+                        style={[
+                            styles.submitButton,
+                            (isSubmitting || isCreatingReceipt) && styles.submitButtonDisabled
+                        ]}
+                        onPress={createReceipt}
+                        disabled={isSubmitting || isCreatingReceipt}
                     >
-                        {isSubmitting ? (
-                            <ActivityIndicator size="small" color="#0a0a0a" />
+                        {isSubmitting || isCreatingReceipt ? (
+                            <ActivityIndicator size="small" color="#FFFFFF" />
                         ) : (
                             <Text style={styles.submitButtonText}>Submit Receipt</Text>
                         )}

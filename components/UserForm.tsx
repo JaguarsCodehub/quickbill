@@ -74,21 +74,21 @@ const UserForm: React.FC = () => {
 
       setLoading(false);
       if (response.status === 200) {
-                const { CompanyID, CompanyName, Tag5, UserID } = response.data;
-                await AsyncStorage.multiSet([
-                  ['CompanyID', CompanyID.toString()],
-                  ['CompanyName', CompanyName],
-                  ['Tag5', Tag5],
-                  ['UserID', UserID.toString()],
-                  ['SelectedYear', year],
-                ]);
-                console.log('Data was added to AsyncStorage');
-                console.log('Selected Year:', year);
-                // showToastWithGravityAndOffset('Welcome !');
-                setUsername('');
-                setPassword('');
+        const { CompanyID, CompanyName, Tag5, UserID } = response.data;
+        await AsyncStorage.multiSet([
+          ['CompanyID', CompanyID.toString()],
+          ['CompanyName', CompanyName],
+          ['Tag5', Tag5],
+          ['UserID', UserID.toString()],
+          ['SelectedYear', year],
+        ]);
+        console.log('Data was added to AsyncStorage');
+        console.log('Selected Year:', year);
+        // showToastWithGravityAndOffset('Welcome !');
+        setUsername('');
+        setPassword('');
         Alert.alert('Login Successful', `Welcome, ${response.data.Tag1}`);
-        
+
         router.push('/(user)/dashboard' as never);
       } else {
         throw new Error(response.data.msg || 'Login failed');
@@ -163,7 +163,7 @@ const UserForm: React.FC = () => {
                 onValueChange={handleYearChange}
                 style={styles.picker}
               >
-                <Picker.Item label='Select Financial Year' value='' style={{fontFamily: 'MontserratRegular'}} />
+                <Picker.Item label='Select Financial Year' value='' style={{ fontFamily: 'MontserratRegular' }} />
                 <Picker.Item
                   label='01 APR 2018 - 31 MAR 2019'
                   value='18041903'
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   headerContainer: {
-    marginTop: height * 0.1,
+    marginTop: 20,
     marginBottom: 40,
   },
   headerTitle: {
