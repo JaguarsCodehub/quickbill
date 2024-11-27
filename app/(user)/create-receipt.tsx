@@ -422,14 +422,7 @@ const CreateReceipt = () => {
     const createReceipt = async () => {
         console.log('Starting receipt creation...');
 
-        // if (!validateForm()) {
-        //     console.log('Form validation failed');
-        //     Alert.alert('Error', 'Please fill in all required fields');
-        //     return;
-        // }
-
         try {
-            setIsCreatingReceipt(true);
             setIsSubmitting(true);
 
             // Get stored values
@@ -444,16 +437,27 @@ const CreateReceipt = () => {
                 return;
             }
 
-            // // Generate unique doc number
-            // const docNo = `REC${Date.now().toString().slice(-6)}`;
+            // Format bills data for the backend
+            const formattedBills = adjustedBills.map(bill => {
+                const originalBill = bills.find(b => b.BillNo === bill.billNo);
+                return {
+                    srl: originalBill?.SRL || '',
+                    type: originalBill?.Type || '',
+                    mainType: originalBill?.MainType || '',
+                    subType: originalBill?.SubType || '',
+                    balance: originalBill?.Balance || 0,
+                    receivedAmount: bill.adjustedAmount,
+                    billNo: bill.billNo
+                };
+            });
 
             // Log the data being sent
             console.log('Selected Party:', selectedParty);
             console.log('Selected Account:', selectedAccount);
             console.log('Adjusted Bills:', adjustedBills);
+            console.log('Formatted Bills for Backend:', formattedBills);
 
             const receiptData = {
-
                 docDate: new Date().toISOString(),
                 bankCode: selectedAccount?.Code,
                 billNo: adjustedBills[0].billNo,
@@ -467,6 +471,7 @@ const CreateReceipt = () => {
                 companyId: parseInt(companyId),
                 createdBy: parseInt(userId),
                 modifiedBy: parseInt(userId),
+                bills: formattedBills, // Add the formatted bills array
                 ...(modeType === 'BANK' && {
                     cheque: refNo,
                     chequeDate: chequeDate.toISOString(),
@@ -478,7 +483,7 @@ const CreateReceipt = () => {
             console.log('Receipt Data:', receiptData);
 
             const response = await axios.post(
-                'https://quickbill-backlend.vercel.app/api/create-receipts',
+                'http://192.168.1.13:3000/api/create-receipts',
                 receiptData,
                 {
                     headers: {
@@ -516,7 +521,6 @@ const CreateReceipt = () => {
                 Alert.alert('Error', 'Failed to create receipt');
             }
         } finally {
-            setIsCreatingReceipt(false);
             setIsSubmitting(false);
         }
     };

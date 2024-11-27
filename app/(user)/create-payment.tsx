@@ -102,10 +102,25 @@ const CreatePayment = () => {
         return;
       }
 
+      // Format bills data for the backend
+      const formattedBills = adjustedBills.map(bill => {
+        const originalBill = bills.find(b => b.BillNo === bill.billNo);
+        return {
+          srl: originalBill?.SRL || '',
+          type: originalBill?.Type || '',
+          mainType: originalBill?.MainType || '',
+          subType: originalBill?.SubType || '',
+          balance: originalBill?.Balance || 0,
+          receivedAmount: bill.adjustedAmount,
+          billNo: bill.billNo
+        };
+      });
+
       // Log the data being sent
       console.log('Selected Party:', selectedParty);
       console.log('Selected Account:', selectedAccount);
       console.log('Adjusted Bills:', adjustedBills);
+      console.log('Formatted Bills for Backend:', formattedBills);
 
       const paymentData = {
         docDate: new Date().toISOString(),
@@ -121,6 +136,7 @@ const CreatePayment = () => {
         companyId: parseInt(companyId),
         createdBy: parseInt(userId),
         modifiedBy: parseInt(userId),
+        bills: formattedBills,
         ...(modeType === 'BANK' && {
           cheque: refNo,
           chequeDate: chequeDate.toISOString(),
@@ -132,7 +148,7 @@ const CreatePayment = () => {
       console.log('Payment Data:', paymentData);
 
       const response = await axios.post(
-        'http://192.168.1.13:3000/api/create-payment',
+        'https://quickbill-backlend.vercel.app/api/create-payment',
         paymentData,
         {
           headers: {
