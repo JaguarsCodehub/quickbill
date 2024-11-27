@@ -18,7 +18,6 @@ import {
 import { Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-// import SearchablePicker from '../../components/SearchablePicker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SearchablePicker from '@/components/SearchablePicker';
@@ -26,7 +25,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import GridBackground from '@/components/GridBackground';
 import RippleLoader from '@/components/RippleLoader';
 import { COLORS } from '@/constants/Colors';
+import { Try } from 'expo-router/build/views/Try';
 
+
+interface Account {
+  AccountID: string;
+  AccountName: string;
+  Code: string;
+}
 interface Customer {
   CustomerID: string;
   CustomerName: string;
@@ -52,7 +58,7 @@ const CreatePayment = () => {
   const [modeType, setModeType] = useState<'BANK' | 'CASH' | null>(null);
   const [selectedParty, setSelectedParty] = useState<Customer | null>(null);
   const [customerCode, setCustomerCode] = useState<string>('');
-  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [selectedAccount, setSelectedAccount] = useState<Account>();
   const [amount, setAmount] = useState('');
   const [chequeDate, setChequeDate] = useState(new Date());
   const [refNo, setRefNo] = useState('');
@@ -78,57 +84,156 @@ const CreatePayment = () => {
     }[]
   >([]);
 
+  const createPayment = async () => {
+    console.log('Starting payment creation...');
+
+    try {
+      setIsSubmitting(true);
+
+      // Get stored values
+      const userId = await AsyncStorage.getItem('UserID');
+      const companyId = await AsyncStorage.getItem('CompanyID');
+      const prefix = await AsyncStorage.getItem('SelectedYear');
+
+      console.log('Retrieved values:', { userId, companyId, prefix });
+
+      if (!userId || !companyId || !prefix) {
+        Alert.alert('Error', 'Missing required data');
+        return;
+      }
+
+      // Log the data being sent
+      console.log('Selected Party:', selectedParty);
+      console.log('Selected Account:', selectedAccount);
+      console.log('Adjusted Bills:', adjustedBills);
+
+      const paymentData = {
+        docDate: new Date().toISOString(),
+        bankCode: selectedAccount?.Code,
+        billNo: adjustedBills[0].billNo,
+        billDate: new Date().toISOString(),
+        amount: adjustedBills.reduce((sum, bill) => sum + bill.adjustedAmount, 0),
+        narration: `Payment against ${adjustedBills.length} bills`,
+        prefix,
+        customerCode: selectedParty?.Code,
+        partyCode: selectedAccount?.Code,
+        userId: parseInt(userId),
+        companyId: parseInt(companyId),
+        createdBy: parseInt(userId),
+        modifiedBy: parseInt(userId),
+        ...(modeType === 'BANK' && {
+          cheque: refNo,
+          chequeDate: chequeDate.toISOString(),
+          draweeBranch: '',
+          accountName: selectedAccount?.AccountName || ''
+        })
+      };
+
+      console.log('Payment Data:', paymentData);
+
+      const response = await axios.post(
+        'http://192.168.1.13:3000/api/create-payment',
+        paymentData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'UserID': userId,
+            'CompanyID': companyId
+          }
+        }
+      );
+
+      console.log('API Response:', response.data);
+
+      if (response.status === 201) {
+        Alert.alert('Success', 'Payment created successfully');
+        // Reset form
+        setSelectedParty(null);
+        // setSelectedAccount();
+        setAdjustedBills([]);
+        setBills([]);
+        setAmount('');
+        setChequeDate(new Date());
+        setRefNo('');
+        setModeType(null);
+      }
+
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      if (axios.isAxiosError(error)) {
+        console.log('API Error Response:', error.response?.data);
+        Alert.alert(
+          'Error',
+          error.response?.data?.details || 'Failed to create payment'
+        );
+      } else {
+        Alert.alert('Error', 'Failed to create payment');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAccountSelect = async (account: Account) => {
+    setSelectedAccount(account);
+    try {
+      const storageKey = modeType === 'BANK' ? 'BankAccountCode' : 'CashAccountCode';
+      await AsyncStorage.setItem(storageKey, account.Code);
+      console.log(`${modeType} Account Code:`, account.Code);
+      const storedCode = await AsyncStorage.getItem(storageKey);
+      console.log(`AsyncStorage ${modeType} Account Code:`, storedCode);
+    } catch (error) {
+      console.error('Error storing account code:', error);
+    }
+  };
+
   const fetchCashAccounts = async () => {
     try {
       const userId = await AsyncStorage.getItem('UserID');
-      const response = await axios.get(
-        'https://quickbill-backlend.vercel.app/api/accounts/cash',
-        {
-          headers: {
-            UserID: userId,
-          },
+      const response = await axios.get('https://quickbill-backlend.vercel.app/api/accounts/cash', {
+        headers: {
+          'UserID': userId,
         }
-      );
+      });
       setCashAccounts(response.data);
+      const cashAccountCode = await AsyncStorage.setItem('CashAccountCode', response.data[0].Code);
+      console.log("Cash Account Code:", cashAccountCode);
     } catch (error) {
       console.error('Error fetching cash accounts:', error);
       Alert.alert('Error', 'Failed to fetch cash accounts.');
     }
-  };
+  }
 
   const fetchBankAccounts = async () => {
     try {
       const userId = await AsyncStorage.getItem('UserID');
-      const response = await axios.get(
-        'https://quickbill-backlend.vercel.app/api/accounts/bank',
-        {
-          headers: {
-            UserID: userId,
-          },
+      const response = await axios.get('https://quickbill-backlend.vercel.app/api/accounts/bank', {
+        headers: {
+          'UserID': userId,
         }
-      );
-      setBankAccounts(response.data);
+      });
+      const mappedAccounts = response.data.map((account: any) => ({
+        AccountID: account.CustomerID.toString(),
+        AccountName: account.CustomerName,
+        Code: account.Code
+      }));
+      setBankAccounts(mappedAccounts);
+      console.log("Mapped Bank Accounts:", mappedAccounts);
     } catch (error) {
       console.error('Error fetching bank accounts:', error);
       Alert.alert('Error', 'Failed to fetch bank accounts.');
     }
-  };
+  }
 
   const handleModeChange = (mode: 'BANK' | 'CASH') => {
     setModeType(mode);
-    if (mode === 'CASH') {
-      fetchCashAccounts();
-    } else if (mode === 'BANK') {
+    // setSelectedAccount(null);
+    if (mode === 'BANK') {
       fetchBankAccounts();
+    } else {
+      fetchCashAccounts();
     }
   };
-
-  // Mock data for accounts
-  // const allAccounts = [
-  //     { AccountID: '1', AccountName: 'IDBI BANK' },
-  //     { AccountID: '2', AccountName: 'HDFC BANK' },
-  //     { AccountID: '3', AccountName: 'CASH ON HAND' },
-  // ];
 
   useEffect(() => {
     fetchCustomers();
@@ -545,20 +650,29 @@ const CreatePayment = () => {
                   <Text style={styles.sectionTitle}>Account</Text>
                   <SearchablePicker
                     items={modeType === 'BANK' ? bankAccounts : cashAccounts}
-                    onSelect={setSelectedAccount}
+                    onSelect={handleAccountSelect}
                     placeholder='Select account...'
-                    labelKey='CustomerName'
-                    valueKey='CustomerID'
+                    labelKey='AccountName'
+                    valueKey='AccountID'
                     icon='wallet-outline'
                     selectedItem={selectedAccount}
                   />
+
+                  {selectedAccount && (
+                    <View style={styles.selectedInfo}>
+                      <Ionicons name="checkmark-circle" size={24} color="#00c06c" />
+                      <Text style={styles.selectedInfoText}>
+                        {selectedAccount.AccountName}
+                      </Text>
+                    </View>
+                  )}
 
                   {modeType === 'BANK' && (
                     <>
                       <Text style={styles.sectionTitle}>Payment Type</Text>
                       <SearchablePicker
                         items={paymentTypes}
-                        onSelect={() => {}}
+                        onSelect={() => { }}
                         placeholder='Select payment type...'
                         labelKey='name'
                         valueKey='id'
@@ -671,11 +785,11 @@ const CreatePayment = () => {
               styles.submitButton,
               isSubmitting && styles.submitButtonDisabled,
             ]}
-            onPress={handleSubmit}
+            onPress={createPayment}
             disabled={isSubmitting}
           >
             {isSubmitting ? (
-              <ActivityIndicator size='small' color='#0a0a0a' />
+              <ActivityIndicator size='small' color='#FFFFFF' />
             ) : (
               <Text style={styles.submitButtonText}>Submit Payment</Text>
             )}
