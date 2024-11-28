@@ -336,7 +336,7 @@ const CreateSalesInvoice = () => {
       Amount: parseFloat(itemValues?.Amount || '0'),
       UTGSTTaxCode: undefined,
       IGSTTaxCode: undefined,
-      GSTTaxCode: undefined,
+      GSTTaxCode: selectedItem.GSTTaxCode,
       TaxCategory: undefined,
       discountPercentage: 0,
       discountAmount: 0,
@@ -540,6 +540,8 @@ const CreateSalesInvoice = () => {
       });
 
       const responseData = await response.json();
+      console.log("Data being sent to the server: ", invoiceSubmit)
+      // console.log("Data sent")
 
       if (!response.ok) {
         throw new Error(responseData.error || 'Failed to create invoice');
@@ -580,7 +582,7 @@ const CreateSalesInvoice = () => {
       Amount: parseFloat(itemValues?.Amount || '0'),
       UTGSTTaxCode: undefined,
       IGSTTaxCode: undefined,
-      GSTTaxCode: undefined,
+      GSTTaxCode: selectedItem.GSTTaxCode,
       TaxCategory: undefined,
       discountPercentage: parseFloat(discountPercentage) || 0,
       discountAmount: parseFloat(discountAmount) || 0,

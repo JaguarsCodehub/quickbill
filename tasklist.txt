@@ -36,3 +36,10 @@ New Taks:
 
 
 - Customer Master: Creating Customers just like Product
+
+
+
+Tasklists:
+- TAX CODE DROPDOWN
+- Reset form
+- Input
