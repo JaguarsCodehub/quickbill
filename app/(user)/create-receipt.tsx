@@ -483,7 +483,7 @@ const CreateReceipt = () => {
             console.log('Receipt Data:', receiptData);
 
             const response = await axios.post(
-                'http://192.168.1.13:3000/api/create-receipts',
+                'http://192.168.1.9:3000/api/create-receipts',
                 receiptData,
                 {
                     headers: {

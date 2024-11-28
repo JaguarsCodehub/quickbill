@@ -335,7 +335,7 @@ const CreatePayment = () => {
       }
 
       const response = await axios.get(
-        'https://quickbill-backlend.vercel.app/api/bills',
+        'http://192.168.1.9:3000/api/payment-bills',
         {
           headers: {
             UserID: userId,
