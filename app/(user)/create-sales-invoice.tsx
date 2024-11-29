@@ -10,12 +10,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import GridBackground from '@/components/GridBackground';
 import RippleLoader from '@/components/RippleLoader';
 import { COLORS } from '@/constants/Colors';
+import TaxCodePicker from '@/components/TaxCodePicker';
 
 interface Customer {
   CustomerID: number;
   CustomerName: string;
   Code: string;
 }
+
 
 
 interface Item {
@@ -216,6 +218,8 @@ const CreateSalesInvoice = () => {
     const asyncCustomerCode = await AsyncStorage.getItem('CustomerCode');
     console.log("AsyncStorage Customer Code:", asyncCustomerCode)
   };
+
+
 
   const fetchCustomers = async () => {
     try {
@@ -922,7 +926,15 @@ const CreateSalesInvoice = () => {
 
                   <View style={styles.gstCodeSection}>
                     <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
-                    <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'} %</Text>
+                    <TaxCodePicker
+                      selectedValue={selectedItem?.GSTTaxCode || ''}
+                      onValueChange={(value) => {
+                        setSelectedItem(prevItem => prevItem ? {
+                          ...prevItem,
+                          GSTTaxCode: value
+                        } : null);
+                      }}
+                    />
                   </View>
 
                   <View style={styles.totalSection}>

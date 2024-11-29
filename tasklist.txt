@@ -44,3 +44,27 @@ Tasklists:
 - Reset form
 - Input
 need to implement this
+
+
+GST Dropdown:
+UTGST 5%
+UTGST 28%
+UTGST 18%
+UTGST 12%
+UTGST 3%
+UTGST 2%
+UTGST 0%
+IGST 5%
+IGST 28%
+IGST 18%
+IGST 12%
+IGST 3%
+IGST 2%
+IGST 0%
+GST 5%
+GST 28%
+GST 18%
+GST 12%
+GST 3%
+GST 2%
+GST 0%

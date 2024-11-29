@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import RippleLoader from '@/components/RippleLoader';
 import { COLORS } from '@/constants/Colors';
+import TaxCodePicker from '@/components/TaxCodePicker';
 
 
 interface Customer {
@@ -887,7 +888,15 @@ const CreateOrder = () => {
 
                   <View style={styles.gstCodeSection}>
                     <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
-                    <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'} %</Text>
+                    <TaxCodePicker
+                      selectedValue={selectedItem?.GSTTaxCode || ''}
+                      onValueChange={(value) => {
+                        setSelectedItem(prevItem => prevItem ? {
+                          ...prevItem,
+                          GSTTaxCode: value
+                        } : null);
+                      }}
+                    />
                   </View>
 
                   <View style={styles.totalSection}>

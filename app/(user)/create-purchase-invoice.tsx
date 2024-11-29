@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import RippleLoader from '@/components/RippleLoader';
 import { COLORS } from '@/constants/Colors';
+import TaxCodePicker from '@/components/TaxCodePicker';
 
 interface Customer {
     CustomerID: number;
@@ -615,7 +616,7 @@ const CreatePurchaseInvoice = () => {
     if (isLoading) {
         return (
             <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.loadingContainer}>
-                <RippleLoader size={24} color={COLORS.primary} />       
+                <RippleLoader size={24} color={COLORS.primary} />
                 <Text style={styles.loadingText}>Loading order data...</Text>
             </LinearGradient>
         );
@@ -920,7 +921,15 @@ const CreatePurchaseInvoice = () => {
 
                                     <View style={styles.gstCodeSection}>
                                         <Text style={styles.gstCodeLabel}>GST Tax Code</Text>
-                                        <Text style={styles.gstCodeValue}>{selectedItem.GSTTaxCode || 'N/A'}</Text>
+                                        <TaxCodePicker
+                                            selectedValue={selectedItem?.GSTTaxCode || ''}
+                                            onValueChange={(value) => {
+                                                setSelectedItem(prevItem => prevItem ? {
+                                                    ...prevItem,
+                                                    GSTTaxCode: value
+                                                } : null);
+                                            }}
+                                        />
                                     </View>
 
                                     <View style={styles.detailSection}>
