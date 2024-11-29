@@ -205,6 +205,7 @@ const CreateSalesInvoice = () => {
   const [itemNotes, setItemNotes] = useState<string>('');
   const [gstTaxCode, setGstTaxCode] = useState<string[]>([]);
   const [customerCode, setCustomerCode] = useState<string>('');
+  const [editedHSNCode, setEditedHSNCode] = useState<string>('');
 
   useEffect(() => {
     fetchData();
@@ -568,6 +569,7 @@ const CreateSalesInvoice = () => {
   const handleItemSelect = (item: Item) => {
     setSelectedItem(item);
     setRate(item.SalRate.toString());
+    setEditedHSNCode(item.HSNCode || '');
     setIsItemSelectModalVisible(false);
     setIsItemDetailsModalVisible(true); // Open item details modal
   };
@@ -577,6 +579,7 @@ const CreateSalesInvoice = () => {
 
     const newItem: OrderItem = {
       ...selectedItem,
+      HSNCode: editedHSNCode,
       Qty: parseFloat(quantity),
       Rate: parseFloat(rate),
       Value: parseFloat(value),
@@ -604,6 +607,7 @@ const CreateSalesInvoice = () => {
     setDiscountPercentage('0');
     setDiscountAmount('0');
     setItemNotes('');
+    setEditedHSNCode('');
   };
 
   const calculateDiscountAmount = (percentage: string) => {
@@ -862,7 +866,13 @@ const CreateSalesInvoice = () => {
 
                   <View style={styles.detailSection}>
                     <Text style={styles.itemDetailLabel}>HSN Code</Text>
-                    <Text style={[styles.detailValue, styles.hsnCode]}>{selectedItem.HSNCode || 'Not Available'}</Text>
+                    <TextInput
+                      style={[styles.detailInput, styles.hsnCode]}
+                      value={editedHSNCode}
+                      onChangeText={setEditedHSNCode}
+                      placeholder="Enter HSN Code"
+                      placeholderTextColor="#888888"
+                    />
                   </View>
 
                   {/* <View style={styles.detailSection}>
@@ -1781,5 +1791,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0E6ED',
     fontFamily: 'monospace',
+    color: '#333333',
   },
 });
