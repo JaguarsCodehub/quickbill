@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert, Modal } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert, Modal, Linking, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,6 +11,8 @@ import GridBackground from '@/components/GridBackground';
 import RippleLoader from '@/components/RippleLoader';
 import { COLORS } from '@/constants/Colors';
 import TaxCodePicker from '@/components/TaxCodePicker';
+import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import WebView from 'react-native-webview';
 
 interface Customer {
   CustomerID: number;
@@ -206,6 +208,7 @@ const CreateSalesInvoice = () => {
   const [gstTaxCode, setGstTaxCode] = useState<string[]>([]);
   const [customerCode, setCustomerCode] = useState<string>('');
   const [editedHSNCode, setEditedHSNCode] = useState<string>('');
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -303,6 +306,178 @@ const CreateSalesInvoice = () => {
       TaxAmt: taxAmount.toFixed(2),
       Amount: totalAmount.toFixed(2),
     };
+  };
+
+  const handlePrint = async () => {
+    try {
+      if (!selectedCustomer || orderItems.length === 0) {
+        Alert.alert('Error', 'Please select a customer and add items before printing.');
+        return;
+      }
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body { font-family: 'Helvetica', sans-serif; padding: 20px; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .invoice-details, .summary { margin-bottom: 20px; }
+              table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              th { background-color: #f2f2f2; }
+              .summary { text-align: right; }
+              .company-details, .customer-details { margin-bottom: 20px; }
+              .company-details p, .customer-details p { margin: 0; }
+              .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #888; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>TAX INVOICE</h1>
+            </div>
+            
+            <div class="company-details">
+              <p><strong>Company Name</strong></p>
+              <p>Address Line 1</p>
+              <p>Address Line 2</p>
+              <p>Contact: 123-456-7890</p>
+              <p>Email: company@example.com</p>
+            </div>
+
+            <div class="customer-details">
+              <p><strong>Customer:</strong> ${selectedCustomer?.CustomerName}</p>
+              <p><strong>Customer Code:</strong> ${selectedCustomer?.Code}</p>
+            </div>
+
+            <div class="invoice-details">
+              <p><strong>Invoice No:</strong> ${nextSerial}</p>
+              <p><strong>Date:</strong> ${currentDate}</p>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Sr.</th>
+                  <th>Item</th>
+                  <th>HSN</th>
+                  <th>Qty</th>
+                  <th>Rate</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${orderItems.map((item, index) => `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.ItemName}</td>
+                    <td>${item.HSNCode || ''}</td>
+                    <td>${item.Qty}</td>
+                    <td>₹${item.Rate.toFixed(2)}</td>
+                    <td>₹${item.Amount.toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+                <tr>
+                  <td colspan="3">Total</td>
+                  <td>${orderSummary.totalGoodsQty}</td>
+                  <td></td>
+                  <td>${orderSummary.totalValueAmount.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colspan="5">Less :Discount Amt.</td>
+                  <td>${orderSummary.totalDiscountAmount.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colspan="5">Add Transport :</td>
+                  <td>0.00</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="display: flex;">
+              <div style="flex: 1; padding: 10px;">
+                <p style="font-weight: bold;">Six hundred and Eighty-Four Only</p>
+                <div style="border: 1px solid #000; padding: 10px;">
+                  <p>Bank    : IDBI Bank Ltd.</p>
+                  <p>BRANCH CODE : 0000897</p>
+                  <p>Branch  : 0897102000015491</p>
+                  <p>RAVIVA INFOTECH</p>
+                  <p>IFSC No : Vishnu Shivam</p>
+                </div>
+                <div style="border: 1px solid #000; padding: 10px; margin-top: 10px;">
+                  <p style="font-weight: bold;">Terms & Condition :-</p>
+                  <ol style="font-size: 10px; margin: 0; padding-left: 15px;">
+                    <li>Payment should be made immediately otherwise interest @24% will be charged.</li>
+                    <li>The right of property of goods &amp; services is not transferable until we receive the entire payment against this invoice.</li>
+                    <li>Any software found on Hard Disk after invoicing is liability of customer.</li>
+                    <li>No refund for any goods &amp; services in this invoice in any condition.</li>
+                    <li>No Sale Return in any condition.</li>
+                    <li>Subject To</li>
+                  </ol>
+                </div>
+              </div>
+              <div style="flex: 1; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td>Taxable Amount</td>
+                    <td style="text-align: right;">${orderSummary.totalValueAmount.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Add CGST:</td>
+                    <td style="text-align: right;">${(orderSummary.totalTaxAmount / 2).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Add SGST:</td>
+                    <td style="text-align: right;">${(orderSummary.totalTaxAmount / 2).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Add IGST:</td>
+                    <td style="text-align: right;">0.00</td>
+                  </tr>
+                  <tr>
+                    <td>Tax Amount GST:</td>
+                    <td style="text-align: right;">${orderSummary.totalTaxAmount.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Total Amount After Tax :</td>
+                    <td style="text-align: right;">${orderSummary.totalAmount.toFixed(2)}</td>
+                  </tr>
+                </table>
+                <div style="margin-top: 20px; border: 1px solid #000; padding: 5px;">
+                  <p>GST Payable on Reverse Charge:N-A</p>
+                  <p>(Certified that the particulars given above are true and correct.)</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                  <div style="text-align: center;">
+                    <p>Receivers Signature</p>
+                    <p>&Rubber Stamp</p>
+                  </div>
+                  <div style="text-align: center;">
+                    <p>(For RAVIVA INFOTECH PVT LTD)</p>
+                    <p>(Authorised Signatory)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      const options = {
+        html: htmlContent,
+        fileName: `Invoice_${nextSerial}`,
+        directory: 'Documents',
+      };
+
+      const file = await RNHTMLtoPDF.convert(options);
+
+      if (file.filePath) {
+        await Linking.openURL(`file://${file.filePath}`);
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      Alert.alert('Error', 'Failed to generate invoice PDF');
+    }
   };
 
 
@@ -616,6 +791,264 @@ const CreateSalesInvoice = () => {
     return ((itemValue * discPercent) / 100).toFixed(2);
   };
 
+  const prepareInvoiceData = () => {
+    return {
+      docNo: nextSerial,
+      docDate: currentDate,
+      customerName: selectedCustomer?.CustomerName || '',
+      customerCode: selectedCustomer?.Code || '',
+      items: orderItems,
+      totalAmount: orderSummary.totalAmount,
+      totalTaxAmount: orderSummary.totalTaxAmount,
+      totalDiscountAmount: orderSummary.totalDiscountAmount,
+    };
+  };
+
+  const renderPreviewModal = () => {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+          <style>
+            body { 
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              margin: 0;
+              font-size: 12px;
+            }
+            .logo-header {
+              display: flex;
+              align-items: center;
+              margin-bottom: 10px;
+            }
+            .logo {
+              width: 80px;
+              margin-right: 20px;
+            }
+            .company-name {
+              font-size: 16px;
+              font-weight: bold;
+            }
+            .company-details {
+              text-align: center;
+              font-size: 11px;
+              margin-bottom: 10px;
+            }
+            .invoice-box {
+              border: 1px solid #000;
+            }
+            .invoice-title {
+              text-align: center;
+              border-bottom: 1px solid #000;
+              padding: 5px;
+              font-weight: bold;
+            }
+            .state-info {
+              border-bottom: 1px solid #000;
+              padding: 5px;
+            }
+            .two-column {
+              display: flex;
+              border-bottom: 1px solid #000;
+            }
+            .left-column {
+              flex: 1;
+              border-right: 1px solid #000;
+              padding: 5px;
+            }
+            .right-column {
+              flex: 1;
+              padding: 5px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            th, td {
+              border: 1px solid #000;
+              padding: 5px;
+              text-align: left;
+            }
+            th {
+              background-color: #fff;
+            }
+            .label {
+              font-weight: normal;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-box">
+            <div class="logo-header">
+              <img src="../../assets/images/logo.jpg" class="logo" alt="RAVIVA">
+              <div class="company-name">RAVIVA INFOTECH PVT LTD</div>
+            </div>
+            
+            
+
+            <div class="invoice-title">TAX INVOICE</div>
+
+            <div class="state-info">
+              State : - Maharashtra    State Code : - 27
+            </div>
+
+            <div class="two-column">
+              <div class="left-column">
+                <div>Name     : ${selectedCustomer?.CustomerName}</div>
+                <div>Address  : ${selectedCustomer?.Address || ''}</div>
+                <div>GSTIN No.: ${selectedCustomer?.GSTIN || '123123556'}</div>
+                <div>State    : MAHARASHTRA    State Code : 27</div>
+                <div>MSME No  : </div>
+                <div>Udyam No : </div>
+              </div>
+              <div class="right-column">
+                <div>Invoice No   : ${nextSerial}</div>
+                <div>Invoice Date : ${currentDate}</div>
+                <div>Chalin No    : </div>
+                <div>Chalin Date  : </div>
+                <div>Order No     : </div>
+                <div>Order Date   : ${selectedCustomer?.CustomerName}</div>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Sr No</th>
+                  <th>Name</th>
+                  <th>HSN ACS</th>
+                  <th>Qty</th>
+                  <th>Rate</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${orderItems.map((item, index) => `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.ItemName}</td>
+                    <td>${item.HSNCode || ''}</td>
+                    <td>${item.Qty}</td>
+                    <td>${item.Rate.toFixed(2)}</td>
+                    <td>${item.Amount.toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+                <tr>
+                  <td colspan="3">Total</td>
+                  <td>${orderSummary.totalGoodsQty}</td>
+                  <td></td>
+                  <td>${orderSummary.totalValueAmount.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colspan="5">Less :Discount Amt.</td>
+                  <td>${orderSummary.totalDiscountAmount.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colspan="5">Add Transport :</td>
+                  <td>0.00</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="display: flex;">
+              <div style="flex: 1; padding: 10px;">
+                <p style="font-weight: bold;">Six hundred and Eighty-Four Only</p>
+                <div style="border: 1px solid #000; padding: 10px;">
+                  <p>Bank    : IDBI Bank Ltd.</p>
+                  <p>BRANCH CODE : 0000897</p>
+                  <p>Branch  : 0897102000015491</p>
+                  <p>RAVIVA INFOTECH</p>
+                  <p>IFSC No : Vishnu Shivam</p>
+                </div>
+                <div style="border: 1px solid #000; padding: 10px; margin-top: 10px;">
+                  <p style="font-weight: bold;">Terms & Condition :-</p>
+                  <ol style="font-size: 10px; margin: 0; padding-left: 15px;">
+                    <li>Payment should be made immediately otherwise interest @24% will be charged.</li>
+                    <li>The right of property of goods &amp; services is not transferable until we receive the entire payment against this invoice.</li>
+                    <li>Any software found on Hard Disk after invoicing is liability of customer.</li>
+                    <li>No refund for any goods &amp; services in this invoice in any condition.</li>
+                    <li>No Sale Return in any condition.</li>
+                    <li>Subject To</li>
+                  </ol>
+                </div>
+              </div>
+              <div style="flex: 1; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td>Taxable Amount</td>
+                    <td style="text-align: right;">${orderSummary.totalValueAmount.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Add CGST:</td>
+                    <td style="text-align: right;">${(orderSummary.totalTaxAmount / 2).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Add SGST:</td>
+                    <td style="text-align: right;">${(orderSummary.totalTaxAmount / 2).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Add IGST:</td>
+                    <td style="text-align: right;">0.00</td>
+                  </tr>
+                  <tr>
+                    <td>Tax Amount GST:</td>
+                    <td style="text-align: right;">${orderSummary.totalTaxAmount.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Total Amount After Tax :</td>
+                    <td style="text-align: right;">${orderSummary.totalAmount.toFixed(2)}</td>
+                  </tr>
+                </table>
+                <div style="margin-top: 20px; border: 1px solid #000; padding: 5px;">
+                  <p>GST Payable on Reverse Charge:N-A</p>
+                  <p>(Certified that the particulars given above are true and correct.)</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                  <div style="text-align: center;">
+                    <p>Receivers Signature</p>
+                    <p>&Rubber Stamp</p>
+                  </div>
+                  <div style="text-align: center;">
+                    <p>(For RAVIVA INFOTECH PVT LTD)</p>
+                    <p>(Authorised Signatory)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    return (
+      <Modal
+        visible={showPreview}
+        animationType="slide"
+        onRequestClose={() => setShowPreview(false)}
+      >
+        <SafeAreaView style={{ flex: 1 }}>
+          <View style={styles.previewHeader}>
+            <TouchableOpacity onPress={() => setShowPreview(false)} style={styles.closePreviewButton}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+            <Text style={styles.previewTitle}>Invoice Preview</Text>
+            <TouchableOpacity onPress={handlePrint} style={styles.downloadButton}>
+              <Ionicons name="download" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+          <WebView
+            source={{ html: htmlContent }}
+            style={{ flex: 1 }}
+            originWhitelist={['*']}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+          />
+        </SafeAreaView>
+      </Modal>
+    );
+  };
+
   if (isLoading) {
     return (
       // <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.loadingContainer}>
@@ -802,6 +1235,15 @@ const CreateSalesInvoice = () => {
               <Text style={styles.submitButtonText}>Submit Invoice</Text>
             )}
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.previewButton}
+            onPress={() => setShowPreview(true)}
+          >
+            <Text style={styles.previewButtonText}>Preview Invoice</Text>
+          </TouchableOpacity>
+
+          {renderPreviewModal()}
         </ScrollView>
       </LinearGradient>
 
@@ -1792,5 +2234,47 @@ const styles = StyleSheet.create({
     borderColor: '#E0E6ED',
     fontFamily: 'monospace',
     color: '#333333',
+  },
+  printButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  printButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E6ED',
+  },
+  closePreviewButton: {
+    padding: 5,
+  },
+  previewTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  downloadButton: {
+    padding: 5,
+  },
+  previewButton: {
+    backgroundColor: '#4A90E2',
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  previewButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
