@@ -29,7 +29,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-file-system",
+        {
+          "filePermission": "Files can be downloaded to your device for offline access."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

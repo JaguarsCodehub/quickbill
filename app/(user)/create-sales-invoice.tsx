@@ -13,6 +13,13 @@ import { COLORS } from '@/constants/Colors';
 import TaxCodePicker from '@/components/TaxCodePicker';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import WebView from 'react-native-webview';
+import { PermissionsAndroid } from 'react-native';
+import RNFS from 'react-native-fs';
+import { NativeModules } from 'react-native';
+const { RNHTMLtoPDF: NativeRNHTMLtoPDF } = NativeModules;
+import * as Print from 'expo-print';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 interface Customer {
   CustomerID: number;
@@ -116,6 +123,27 @@ interface OrderSubmit {
   items: OrderItemSubmit[];
 }
 
+const requestStoragePermission = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission',
+          message: 'App needs access to storage to save PDF',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.error('Permission error:', err);
+      return false;
+    }
+  }
+  return true;
+};
 
 const SearchablePicker = ({
   items,
@@ -214,6 +242,12 @@ const CreateSalesInvoice = () => {
   useEffect(() => {
     fetchData();
     fetchCompanyDetails();
+
+    // Check if the native module is available
+    if (!NativeRNHTMLtoPDF) {
+      console.error('RNHTMLtoPDF native module not found');
+    }
+    requestStoragePermission()
   }, []);
 
   // useEffect(() => {
@@ -692,15 +726,18 @@ const CreateSalesInvoice = () => {
             .logo-header {
               display: flex;
               align-items: center;
+              justify-content: center;
               margin-bottom: 10px;
+              text-align: center;
             }
             .logo {
               width: 80px;
+              text-align: center;
             }
             .company-name {
               font-size: 16px;
               font-weight: bold;
-              margin-left: 60px;
+              text-align: center;
             }
             .company-details {
               text-align: center;
@@ -711,10 +748,12 @@ const CreateSalesInvoice = () => {
             }
             .company-info {
               margin-left: 10px;
+              text-align: center;
             }
             .company-info-2 {
               margin-top: 10px;
               margin-left: 5px;
+              text-align: center;
               }
             .company-info-2 span {
               font-weight: bold;
@@ -775,6 +814,9 @@ const CreateSalesInvoice = () => {
             </div>
             
             <div class="company-details">
+              ${companyDetails?.Tag7}
+            </div>
+            <div class="company-details">
               SHOP NO.16,SAI VIHAR CHWAL,DEVIPADA MAIN ROAD MUMBAI 400066 MAHARASHTRA<br>
               Mobile:-7045599660,Email:-ravivainfotech@gmail.com
               
@@ -814,7 +856,7 @@ MUMBAI 400066 MAHARASHTRA</div>
                 <div>Chalin No    : </div>
                 <div>Chalin Date  : </div>
                 <div>Order No     : </div>
-                <div>Order Date   : ${selectedCustomer?.CustomerName}</div>
+                <div>Order Date   : ${currentDate}</div>
               </div>
             </div>
 
@@ -928,6 +970,74 @@ MUMBAI 400066 MAHARASHTRA</div>
       </html>
     `;
 
+
+    const downloadPDF = async () => {
+      try {
+        // Generate the PDF
+        const { uri } = await Print.printToFileAsync({
+          html: htmlContent,
+          base64: false
+        });
+
+        console.log('PDF generated at:', uri);
+
+        // Create a filename with timestamp
+        const filename = `Invoice_${nextSerial}_${Date.now()}.pdf`;
+
+        // Get the downloads directory
+        const downloadDir = FileSystem.documentDirectory + 'Downloads/';
+        const pdfPath = downloadDir + filename;
+
+        // Ensure the downloads directory exists
+        await FileSystem.makeDirectoryAsync(downloadDir, { intermediates: true });
+
+        // Copy the file to the downloads directory
+        await FileSystem.copyAsync({
+          from: uri,
+          to: pdfPath
+        });
+
+        console.log('PDF saved to:', pdfPath);
+
+        if (Platform.OS === 'android') {
+          // Move file to downloads folder (Android only)
+          const androidDownloadDir = FileSystem.cacheDirectory + filename;
+          await FileSystem.copyAsync({
+            from: pdfPath,
+            to: androidDownloadDir
+          });
+
+          // Share the file
+          await Sharing.shareAsync(androidDownloadDir, {
+            mimeType: 'application/pdf',
+            dialogTitle: 'Save PDF',
+            UTI: 'com.adobe.pdf'
+          });
+        } else {
+          // For iOS, just share the file
+          await Sharing.shareAsync(pdfPath, {
+            mimeType: 'application/pdf',
+            dialogTitle: 'Save PDF',
+            UTI: 'com.adobe.pdf'
+          });
+        }
+
+        Alert.alert(
+          'Success',
+          'PDF has been saved successfully!',
+          [{ text: 'OK' }]
+        );
+
+      } catch (error) {
+        console.error('Error saving PDF:', error);
+        Alert.alert(
+          'Error',
+          'Failed to save PDF. Please try again.',
+          [{ text: 'OK' }]
+        );
+      }
+    };
+
     return (
       <Modal
         visible={showPreview}
@@ -940,9 +1050,9 @@ MUMBAI 400066 MAHARASHTRA</div>
               <Ionicons name="close" size={24} color="#333" />
             </TouchableOpacity>
             <Text style={styles.previewTitle}>Invoice Preview</Text>
-            {/* <TouchableOpacity onPress={handlePrint} style={styles.downloadButton}>
+            <TouchableOpacity onPress={downloadPDF} style={styles.downloadButton}>
               <Ionicons name="download" size={24} color="#333" />
-            </TouchableOpacity> */}
+            </TouchableOpacity>
           </View>
           <WebView
             source={{ html: htmlContent }}
