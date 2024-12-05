@@ -43,28 +43,114 @@ Tasklists:
 
 - Cash Payment / Receipt
 
-need to implement this
+// const handlePrint = async () => {
+  //   try {
+  //     if (!selectedCustomer || orderItems.length === 0) {
+  //       Alert.alert('Error', 'Please select a customer and add items before printing.');
+  //       return;
+  //     }
 
+  //     // Define a single htmlContent variable
+  //     const htmlContent = `
+  //       <!DOCTYPE html>
+  //       <html>
+  //         <head>
+  //           <style>
+  //             body { 
+  //               font-family: Arial, sans-serif;
+  //               padding: 20px;
+  //               margin: 0;
+  //               font-size: 12px;
+  //             }
+  //             .header-section {
+  //               padding: 20px;
+  //               border-bottom: 2px solid #000;
+  //               margin-bottom: 20px;
+  //             }
+  //             .company-header {
+  //               text-align: center;
+  //               margin-bottom: 15px;
+  //             }
+  //             .company-name {
+  //               font-size: 24px;
+  //               font-weight: bold;
+  //               letter-spacing: 1px;
+  //             }
+  //             .company-details {
+  //               text-align: center;
+  //               font-size: 13px;
+  //               margin: 15px 0;
+  //               line-height: 1.6;
+  //             }
+  //             .company-address {
+  //               text-align: center;
+  //               font-size: 13px;
+  //               margin: 15px 0;
+  //               line-height: 1.6;
+  //             }
+  //             .company-info {
+  //               text-align: center;
+  //               display: flex;
+  //               justify-content: center;
+  //               gap: 40px;
+  //               margin-top: 10px;
+  //             }
+  //             .company-info span {
+  //               font-weight: bold;
+  //             }
+  //             .invoice-title {
+  //               text-align: center;
+  //               font-size: 16px;
+  //               font-weight: bold;
+  //               padding: 10px;
+  //               border-bottom: 2px solid #000;
+  //               background-color: #f5f5f5;
+  //               margin-bottom: 20px;
+  //             }
+  //             // Add other styles as needed
+  //           </style>
+  //         </head>
+  //         <body>
+  //           <div class="main-container">
+  //             <div class="header-section">
+  //               <div class="company-header">
+  //                 <div class="company-name">${companyDetails?.CompanyName}</div>
+  //               </div>
+  //               <div class="company-details">
+  //                 ${companyDetails?.Tag7}
+  //               </div>
+  //               <div class="company-address">
+  //                 ${companyDetails?.Address1} ${companyDetails?.Address2} ${companyDetails?.Address3} ${companyDetails?.City} ${companyDetails?.Zip} ${companyDetails?.State}<br>
+  //                 Mobile:-${companyDetails?.Mobile}, Email:-${companyDetails?.Email}
+  //               </div>
+  //               <div class="company-info">
+  //                 <span>MSME No:- ${companyDetails?.msme}</span>
+  //                 <span>Udyam No:- ${companyDetails?.UdyamNo}</span>
+  //                 <span>GST No:- ${companyDetails?.Tag1}</span>
+  //                 <span>PAN NO:- ${companyDetails?.Tag6}</span>
+  //               </div>
+  //             </div>
+  //             <div class="invoice-title">TAX INVOICE</div>
+  //             // Add other sections as needed
+  //           </div>
+  //         </body>
+  //       </html>
+  //     `;
 
-GST Dropdown:
-UTGST 5%
-UTGST 28%
-UTGST 18%
-UTGST 12%
-UTGST 3%
-UTGST 2%
-UTGST 0%
-IGST 5%
-IGST 28%
-IGST 18%
-IGST 12%
-IGST 3%
-IGST 2%
-IGST 0%
-GST 5%
-GST 28%
-GST 18%
-GST 12%
-GST 3%
-GST 2%
-GST 0%
+  //     // Use this htmlContent for PDF generation
+  //     const options = {
+  //       html: htmlContent,
+  //       fileName: `Invoice_${nextSerial}`,
+  //       directory: 'Documents',
+  //     };
+
+  //     const file = await RNHTMLtoPDF.convert(options);
+
+  //     if (file.filePath) {
+  //       await Linking.openURL(`file://${file.filePath}`);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error generating PDF:', error);
+  //     Alert.alert('Error', 'Failed to generate invoice PDF');
+  //   }
+  // };
