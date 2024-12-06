@@ -762,6 +762,15 @@ const CreateSalesInvoice = () => {
               font-weight: bold;
               margin-left: 10px;
             }
+            .state-info-container {
+              display: flex;
+              justify-content: space-between;
+              border-bottom: 1px solid #000;
+
+            }
+            .state-gst {
+              margin-right: 10px;
+            }
             .invoice-box {
               border: 1px solid #000;
             }
@@ -774,7 +783,6 @@ const CreateSalesInvoice = () => {
               color: #000;
             }
             .state-info {
-              border-bottom: 1px solid #000;
               padding: 5px;
             }
             .two-column {
@@ -819,7 +827,6 @@ const CreateSalesInvoice = () => {
             <div class="company-details">
               SHOP NO.16,SAI VIHAR CHWAL,DEVIPADA MAIN ROAD MUMBAI 400066 MAHARASHTRA<br>
               Mobile:-7045599660,Email:-ravivainfotech@gmail.com
-              
             </div>
 
             <div class="company-info">
@@ -834,9 +841,18 @@ const CreateSalesInvoice = () => {
 
             <div class="invoice-title">TAX INVOICE</div>
 
-            <div class="state-info">
+            <div class="state-info-container">
+              <div class="state-info">
               State : - Maharashtra    State Code : - 27
+              </div>
+
+              <div class="state-gst">
+                <p style="font-size: 10px;">GST Payable on Reverse Charge:N-A</p>
+              </div>
             </div>
+            
+                  
+            
 
             <div class="two-column">
               <div class="left-column">
@@ -844,7 +860,7 @@ const CreateSalesInvoice = () => {
                 <div>Address  : SHOP NO.16,
 SAI VIHAR CHWAL,
 DEVIPADA MAIN ROAD
-MUMBAI 400066 MAHARASHTRA</div>
+MUMBAI 400066 </div>
                 <div>GSTIN No.: 27AABCR9876F1Z5</div>
                 <div>State    : MAHARASHTRA    State Code : 27</div>
                 <div>MSME No  : </div>
@@ -866,9 +882,10 @@ MUMBAI 400066 MAHARASHTRA</div>
                   <th>Sr No</th>
                   <th>Name</th>
                   <th>HSN ACS</th>
-                  <th>Qty</th>
-                  <th>Rate</th>
-                  <th>Amount</th>
+                  <th style="text-align: right;">Disc(%)</th>
+                  <th style="text-align: right;">Qty</th>
+                  <th style="text-align: right;">Rate</th>
+                  <th style="text-align: right;">Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -877,32 +894,30 @@ MUMBAI 400066 MAHARASHTRA</div>
                     <td>${index + 1}</td>
                     <td>${item.ItemName}</td>
                     <td>${item.HSNCode || ''}</td>
-                    <td>${item.Qty}</td>
-                    <td>${item.Rate.toFixed(2)}</td>
-                    <td>${item.Amount.toFixed(2)}</td>
+                    <td style="text-align: right;">${item.discountPercentage || '0'}</td>
+                    <td style="text-align: right;">${item.Qty}</td>
+                    <td style="text-align: right;">${item.Rate.toFixed(2)}</td>
+                    <td style="text-align: right;">${item.Amount.toFixed(2)}</td>
                   </tr>
                 `).join('')}
                 <tr>
-                  <td colspan="3">Total</td>
-                  <td>${orderSummary.totalGoodsQty}</td>
+                  <td colspan="4">Total</td>
+                  <td style="text-align: right;">${orderSummary.totalGoodsQty}</td>
                   <td></td>
-                  <td>${orderSummary.totalValueAmount.toFixed(2)}</td>
+                  <td style="text-align: right;">${orderSummary.totalValueAmount.toFixed(2)}</td>
                 </tr>
                 <tr>
-                  <td colspan="5">Less :Discount Amt.</td>
-                  <td>${orderSummary.totalDiscountAmount.toFixed(2)}</td>
+                  <td colspan="6">Less :Discount Amt.</td>
+                  <td style="text-align: right;">${orderSummary.totalDiscountAmount.toFixed(2)}</td>
                 </tr>
-                <tr>
-                  <td colspan="5">Add Transport :</td>
-                  <td>0.00</td>
-                </tr>
+
               </tbody>
             </table>
 
             <div style="display: flex;">
               <div style="flex: 1; padding: 10px;">
               
-                <div style="border: 1px solid #000; padding: 10px;">
+                <div style="border: 1px solid #000; border-bottom: 1px solid #000; padding: 4px;">
                   <p>Bank    : IDBI Bank Ltd.</p>
                   <p>BRANCH CODE : 0000897</p>
                   <p>Branch  : 0897102000015491</p>
@@ -918,14 +933,16 @@ MUMBAI 400066 MAHARASHTRA</div>
                     <li>No refund for any goods &amp; services in this invoice in any condition.</li>
                     <li>No Sale Return in any condition.</li>
                     <li>Subject To</li>
+                    <p style="font-size: 10px;">(Certified that the particulars given above are true and correct.)</p>
                   </ol>
                 </div>
+                
               </div>
               <div style="flex: 1; padding: 10px;">
                 <table style="width: 100%; border-collapse: collapse;">
                   <tr>
                     <td>Taxable Amount</td>
-                    <td style="text-align: right;">${orderSummary.totalValueAmount.toFixed(2)}</td>
+                    <td style="text-align: right;">${orderSummary.totalTaxableAmount.toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>Add CGST:</td>
@@ -948,16 +965,15 @@ MUMBAI 400066 MAHARASHTRA</div>
                     <td style="text-align: right;">${orderSummary.totalAmount.toFixed(2)}</td>
                   </tr>
                 </table>
-                <div style="margin-top: 5px; border: 1px solid #000; padding: 5px;">
-                  <p style="font-size: 10px;">GST Payable on Reverse Charge:N-A</p>
-                  <p style="font-size: 10px;">(Certified that the particulars given above are true and correct.)</p>
-                </div>
+
                 <div style="display: flex; padding: 10px; border: 1px solid #000; justify-content: space-between; margin-top: 10px;">
                   <div style="text-align: center;">
                     <p style="font-size: 8px; margin-top: 30px;">Receivers Signature & Rubber Stamp</p>
                   </div>
                   
                 </div>
+                
+                
                 <div style="display: flex; justify-content: space-between; padding: 10px; border: 1px solid #000; margin-top: 20px;">
                 <div style="text-align: center;">
                     <p style="font-size: 8px; margin-top: 50px;">(For RAVIVA INFOTECH PVT LTD) (Authorised Signatory)</p>
