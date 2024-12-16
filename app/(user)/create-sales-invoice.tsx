@@ -478,7 +478,7 @@ const CreateSalesInvoice = () => {
 
       console.log('Fetching company details with:', { companyId }); // Debug log
 
-      const response = await axios.get('http://192.168.1.11:3000/company-details', {
+      const response = await axios.get('https://quickbill-backlend.vercel.app/company-details', {
         headers: {
           // 'UserID': userId,
           'CompanyID': companyId
