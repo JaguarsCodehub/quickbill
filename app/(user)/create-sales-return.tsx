@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert, Modal } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert, Modal, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,11 +11,21 @@ import RippleLoader from '@/components/RippleLoader';
 import { COLORS } from '@/constants/Colors';
 import GridBackground from '@/components/GridBackground';
 import TaxCodePicker from '@/components/TaxCodePicker';
+import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import WebView from 'react-native-webview';
+import { PermissionsAndroid } from 'react-native';
+import RNFS from 'react-native-fs';
+import { NativeModules } from 'react-native';
+const { RNHTMLtoPDF: NativeRNHTMLtoPDF } = NativeModules;
+import * as Print from 'expo-print';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 interface Customer {
   CustomerID: number;
   CustomerName: string;
   Code: string;
+  GSTIN?: string;
 }
 
 
@@ -112,6 +122,28 @@ interface OrderSubmit {
   items: OrderItemSubmit[];
 }
 
+const requestStoragePermission = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission',
+          message: 'App needs access to storage to save PDF',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.error('Permission error:', err);
+      return false;
+    }
+  }
+  return true;
+};
+
 
 const SearchablePicker = ({
   items,
@@ -196,6 +228,7 @@ const CreateSalesReturn = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const router = useRouter();
+  const [gstTaxCode, setGstTaxCode] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isItemSelectModalVisible, setIsItemSelectModalVisible] = useState(false);
   const [isItemDetailsModalVisible, setIsItemDetailsModalVisible] = useState(false);
@@ -204,9 +237,17 @@ const CreateSalesReturn = () => {
   const [itemNotes, setItemNotes] = useState<string>('');
   const [customerCode, setCustomerCode] = useState<string>('');
   const [editedHSNCode, setEditedHSNCode] = useState<string>('');
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     fetchData();
+    fetchCompanyDetails();
+
+    // Check if the native module is available
+    if (!NativeRNHTMLtoPDF) {
+      console.error('RNHTMLtoPDF native module not found');
+    }
+    requestStoragePermission()
   }, []);
 
 
@@ -254,6 +295,9 @@ const CreateSalesReturn = () => {
       });
       setItems(response.data.items);
       setNextSerial(response.data.nextSerial);
+      const gstTaxCode = response.data.items.map((item: any) => item.GSTTaxCode);
+      // console.log("GST Tax Code:", gstTaxCode)
+      setGstTaxCode(gstTaxCode);
       console.log("Response:", response.data.nextSerial)
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -405,6 +449,37 @@ const CreateSalesReturn = () => {
   };
 
   const orderSummary = calculateOrderSummary();
+
+  const [companyDetails, setCompanyDetails] = useState<any>(null);
+
+
+  const fetchCompanyDetails = async () => {
+    try {
+      // const userId = await AsyncStorage.getItem('UserID');
+      const companyId = await AsyncStorage.getItem('CompanyID');
+
+      console.log('Fetching company details with:', { companyId }); // Debug log
+
+      const response = await axios.get('https://quickbill-backlend.vercel.app/company-details', {
+        headers: {
+          // 'UserID': userId,
+          'CompanyID': companyId
+        }
+      });
+
+      console.log('Company details response:', response);
+
+      if (response.data) {
+        setCompanyDetails(response.data);
+        console.log("Company Data:", response)
+      }
+    } catch (error) {
+      console.error('Error fetching company details:', error);
+      // Handle error appropriately
+    }
+  };
+
+
 
   const handleSubmit = async () => {
     if (!selectedCustomer || orderItems.length === 0) {
@@ -605,6 +680,398 @@ const CreateSalesReturn = () => {
     return ((itemValue * discPercent) / 100).toFixed(2);
   };
 
+
+  const prepareInvoiceData = () => {
+    return {
+      docNo: nextSerial,
+      docDate: currentDate,
+      customerName: selectedCustomer?.CustomerName || '',
+      customerCode: selectedCustomer?.Code || '',
+      items: orderItems,
+      totalAmount: orderSummary.totalAmount,
+      totalTaxAmount: orderSummary.totalTaxAmount,
+      totalDiscountAmount: orderSummary.totalDiscountAmount,
+    };
+  };
+
+
+
+
+
+  const renderPreviewModal = () => {
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+          <style>
+            body { 
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              margin: 0;
+              font-size: 12px;
+            }
+            .logo-header {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 10px;
+              text-align: center;
+            }
+            .logo {
+              width: 80px;
+              text-align: center;
+            }
+            .company-name {
+              font-size: 16px;
+              font-weight: bold;
+              text-align: center;
+            }
+            .company-details {
+              text-align: center;
+              font-size: 12px;
+              margin-bottom: 10px;
+              padding-left: 10px;
+              padding-right: 10px;
+            }
+            .company-info {
+              margin-left: 10px;
+              text-align: center;
+            }
+            .company-info-2 {
+              margin-top: 10px;
+              margin-left: 5px;
+              text-align: center;
+              }
+            .company-info-2 span {
+              font-weight: bold;
+            }
+            .company-info-2 span:nth-child(2) {
+              font-weight: bold;
+              margin-left: 10px;
+            }
+            .state-info-container {
+              display: flex;
+              justify-content: space-between;
+              border-bottom: 1px solid #000;
+
+            }
+            .state-gst {
+              margin-right: 10px;
+            }
+            .invoice-box {
+              border: 1px solid #000;
+            }
+            .invoice-title {
+              text-align: center;
+              border-bottom: 1px solid #000;
+              padding: 5px;
+              font-weight: bold;
+              background-color: #c6c6c6;
+              color: #000;
+            }
+            .state-info {
+              padding: 5px;
+            }
+            .two-column {
+              display: flex;
+              border-bottom: 1px solid #000;
+            }
+            .left-column {
+              flex: 1;
+              border-right: 1px solid #000;
+              padding: 5px;
+            }
+            .right-column {
+              flex: 1;
+              padding: 5px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            th, td {
+              border: 1px solid #000;
+              padding: 5px;
+              text-align: left;
+            }
+            th {
+              background-color: #fff;
+            }
+            .label {
+              font-weight: normal;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-box">
+            <div class="logo-header">
+              <div class="company-name">RAVIVA INFOTECH PVT LTD</div>
+            </div>
+            
+            <div class="company-details">
+              ${companyDetails?.Tag7}
+            </div>
+            <div class="company-details">
+              SHOP NO.16,SAI VIHAR CHWAL,DEVIPADA MAIN ROAD MUMBAI 400066 MAHARASHTRA<br>
+              Mobile:-7045599660,Email:-ravivainfotech@gmail.com
+            </div>
+
+            <div class="company-info">
+              <span>MSME No:-${companyDetails?.msme}</span>
+              <span>Udyam No:-${companyDetails?.UdyamNo}</span>
+            </div>
+            
+            <div class="company-info-2" style={{marginTop: 10}}>
+              <span>GSTIN No:-${companyDetails?.Tag1}</span>
+              <span>PAN NO:-${companyDetails?.Tag6}</span>
+            </div>
+
+            <div class="invoice-title">TAX INVOICE</div>
+
+            <div class="state-info-container">
+              <div class="state-info">
+              State : - Maharashtra    State Code : - 27
+              </div>
+
+              <div class="state-gst">
+                <p style="font-size: 10px;">GST Payable on Reverse Charge:N-A</p>
+              </div>
+            </div>
+            
+                  
+            
+
+            <div class="two-column">
+              <div class="left-column">
+                <div>Name     : ${selectedCustomer?.CustomerName}</div>
+                <div>Address  : SHOP NO.16,
+SAI VIHAR CHWAL,
+DEVIPADA MAIN ROAD
+MUMBAI 400066 </div>
+                <div>GSTIN No.: 27AABCR9876F1Z5</div>
+                <div>State    : MAHARASHTRA    State Code : 27</div>
+                <div>MSME No  : </div>
+                <div>Udyam No : </div>
+              </div>
+              <div class="right-column">
+                <div>Invoice No   : ${nextSerial}</div>
+                <div>Invoice Date : ${currentDate}</div>
+                <div>Chalin No    : </div>
+                <div>Chalin Date  : </div>
+                <div>Order No     : </div>
+                <div>Order Date   : ${currentDate}</div>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Sr No</th>
+                  <th>Name</th>
+                  <th>HSN ACS</th>
+                  <th style="text-align: right;">Disc(%)</th>
+                  <th style="text-align: right;">Qty</th>
+                  <th style="text-align: right;">Rate</th>
+                  <th style="text-align: right;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${orderItems.map((item, index) => `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.ItemName}</td>
+                    <td>${item.HSNCode || ''}</td>
+                    <td style="text-align: right;">${item.discountPercentage || '0'}</td>
+                    <td style="text-align: right;">${item.Qty}</td>
+                    <td style="text-align: right;">${item.Rate.toFixed(2)}</td>
+                    <td style="text-align: right;">${item.Amount.toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+                <tr>
+                  <td colspan="4">Total</td>
+                  <td style="text-align: right;">${orderSummary.totalGoodsQty}</td>
+                  <td></td>
+                  <td style="text-align: right;">${orderSummary.totalValueAmount.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colspan="6">Less :Discount Amt.</td>
+                  <td style="text-align: right;">${orderSummary.totalDiscountAmount.toFixed(2)}</td>
+                </tr>
+
+              </tbody>
+            </table>
+
+            <div style="display: flex;">
+              <div style="flex: 1; padding: 10px;">
+              
+                <div style="border: 1px solid #000; border-bottom: 1px solid #000; padding: 4px;">
+                  <p>Bank    : IDBI Bank Ltd.</p>
+                  <p>BRANCH CODE : 0000897</p>
+                  <p>Branch  : 0897102000015491</p>
+                  <p>RAVIVA INFOTECH</p>
+                  <p>IFSC No : Vishnu Shivam</p>
+                </div>
+                <div style="border: 1px solid #000; padding: 10px; margin-top: 10px;">
+                  <p style="font-weight: bold;">Terms & Condition :-</p>
+                  <ol style="font-size: 10px; margin: 0; padding-left: 15px;">
+                    <li>Payment should be made immediately otherwise interest @24% will be charged.</li>
+                    <li>The right of property of goods &amp; services is not transferable until we receive the entire payment against this invoice.</li>
+                    <li>Any software found on Hard Disk after invoicing is liability of customer.</li>
+                    <li>No refund for any goods &amp; services in this invoice in any condition.</li>
+                    <li>No Sale Return in any condition.</li>
+                    <li>Subject To</li>
+                    <p style="font-size: 10px;">(Certified that the particulars given above are true and correct.)</p>
+                  </ol>
+                </div>
+                
+              </div>
+              <div style="flex: 1; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td>Taxable Amount</td>
+                    <td style="text-align: right;">${orderSummary.totalTaxableAmount.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Add CGST:</td>
+                    <td style="text-align: right;">${(orderSummary.totalTaxAmount / 2).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Add SGST:</td>
+                    <td style="text-align: right;">${(orderSummary.totalTaxAmount / 2).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Add IGST:</td>
+                    <td style="text-align: right;">0.00</td>
+                  </tr>
+                  <tr>
+                    <td>Tax Amount GST:</td>
+                    <td style="text-align: right;">${orderSummary.totalTaxAmount.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Total Amount After Tax :</td>
+                    <td style="text-align: right;">${orderSummary.totalAmount.toFixed(2)}</td>
+                  </tr>
+                </table>
+
+                <div style="display: flex; padding: 10px; border: 1px solid #000; justify-content: space-between; margin-top: 10px;">
+                  <div style="text-align: center;">
+                    <p style="font-size: 8px; margin-top: 30px;">Receivers Signature & Rubber Stamp</p>
+                  </div>
+                  
+                </div>
+                
+                
+                <div style="display: flex; justify-content: space-between; padding: 10px; border: 1px solid #000; margin-top: 20px;">
+                <div style="text-align: center;">
+                    <p style="font-size: 8px; margin-top: 50px;">(For RAVIVA INFOTECH PVT LTD) (Authorised Signatory)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+
+    const downloadPDF = async () => {
+      try {
+        // Generate the PDF
+        const { uri } = await Print.printToFileAsync({
+          html: htmlContent,
+          base64: false
+        });
+
+        console.log('PDF generated at:', uri);
+
+        // Create a filename with timestamp
+        const filename = `Invoice_${nextSerial}_${Date.now()}.pdf`;
+
+        // Get the downloads directory
+        const downloadDir = FileSystem.documentDirectory + 'Downloads/';
+        const pdfPath = downloadDir + filename;
+
+        // Ensure the downloads directory exists
+        await FileSystem.makeDirectoryAsync(downloadDir, { intermediates: true });
+
+        // Copy the file to the downloads directory
+        await FileSystem.copyAsync({
+          from: uri,
+          to: pdfPath
+        });
+
+        console.log('PDF saved to:', pdfPath);
+
+        if (Platform.OS === 'android') {
+          // Move file to downloads folder (Android only)
+          const androidDownloadDir = FileSystem.cacheDirectory + filename;
+          await FileSystem.copyAsync({
+            from: pdfPath,
+            to: androidDownloadDir
+          });
+
+          // Share the file
+          await Sharing.shareAsync(androidDownloadDir, {
+            mimeType: 'application/pdf',
+            dialogTitle: 'Save PDF',
+            UTI: 'com.adobe.pdf'
+          });
+        } else {
+          // For iOS, just share the file
+          await Sharing.shareAsync(pdfPath, {
+            mimeType: 'application/pdf',
+            dialogTitle: 'Save PDF',
+            UTI: 'com.adobe.pdf'
+          });
+        }
+
+        Alert.alert(
+          'Success',
+          'PDF has been saved successfully!',
+          [{ text: 'OK' }]
+        );
+
+      } catch (error) {
+        console.error('Error saving PDF:', error);
+        Alert.alert(
+          'Error',
+          'Failed to save PDF. Please try again.',
+          [{ text: 'OK' }]
+        );
+      }
+    };
+
+    return (
+      <Modal
+        visible={showPreview}
+        animationType="slide"
+        onRequestClose={() => setShowPreview(false)}
+      >
+        <SafeAreaView style={{ flex: 1 }}>
+          <View style={styles.previewHeader}>
+            <TouchableOpacity onPress={() => setShowPreview(false)} style={styles.closePreviewButton}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+            <Text style={styles.previewTitle}>Invoice Preview</Text>
+            <TouchableOpacity onPress={downloadPDF} style={styles.downloadButton}>
+              <Ionicons name="download" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+          <WebView
+            source={{ html: htmlContent }}
+            style={{ flex: 1 }}
+            originWhitelist={['*']}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+          />
+        </SafeAreaView>
+      </Modal>
+    );
+  };
+
+
   if (isLoading) {
     return (
       <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.loadingContainer}>
@@ -788,6 +1255,16 @@ const CreateSalesReturn = () => {
               <Text style={styles.submitButtonText}>Submit Sales Return</Text>
             )}
           </TouchableOpacity>
+
+
+          <TouchableOpacity
+            style={styles.previewButton}
+            onPress={() => setShowPreview(true)}
+          >
+            <Text style={styles.previewButtonText}>Preview Invoice</Text>
+          </TouchableOpacity>
+
+          {renderPreviewModal()}
         </ScrollView>
       </LinearGradient>
 
@@ -1784,5 +2261,47 @@ const styles = StyleSheet.create({
     borderColor: '#E0E6ED',
     fontFamily: 'monospace',
     color: '#333333',
+  },
+  printButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  printButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E6ED',
+  },
+  closePreviewButton: {
+    padding: 5,
+  },
+  previewTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  downloadButton: {
+    padding: 5,
+  },
+  previewButton: {
+    backgroundColor: '#4A90E2',
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  previewButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

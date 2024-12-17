@@ -250,9 +250,7 @@ const CreateSalesInvoice = () => {
     requestStoragePermission()
   }, []);
 
-  // useEffect(() => {
-  //   fetchCompanyDetails();
-  // }, [])
+
 
   const handleCustomerSelect = async (customer: Customer) => {
     setSelectedCustomer(customer);
