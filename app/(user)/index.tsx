@@ -49,7 +49,7 @@ const User = () => {
     };
 
     const handleSubmit = async () => {
-        if (isLoading) return; // Prevent multiple submissions
+        if (isLoading) return;
         setIsLoading(true);
         try {
             const response = await fetch('https://quickbill-backlend.vercel.app/addCustomer', {

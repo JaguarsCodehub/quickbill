@@ -58,146 +58,145 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
         const isCompleted = selectedTransaction?.Status === 'Completed';
 
         return (
-          <Modal
-            animationType='fade'
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContainer}>
-                {/* Header */}
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Transaction Details</Text>
-                  <TouchableOpacity
-                    onPress={() => setModalVisible(false)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <Ionicons
-                      name='close'
-                      size={20}
-                      color={COLORS.textSecondary}
-                    />
-                  </TouchableOpacity>
+            <Modal
+                animationType='fade'
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        {/* Header */}
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Transaction Details</Text>
+                            <TouchableOpacity
+                                onPress={() => setModalVisible(false)}
+                                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            >
+                                <Ionicons
+                                    name='close'
+                                    size={20}
+                                    color={COLORS.textSecondary}
+                                />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View
+                            style={[
+                                styles.infoBar,
+                                isCompleted ? styles.infoBarSuccess : styles.infoBarPending,
+                            ]}
+                        >
+                            <Ionicons
+                                name={isCompleted ? 'checkmark-circle' : 'warning'}
+                                size={20}
+                                color={isCompleted ? '#0F672E' : '#946300'}
+                            />
+                            <Text
+                                style={[
+                                    styles.infoBarText,
+                                    isCompleted
+                                        ? styles.infoBarTextSuccess
+                                        : styles.infoBarTextPending,
+                                ]}
+                            >
+                                {isCompleted
+                                    ? 'Transaction completed successfully!'
+                                    : 'Payment not confirmed yet'}
+                            </Text>
+                        </View>
+
+                        {/* Amount Section */}
+                        <View style={styles.amountSection}>
+                            <View style={styles.amountIcon}>
+                                <Ionicons
+                                    name='receipt-outline'
+                                    size={24}
+                                    color={COLORS.primary}
+                                />
+                            </View>
+                            <View style={styles.amountDetails}>
+                                <Text style={styles.amountLabel}>Amount</Text>
+                                <Text style={styles.amountValue}>
+                                    ₹{selectedTransaction?.BillAmt.toLocaleString('en-IN')}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Transaction Info Card */}
+                        <View style={styles.infoCard}>
+                            <InfoRow
+                                label='Party Name'
+                                value={selectedTransaction?.PartyName || '-'}
+                            />
+                            <InfoRow
+                                label='Document No'
+                                value={selectedTransaction?.DocNo || '-'}
+                            />
+                            <InfoRow
+                                label='Net Amount'
+                                value={`₹${selectedTransaction?.NetAmt.toLocaleString(
+                                    'en-IN'
+                                )}`}
+                            />
+                            <InfoRow
+                                label='Tax Amount'
+                                value={`₹${selectedTransaction?.TaxAmt.toLocaleString(
+                                    'en-IN'
+                                )}`}
+                            />
+
+                            {/* Dotted Separator */}
+                            <View style={styles.dottedSeparator}>
+                                <Text style={styles.separatorLine}>
+                                    - - - - - - - - - - - - - - - - - - - - - - - - -
+                                </Text>
+                            </View>
+
+                            <InfoRow
+                                label='Created on'
+                                value={new Date(
+                                    selectedTransaction?.DocDate || ''
+                                ).toLocaleString()}
+                            />
+                            <InfoRow
+                                label='Bill No'
+                                value={selectedTransaction?.DocNo || '-'}
+                            />
+                        </View>
+
+                        {/* Action Buttons */}
+                        <View style={styles.modalActions}>
+                            <TouchableOpacity
+                                style={[styles.modalActionBtn, styles.secondaryButton]}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <Text style={styles.secondaryButtonText}>Close</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalActionBtn, styles.primaryButton]}
+                                onPress={() => {
+                                    /* Handle print */
+                                }}
+                            >
+                                <Ionicons
+                                    name='print-outline'
+                                    size={20}
+                                    color='#FFF'
+                                    style={styles.buttonIcon}
+                                />
+                                <Text style={styles.primaryButtonText}>Print Invoice</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
-
-                {/* Status Info Bar */}
-                <View
-                  style={[
-                    styles.infoBar,
-                    isCompleted ? styles.infoBarSuccess : styles.infoBarPending,
-                  ]}
-                >
-                  <Ionicons
-                    name={isCompleted ? 'checkmark-circle' : 'warning'}
-                    size={20}
-                    color={isCompleted ? '#0F672E' : '#946300'}
-                  />
-                  <Text
-                    style={[
-                      styles.infoBarText,
-                      isCompleted
-                        ? styles.infoBarTextSuccess
-                        : styles.infoBarTextPending,
-                    ]}
-                  >
-                    {isCompleted
-                      ? 'Transaction completed successfully!'
-                      : 'Payment not confirmed yet'}
-                  </Text>
-                </View>
-
-                {/* Amount Section */}
-                <View style={styles.amountSection}>
-                  <View style={styles.amountIcon}>
-                    <Ionicons
-                      name='receipt-outline'
-                      size={24}
-                      color={COLORS.primary}
-                    />
-                  </View>
-                  <View style={styles.amountDetails}>
-                    <Text style={styles.amountLabel}>Amount</Text>
-                    <Text style={styles.amountValue}>
-                      ₹{selectedTransaction?.BillAmt.toLocaleString('en-IN')}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Transaction Info Card */}
-                <View style={styles.infoCard}>
-                  <InfoRow
-                    label='Party Name'
-                    value={selectedTransaction?.PartyName || '-'}
-                  />
-                  <InfoRow
-                    label='Document No'
-                    value={selectedTransaction?.DocNo || '-'}
-                  />
-                  <InfoRow
-                    label='Net Amount'
-                    value={`₹${selectedTransaction?.NetAmt.toLocaleString(
-                      'en-IN'
-                    )}`}
-                  />
-                  <InfoRow
-                    label='Tax Amount'
-                    value={`₹${selectedTransaction?.TaxAmt.toLocaleString(
-                      'en-IN'
-                    )}`}
-                  />
-
-                  {/* Dotted Separator */}
-                  <View style={styles.dottedSeparator}>
-                    <Text style={styles.separatorLine}>
-                      - - - - - - - - - - - - - - - - - - - - - - - - -
-                    </Text>
-                  </View>
-
-                  <InfoRow
-                    label='Created on'
-                    value={new Date(
-                      selectedTransaction?.DocDate || ''
-                    ).toLocaleString()}
-                  />
-                  <InfoRow
-                    label='Bill No'
-                    value={selectedTransaction?.DocNo || '-'}
-                  />
-                </View>
-
-                {/* Action Buttons */}
-                <View style={styles.modalActions}>
-                  <TouchableOpacity
-                    style={[styles.modalActionBtn, styles.secondaryButton]}
-                    onPress={() => setModalVisible(false)}
-                  >
-                    <Text style={styles.secondaryButtonText}>Close</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.modalActionBtn, styles.primaryButton]}
-                    onPress={() => {
-                      /* Handle print */
-                    }}
-                  >
-                    <Ionicons
-                      name='print-outline'
-                      size={20}
-                      color='#FFF'
-                      style={styles.buttonIcon}
-                    />
-                    <Text style={styles.primaryButtonText}>Print Invoice</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </Modal>
+            </Modal>
         );
     };
 
-    const InfoRow = ({ label, value, isStatus = false }: { 
-        label: string; 
-        value: string; 
+    const InfoRow = ({ label, value, isStatus = false }: {
+        label: string;
+        value: string;
         isStatus?: boolean;
     }) => (
         <View style={styles.infoRow}>
@@ -228,8 +227,8 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
             </View>
 
             {displayedTransactions.map((transaction, index) => (
-                <TouchableOpacity 
-                    key={index} 
+                <TouchableOpacity
+                    key={index}
                     style={styles.transactionItem}
                     onPress={() => handleTransactionPress(transaction)}
                 >
@@ -351,34 +350,34 @@ const PerformanceView: React.FC<PerformanceViewProps> = ({ salesData }) => {
 };
 
 const QuickActionsGrid = () => {
-  const actions = [
-    { id: 1, title: 'Sales Invoice', icon: 'receipt-outline' },
-    { id: 2, title: 'Sales Return', icon: 'return-down-back-outline' },
-    { id: 3, title: 'Sales Order', icon: 'cart-outline' },
-    { id: 4, title: 'Check Status', icon: 'checkmark-circle-outline' },
-    { id: 5, title: 'Run Analysis', icon: 'analytics-outline' },
-    { id: 6, title: 'View Reports', icon: 'document-text-outline' },
-  ];
+    const actions = [
+        { id: 1, title: 'Sales Invoice', icon: 'receipt-outline' },
+        { id: 2, title: 'Sales Return', icon: 'return-down-back-outline' },
+        { id: 3, title: 'Sales Order', icon: 'cart-outline' },
+        { id: 4, title: 'Check Status', icon: 'checkmark-circle-outline' },
+        { id: 5, title: 'Run Analysis', icon: 'analytics-outline' },
+        { id: 6, title: 'View Reports', icon: 'document-text-outline' },
+    ];
 
-  return (
-    <View style={styles.quickActionsWrapper}>
-      <Text style={styles.quickActionsTitle}>What would you like to do?</Text>
-      <View style={styles.quickActionsGrid}>
-        {actions.map((action) => (
-          <TouchableOpacity 
-            key={action.id} 
-            style={styles.quickAction}
-            onPress={() => {/* handle action */}}
-          >
-            <View style={styles.quickActionIcon}>
-              <Ionicons name={action.icon as any} size={24} color={COLORS.primary} />
+    return (
+        <View style={styles.quickActionsWrapper}>
+            <Text style={styles.quickActionsTitle}>What would you like to do?</Text>
+            <View style={styles.quickActionsGrid}>
+                {actions.map((action) => (
+                    <TouchableOpacity
+                        key={action.id}
+                        style={styles.quickAction}
+                        onPress={() => {/* handle action */ }}
+                    >
+                        <View style={styles.quickActionIcon}>
+                            <Ionicons name={action.icon as any} size={24} color={COLORS.primary} />
+                        </View>
+                        <Text style={styles.quickActionText}>{action.title}</Text>
+                    </TouchableOpacity>
+                ))}
             </View>
-            <Text style={styles.quickActionText}>{action.title}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
+        </View>
+    );
 };
 
 export default function SalesScreen() {
@@ -439,46 +438,46 @@ export default function SalesScreen() {
     }
 
     return (
-      <ScrollView style={styles.container}>
-        <GridBackground />
-        <Stack.Screen
-          options={{
-            title: 'Sales',
-            headerStyle: {
-              backgroundColor: COLORS.background,
-            },
-            headerTitleStyle: {
-              color: COLORS.text,
-              fontSize: 20,
-              fontFamily: 'MontserratBold',
-            },
-            headerShadowVisible: false, // removes the bottom border
-            headerTintColor: COLORS.primary, // for back button and other icons
-            headerRight: () => (
-              <TouchableOpacity
-                style={styles.headerButton}
-                onPress={() => {
-                  /* handle press */
+        <ScrollView style={styles.container}>
+            <GridBackground />
+            <Stack.Screen
+                options={{
+                    title: 'Sales',
+                    headerStyle: {
+                        backgroundColor: COLORS.background,
+                    },
+                    headerTitleStyle: {
+                        color: COLORS.text,
+                        fontSize: 20,
+                        fontFamily: 'MontserratBold',
+                    },
+                    headerShadowVisible: false, // removes the bottom border
+                    headerTintColor: COLORS.primary, // for back button and other icons
+                    headerRight: () => (
+                        <TouchableOpacity
+                            style={styles.headerButton}
+                            onPress={() => {
+                                /* handle press */
+                            }}
+                        >
+                            <Ionicons
+                                name='notifications'
+                                size={24}
+                                color={COLORS.primary}
+                            />
+                        </TouchableOpacity>
+                    ),
+                    headerLeft: () => null,
                 }}
-              >
-                <Ionicons
-                  name='notifications'
-                  size={24}
-                  color={COLORS.primary}
-                />
-              </TouchableOpacity>
-            ),
-            headerLeft: () => null,
-          }}
-        />
-        <View style={styles.header}>
-          <View style={{ gap: 10 }}>
-            <Text style={styles.headerTitle}>Sales Dashboard</Text>
-            <Text style={styles.headerSubtitle}>
-              Check your sales performance and manage your sales with
-              ease.
-            </Text>
-            {/* <TouchableOpacity style={{
+            />
+            <View style={styles.header}>
+                <View style={{ gap: 10 }}>
+                    <Text style={styles.headerTitle}>Sales Dashboard</Text>
+                    <Text style={styles.headerSubtitle}>
+                        Check your sales performance and manage your sales with
+                        ease.
+                    </Text>
+                    {/* <TouchableOpacity style={{
                         width: 40,
                         height: 40,
                         justifyContent: 'center',
@@ -489,12 +488,12 @@ export default function SalesScreen() {
                     }}>
                         <Ionicons name="add" size={24} color={COLORS.background} />
                     </TouchableOpacity> */}
-          </View>
-        </View>
+                </View>
+            </View>
 
-        <PerformanceView salesData={salesData.recentTransactions} />
+            <PerformanceView salesData={salesData.recentTransactions} />
 
-        {/* <View
+            {/* <View
           style={{
             margin: 10,
             padding: 20,
@@ -536,9 +535,9 @@ export default function SalesScreen() {
             </View>
           </View>
         </View> */}
-        <TransactionList transactions={salesData.recentTransactions} />
-        <QuickActionsGrid />
-      </ScrollView>
+            <TransactionList transactions={salesData.recentTransactions} />
+            <QuickActionsGrid />
+        </ScrollView>
     );
 }
 
