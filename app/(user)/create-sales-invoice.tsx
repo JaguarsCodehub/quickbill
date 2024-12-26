@@ -1097,22 +1097,29 @@ MUMBAI 400066 </div>
       <GridBackground />
       <Stack.Screen options={{ headerShown: false }} />
       <LinearGradient colors={['#cfd9df', '#e2ebf0']} style={styles.gradient}>
-        <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
             <Text style={styles.title}>New Sales Invoice</Text>
-            <Ionicons name="cart" size={24} color="#7868e5" />
+            <Ionicons name='cart' size={24} color='#7868e5' />
           </View>
 
           <View style={styles.card}>
             <View style={styles.headerInfo}>
               <View style={styles.headerItem}>
-                <Ionicons name="calendar-outline" size={20} color="#7868e5" />
+                <Ionicons name='calendar-outline' size={20} color='#7868e5' />
                 <Text style={styles.headerText}>Date:</Text>
                 <Text style={styles.headerValue}>{currentDate}</Text>
               </View>
 
               <View style={styles.headerItem}>
-                <Ionicons name="document-text-outline" size={20} color="#7868e5" />
+                <Ionicons
+                  name='document-text-outline'
+                  size={20}
+                  color='#7868e5'
+                />
                 <Text style={styles.headerText}>No:</Text>
                 <Text style={styles.headerValue}>SAL/{nextSerial}</Text>
               </View>
@@ -1120,28 +1127,86 @@ MUMBAI 400066 </div>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Customer</Text>
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginHorizontal: 10,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={styles.sectionTitle}>Customer</Text>
+              <TouchableOpacity onPress={() => router.push('/(user)')}>
+                <Ionicons
+                  name='add-circle'
+                  size={28}
+                  color='#000'
+                  style={{ marginRight: 10 }}
+                />
+              </TouchableOpacity>
+            </View>
             <SearchablePicker
               items={customers}
               onSelect={handleCustomerSelect}
-              placeholder="Search customers..."
-              labelKey="CustomerName"
-              valueKey="CustomerID"
-              icon="person-outline"
+              placeholder='Search customers...'
+              labelKey='CustomerName'
+              valueKey='CustomerID'
+              icon='person-outline'
               selectedItem={selectedCustomer}
             />
             {selectedCustomer && (
               <View style={styles.selectedInfo}>
-                <Ionicons name="checkmark-circle" size={24} color="#00c06c" />
-                <Text style={styles.selectedInfoText}>{selectedCustomer.CustomerName}</Text>
+                <Ionicons name='checkmark-circle' size={24} color='#00c06c' />
+                <Text style={styles.selectedInfoText}>
+                  {selectedCustomer.CustomerName}
+                </Text>
               </View>
             )}
 
             <View style={{ marginTop: 10 }}>
-              <Text style={styles.sectionTitle}>Item</Text>
-              <TouchableOpacity style={{ backgroundColor: "#000", borderRadius: 10, padding: 10, display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", }} onPress={handleAddItem}>
-                <Text style={{ color: "white", fontSize: 15, fontWeight: "500" }}>Add Item</Text>
-                <Ionicons name="add-circle" size={24} color="#FFF" style={{ marginLeft: 5 }} />
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginHorizontal: 10,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={styles.sectionTitle}>Item</Text>
+                <TouchableOpacity onPress={() => router.push('/(user)/add-item')}>
+                  <Ionicons
+                    name='add-circle'
+                    size={28}
+                    color='#000'
+                    style={{ marginRight: 10 }}
+                  />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#000',
+                  borderRadius: 10,
+                  padding: 10,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={handleAddItem}
+              >
+                <Text
+                  style={{ color: 'white', fontSize: 15, fontWeight: '500' }}
+                >
+                  Add Item
+                </Text>
+                <Ionicons
+                  name='add-circle'
+                  size={24}
+                  color='#FFF'
+                  style={{ marginLeft: 5 }}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -1165,15 +1230,23 @@ MUMBAI 400066 </div>
                     <View style={styles.orderItemHeader}>
                       <View style={styles.orderItemMain}>
                         <View style={styles.orderItemTitleRow}>
-                          <Text style={styles.orderItemName}>{item.ItemName}</Text>
+                          <Text style={styles.orderItemName}>
+                            {item.ItemName}
+                          </Text>
                           <TouchableOpacity
                             onPress={() => removeItemFromOrder(index)}
                             style={styles.removeButton}
                           >
-                            <Ionicons name="close-circle" size={24} color="#FF3B30" />
+                            <Ionicons
+                              name='close-circle'
+                              size={24}
+                              color='#FF3B30'
+                            />
                           </TouchableOpacity>
                         </View>
-                        <Text style={styles.itemCode}>Itemcode: {item.ItemCode}</Text>
+                        <Text style={styles.itemCode}>
+                          Itemcode: {item.ItemCode}
+                        </Text>
                       </View>
                     </View>
 
@@ -1185,25 +1258,35 @@ MUMBAI 400066 </div>
                         </View>
                         <View style={styles.detailCol}>
                           <Text style={styles.detailLabel}>Rate</Text>
-                          <Text style={styles.detailValue}>₹{item.Rate.toFixed(2)}</Text>
+                          <Text style={styles.detailValue}>
+                            ₹{item.Rate.toFixed(2)}
+                          </Text>
                         </View>
                         <View style={styles.detailCol}>
                           <Text style={styles.detailLabel}>Value</Text>
-                          <Text style={styles.detailValue}>₹{item.Value.toFixed(2)}</Text>
+                          <Text style={styles.detailValue}>
+                            ₹{item.Value.toFixed(2)}
+                          </Text>
                         </View>
                       </View>
 
-                      {(item.discountPercentage > 0 || item.discountAmount > 0) && (
+                      {(item.discountPercentage > 0 ||
+                        item.discountAmount > 0) && (
                         <View style={styles.discountRow}>
                           <View style={styles.detailCol}>
                             <Text style={styles.detailLabel}>Discount</Text>
                             <Text style={styles.discountValue}>
-                              {item.discountPercentage}% (₹{item.discountAmount.toFixed(2)})
+                              {item.discountPercentage}% (₹
+                              {item.discountAmount.toFixed(2)})
                             </Text>
                           </View>
                           <View style={styles.detailCol}>
-                            <Text style={styles.detailLabel}>After Discount</Text>
-                            <Text style={styles.detailValue}>₹{item.Taxable.toFixed(2)}</Text>
+                            <Text style={styles.detailLabel}>
+                              After Discount
+                            </Text>
+                            <Text style={styles.detailValue}>
+                              ₹{item.Taxable.toFixed(2)}
+                            </Text>
                           </View>
                         </View>
                       )}
@@ -1211,17 +1294,25 @@ MUMBAI 400066 </div>
                       <View style={styles.taxRow}>
                         <View style={styles.detailCol}>
                           <Text style={styles.detailLabel}>Tax</Text>
-                          <Text style={styles.detailValue}>₹{item.TaxAmt.toFixed(2)}</Text>
+                          <Text style={styles.detailValue}>
+                            ₹{item.TaxAmt.toFixed(2)}
+                          </Text>
                         </View>
                         <View style={styles.detailCol}>
                           <Text style={styles.detailLabel}>Net Amount</Text>
-                          <Text style={styles.netAmountValue}>₹{item.Amount.toFixed(2)}</Text>
+                          <Text style={styles.netAmountValue}>
+                            ₹{item.Amount.toFixed(2)}
+                          </Text>
                         </View>
                       </View>
 
                       {item.notes && (
                         <View style={styles.notesContainer}>
-                          <Ionicons name="document-text-outline" size={16} color="#666666" />
+                          <Ionicons
+                            name='document-text-outline'
+                            size={16}
+                            color='#666666'
+                          />
                           <Text style={styles.notesText}>{item.notes}</Text>
                         </View>
                       )}
@@ -1232,36 +1323,49 @@ MUMBAI 400066 </div>
                 <View style={styles.orderSummaryFooter}>
                   <View style={styles.summaryRow}>
                     <Text style={styles.summaryLabel}>Sub Total:</Text>
-                    <Text style={styles.summaryValue}>₹{orderSummary.totalValueAmount.toFixed(2)}</Text>
+                    <Text style={styles.summaryValue}>
+                      ₹{orderSummary.totalValueAmount.toFixed(2)}
+                    </Text>
                   </View>
                   {orderSummary.totalDiscountAmount > 0 && (
                     <View style={styles.summaryRow}>
                       <Text style={styles.summaryLabel}>Total Discount:</Text>
-                      <Text style={styles.discountValue}>-₹{orderSummary.totalDiscountAmount.toFixed(2)}</Text>
+                      <Text style={styles.discountValue}>
+                        -₹{orderSummary.totalDiscountAmount.toFixed(2)}
+                      </Text>
                     </View>
                   )}
                   <View style={styles.summaryRow}>
                     <Text style={styles.summaryLabel}>Total Tax:</Text>
-                    <Text style={styles.summaryValue}>₹{orderSummary.totalTaxAmount.toFixed(2)}</Text>
+                    <Text style={styles.summaryValue}>
+                      ₹{orderSummary.totalTaxAmount.toFixed(2)}
+                    </Text>
                   </View>
                   <View style={[styles.summaryRow, styles.netAmountRow]}>
                     <Text style={styles.netAmountLabel}>Net Amount:</Text>
-                    <Text style={styles.netAmountTotal}>₹{orderSummary.totalAmount.toFixed(2)}</Text>
+                    <Text style={styles.netAmountTotal}>
+                      ₹{orderSummary.totalAmount.toFixed(2)}
+                    </Text>
                   </View>
                 </View>
               </View>
             ) : (
-              <Text style={styles.noItemsText}>No items added to the invoice yet.</Text>
+              <Text style={styles.noItemsText}>
+                No items added to the invoice yet.
+              </Text>
             )}
           </View>
 
           <TouchableOpacity
-            style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+            style={[
+              styles.submitButton,
+              isSubmitting && styles.submitButtonDisabled,
+            ]}
             onPress={handleSubmit}
             disabled={isSubmitting}
           >
             {isSubmitting ? (
-              <ActivityIndicator size="small" color="#0a0a0a" />
+              <ActivityIndicator size='small' color='#0a0a0a' />
             ) : (
               <Text style={styles.submitButtonText}>Submit Invoice</Text>
             )}
@@ -1290,7 +1394,9 @@ MUMBAI 400066 </div>
             <View style={styles.modalHeader}>
               <View>
                 <Text style={styles.modalTitle}>Select Product</Text>
-                <Text style={styles.modalDescription}>Choose a product to add to your order</Text>
+                <Text style={styles.modalDescription}>
+                  Choose a product to add to your order
+                </Text>
               </View>
               <TouchableOpacity
                 onPress={() => setIsItemSelectModalVisible(false)}
@@ -1304,10 +1410,10 @@ MUMBAI 400066 </div>
               <SearchablePicker
                 items={items}
                 onSelect={handleItemSelect}
-                placeholder="Search items..."
-                labelKey="ItemName"
-                valueKey="ItemCode"
-                icon="cube-outline"
+                placeholder='Search items...'
+                labelKey='ItemName'
+                valueKey='ItemCode'
+                icon='cube-outline'
                 selectedItem={selectedItem}
               />
             </View>
@@ -1323,11 +1429,18 @@ MUMBAI 400066 </div>
         onRequestClose={() => setIsItemDetailsModalVisible(false)}
       >
         <View style={styles.itemModalOverlay}>
-          <View style={[styles.itemModalContent, { width: '90%', maxHeight: '80%' }]}>
+          <View
+            style={[
+              styles.itemModalContent,
+              { width: '90%', maxHeight: '80%' },
+            ]}
+          >
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Item Details</Text>
-                <TouchableOpacity onPress={() => setIsItemDetailsModalVisible(false)}>
+                <TouchableOpacity
+                  onPress={() => setIsItemDetailsModalVisible(false)}
+                >
                   <Ionicons name='close' size={24} color='#c9d1d9' />
                 </TouchableOpacity>
               </View>
@@ -1335,7 +1448,9 @@ MUMBAI 400066 </div>
               {selectedItem && (
                 <View style={styles.itemDetailsContainer}>
                   <Text style={styles.itemDetailLabel}>Selected Item</Text>
-                  <Text style={styles.itemDetailValue}>{selectedItem.ItemName}</Text>
+                  <Text style={styles.itemDetailValue}>
+                    {selectedItem.ItemName}
+                  </Text>
 
                   <View style={styles.detailSection}>
                     <Text style={styles.itemDetailLabel}>HSN Code</Text>
@@ -1343,8 +1458,8 @@ MUMBAI 400066 </div>
                       style={[styles.detailInput, styles.hsnCode]}
                       value={editedHSNCode}
                       onChangeText={setEditedHSNCode}
-                      placeholder="Enter HSN Code"
-                      placeholderTextColor="#888888"
+                      placeholder='Enter HSN Code'
+                      placeholderTextColor='#888888'
                     />
                   </View>
 
@@ -1360,11 +1475,13 @@ MUMBAI 400066 </div>
                       value={quantity}
                       onChangeText={(text) => {
                         setQuantity(text);
-                        setValue((parseFloat(text) * parseFloat(rate)).toFixed(2));
+                        setValue(
+                          (parseFloat(text) * parseFloat(rate)).toFixed(2)
+                        );
                       }}
-                      keyboardType="numeric"
-                      placeholder="Enter quantity"
-                      placeholderTextColor="#888888"
+                      keyboardType='numeric'
+                      placeholder='Enter quantity'
+                      placeholderTextColor='#888888'
                     />
                   </View>
 
@@ -1374,9 +1491,9 @@ MUMBAI 400066 </div>
                       style={styles.detailInput}
                       value={rate}
                       onChangeText={updateRate}
-                      keyboardType="numeric"
-                      placeholder="Enter rate"
-                      placeholderTextColor="#888888"
+                      keyboardType='numeric'
+                      placeholder='Enter rate'
+                      placeholderTextColor='#888888'
                     />
                   </View>
 
@@ -1390,18 +1507,18 @@ MUMBAI 400066 </div>
                           setDiscountPercentage(text);
                           setDiscountAmount(calculateDiscountAmount(text));
                         }}
-                        keyboardType="numeric"
-                        placeholder="%"
-                        placeholderTextColor="#888888"
+                        keyboardType='numeric'
+                        placeholder='%'
+                        placeholderTextColor='#888888'
                       />
                       <Text style={styles.discountSeparator}>|</Text>
                       <TextInput
                         style={[styles.detailInput, { flex: 1 }]}
                         value={discountAmount}
                         onChangeText={setDiscountAmount}
-                        keyboardType="numeric"
-                        placeholder="₹"
-                        placeholderTextColor="#888888"
+                        keyboardType='numeric'
+                        placeholder='₹'
+                        placeholderTextColor='#888888'
                         editable={false}
                       />
                     </View>
@@ -1412,22 +1529,31 @@ MUMBAI 400066 </div>
                     <TaxCodePicker
                       selectedValue={selectedItem?.GSTTaxCode || ''}
                       onValueChange={(value) => {
-                        setSelectedItem(prevItem => prevItem ? {
-                          ...prevItem,
-                          GSTTaxCode: value
-                        } : null);
+                        setSelectedItem((prevItem) =>
+                          prevItem
+                            ? {
+                                ...prevItem,
+                                GSTTaxCode: value,
+                              }
+                            : null
+                        );
                       }}
                     />
                   </View>
 
                   <View style={styles.totalSection}>
                     <Text style={styles.totalLabel}>Item Total</Text>
-                    <Text style={styles.totalValue}>₹ {itemValues?.Amount || '0.00'}</Text>
+                    <Text style={styles.totalValue}>
+                      ₹ {itemValues?.Amount || '0.00'}
+                    </Text>
                   </View>
                 </View>
               )}
 
-              <TouchableOpacity onPress={handleAddItemToOrder} style={styles.addButton}>
+              <TouchableOpacity
+                onPress={handleAddItemToOrder}
+                style={styles.addButton}
+              >
                 <Text style={styles.addButtonText}>Add to Invoice</Text>
               </TouchableOpacity>
             </ScrollView>

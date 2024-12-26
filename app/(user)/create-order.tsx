@@ -601,7 +601,25 @@ const CreateOrder = () => {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Customer</Text>
+            <View
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              marginHorizontal: 10,
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Text style={styles.sectionTitle}>Customer</Text>
+                            <TouchableOpacity onPress={() => router.push('/(user)')}>
+                              <Ionicons
+                                name='add-circle'
+                                size={28}
+                                color='#000'
+                                style={{ marginRight: 10 }}
+                              />
+                            </TouchableOpacity>
+                          </View>
             <SearchablePicker
               items={customers}
               onSelect={setSelectedCustomer}
@@ -619,7 +637,25 @@ const CreateOrder = () => {
             )}
 
             <View style={{ marginTop: 10 }}>
-              <Text style={styles.sectionTitle}>Item</Text>
+              <View
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                marginHorizontal: 10,
+                                alignItems: 'center',
+                              }}
+                            >
+                              <Text style={styles.sectionTitle}>Item</Text>
+                              <TouchableOpacity onPress={() => router.push('/(user)/add-item')}>
+                                <Ionicons
+                                  name='add-circle'
+                                  size={28}
+                                  color='#000'
+                                  style={{ marginRight: 10 }}
+                                />
+                              </TouchableOpacity>
+                            </View>
               <TouchableOpacity style={{ backgroundColor: "#000", borderRadius: 10, padding: 10, display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", }} onPress={handleAddItem}>
                 <Text style={{ color: "white", fontSize: 15, fontWeight: "500" }}>Add Item</Text>
                 <Ionicons name="add-circle" size={24} color="#FFF" style={{ marginLeft: 5 }} />

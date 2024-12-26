@@ -252,7 +252,6 @@ const Dashboard = () => {
               icon='return-up-back-outline'
               onPress={() => router.push('/(user)/create-sales-return')}
             />
-
           </CollapsibleSection>
 
           <CollapsibleSection title='Purchase'>
@@ -265,6 +264,18 @@ const Dashboard = () => {
               title='Purchase Return'
               icon='return-down-back-outline'
               onPress={() => router.push('/(user)/create-purchase-return')}
+            />
+          </CollapsibleSection>
+          <CollapsibleSection title='Customer'>
+            <ActionButton
+              title='Add Customer'
+              icon='person-add-outline'
+              onPress={() => router.push('/(user)')}
+            />
+            <ActionButton
+              title='Add Items'
+              icon='list-outline'
+              onPress={() => router.push('/')}
             />
           </CollapsibleSection>
 
@@ -305,7 +316,7 @@ const Dashboard = () => {
               }}
             >
               <Text style={styles.periodText}>{selectedPeriod}</Text>
-              <TouchableOpacity onPress={() => { }}>
+              <TouchableOpacity onPress={() => {}}>
                 <Text style={styles.viewBills}>View Bills</Text>
               </TouchableOpacity>
             </View>
@@ -366,7 +377,7 @@ const Dashboard = () => {
                   <Text style={styles.centerLabelAmount}>
                     {formatCurrency(
                       salesVsPurchases.totalSales +
-                      salesVsPurchases.totalPurchases
+                        salesVsPurchases.totalPurchases
                     )}
                   </Text>
                 </View>
@@ -432,25 +443,25 @@ const Dashboard = () => {
             <QuickAction
               title='E-Invoice'
               icon='receipt-outline'
-              onPress={() => { }}
+              onPress={() => {}}
               color={COLORS.primary}
             />
             <QuickAction
               title='Print Preview'
               icon='print-outline'
-              onPress={() => { }}
+              onPress={() => {}}
               color={COLORS.primary}
             />
             <QuickAction
               title='E-way Bill'
               icon='car-outline'
-              onPress={() => { }}
+              onPress={() => {}}
               color={COLORS.primary}
             />
             <QuickAction
               title='Export Data'
               icon='download-outline'
-              onPress={() => { }}
+              onPress={() => {}}
               color={COLORS.primary}
             />
           </View>
