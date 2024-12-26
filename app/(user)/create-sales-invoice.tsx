@@ -1541,6 +1541,19 @@ MUMBAI 400066 </div>
                     />
                   </View>
 
+                  <View style={styles.detailSection}>
+                                                          <Text style={styles.itemDetailLabel}>Notes</Text>
+                                                          <TextInput
+                                                              style={styles.notesInput}
+                                                              value={itemNotes}
+                                                              onChangeText={setItemNotes}
+                                                              placeholder="Add notes"
+                                                              placeholderTextColor="#888888"
+                                                              multiline
+                                                              numberOfLines={3}
+                                                          />
+                                                      </View>
+
                   <View style={styles.totalSection}>
                     <Text style={styles.totalLabel}>Item Total</Text>
                     <Text style={styles.totalValue}>
