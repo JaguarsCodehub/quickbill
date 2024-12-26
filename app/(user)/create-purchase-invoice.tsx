@@ -633,6 +633,17 @@ const CreatePurchaseInvoice = () => {
             Alert.alert('Error', `Failed to create purchase invoice. ${error.message}`);
         } finally {
             setIsSubmitting(false);
+            // Reset all fields
+            setSelectedItem(null);
+            setQuantity('1');
+            setRate('');
+            setValue('');
+            setDiscountPercentage('0');
+            setDiscountAmount('0');
+            setItemNotes('');
+            setCustomers([])
+            setItems([])
+            setOrderItems([])
         }
     };
 
@@ -1117,24 +1128,24 @@ MUMBAI 400066 </div>
 
                     <View style={styles.card}>
                         <View
-                                        style={{
-                                          display: 'flex',
-                                          flexDirection: 'row',
-                                          justifyContent: 'space-between',
-                                          marginHorizontal: 10,
-                                          alignItems: 'center',
-                                        }}
-                                      >
-                                        <Text style={styles.sectionTitle}>Customer</Text>
-                                        <TouchableOpacity onPress={() => router.push('/(user)')}>
-                                          <Ionicons
-                                            name='add-circle'
-                                            size={28}
-                                            color='#000'
-                                            style={{ marginRight: 10 }}
-                                          />
-                                        </TouchableOpacity>
-                                      </View>
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                marginHorizontal: 10,
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Text style={styles.sectionTitle}>Customer</Text>
+                            <TouchableOpacity onPress={() => router.push('/(user)')}>
+                                <Ionicons
+                                    name='add-circle'
+                                    size={28}
+                                    color='#000'
+                                    style={{ marginRight: 10 }}
+                                />
+                            </TouchableOpacity>
+                        </View>
                         <SearchablePicker
                             items={customers}
                             onSelect={handleCustomerSelect}
@@ -1153,24 +1164,24 @@ MUMBAI 400066 </div>
 
                         <View style={{ marginTop: 10 }}>
                             <View
-                                            style={{
-                                              display: 'flex',
-                                              flexDirection: 'row',
-                                              justifyContent: 'space-between',
-                                              marginHorizontal: 10,
-                                              alignItems: 'center',
-                                            }}
-                                          >
-                                            <Text style={styles.sectionTitle}>Item</Text>
-                                            <TouchableOpacity onPress={() => router.push('/(user)/add-item')}>
-                                              <Ionicons
-                                                name='add-circle'
-                                                size={28}
-                                                color='#000'
-                                                style={{ marginRight: 10 }}
-                                              />
-                                            </TouchableOpacity>
-                                          </View>
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    marginHorizontal: 10,
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Text style={styles.sectionTitle}>Item</Text>
+                                <TouchableOpacity onPress={() => router.push('/(user)/add-item')}>
+                                    <Ionicons
+                                        name='add-circle'
+                                        size={28}
+                                        color='#000'
+                                        style={{ marginRight: 10 }}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                             <TouchableOpacity style={{ backgroundColor: "#000", borderRadius: 10, padding: 10, display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", }} onPress={handleAddItem}>
                                 <Text style={{ color: "white", fontSize: 15, fontWeight: "500" }}>Add Item</Text>
                                 <Ionicons name="add-circle" size={24} color="#FFF" style={{ marginLeft: 5 }} />

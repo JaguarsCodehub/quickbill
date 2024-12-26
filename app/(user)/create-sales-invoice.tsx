@@ -633,6 +633,17 @@ const CreateSalesInvoice = () => {
       Alert.alert('Error', `Failed to create invoice. ${error.message}`);
     } finally {
       setIsSubmitting(false);
+      // Reset all fields
+      setSelectedItem(null);
+      setQuantity('1');
+      setRate('');
+      setValue('');
+      setDiscountPercentage('0');
+      setDiscountAmount('0');
+      setItemNotes('');
+      setCustomers([])
+      setItems([])
+      setOrderItems([])
     }
   };
 
@@ -1272,24 +1283,24 @@ MUMBAI 400066 </div>
 
                       {(item.discountPercentage > 0 ||
                         item.discountAmount > 0) && (
-                        <View style={styles.discountRow}>
-                          <View style={styles.detailCol}>
-                            <Text style={styles.detailLabel}>Discount</Text>
-                            <Text style={styles.discountValue}>
-                              {item.discountPercentage}% (₹
-                              {item.discountAmount.toFixed(2)})
-                            </Text>
+                          <View style={styles.discountRow}>
+                            <View style={styles.detailCol}>
+                              <Text style={styles.detailLabel}>Discount</Text>
+                              <Text style={styles.discountValue}>
+                                {item.discountPercentage}% (₹
+                                {item.discountAmount.toFixed(2)})
+                              </Text>
+                            </View>
+                            <View style={styles.detailCol}>
+                              <Text style={styles.detailLabel}>
+                                After Discount
+                              </Text>
+                              <Text style={styles.detailValue}>
+                                ₹{item.Taxable.toFixed(2)}
+                              </Text>
+                            </View>
                           </View>
-                          <View style={styles.detailCol}>
-                            <Text style={styles.detailLabel}>
-                              After Discount
-                            </Text>
-                            <Text style={styles.detailValue}>
-                              ₹{item.Taxable.toFixed(2)}
-                            </Text>
-                          </View>
-                        </View>
-                      )}
+                        )}
 
                       <View style={styles.taxRow}>
                         <View style={styles.detailCol}>
@@ -1532,9 +1543,9 @@ MUMBAI 400066 </div>
                         setSelectedItem((prevItem) =>
                           prevItem
                             ? {
-                                ...prevItem,
-                                GSTTaxCode: value,
-                              }
+                              ...prevItem,
+                              GSTTaxCode: value,
+                            }
                             : null
                         );
                       }}
@@ -1542,17 +1553,17 @@ MUMBAI 400066 </div>
                   </View>
 
                   <View style={styles.detailSection}>
-                                                          <Text style={styles.itemDetailLabel}>Notes</Text>
-                                                          <TextInput
-                                                              style={styles.notesInput}
-                                                              value={itemNotes}
-                                                              onChangeText={setItemNotes}
-                                                              placeholder="Add notes"
-                                                              placeholderTextColor="#888888"
-                                                              multiline
-                                                              numberOfLines={3}
-                                                          />
-                                                      </View>
+                    <Text style={styles.itemDetailLabel}>Notes</Text>
+                    <TextInput
+                      style={styles.notesInput}
+                      value={itemNotes}
+                      onChangeText={setItemNotes}
+                      placeholder="Add notes"
+                      placeholderTextColor="#888888"
+                      multiline
+                      numberOfLines={3}
+                    />
+                  </View>
 
                   <View style={styles.totalSection}>
                     <Text style={styles.totalLabel}>Item Total</Text>

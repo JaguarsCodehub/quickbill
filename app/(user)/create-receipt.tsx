@@ -522,6 +522,15 @@ const CreateReceipt = () => {
             }
         } finally {
             setIsSubmitting(false);
+            // Reset all fields
+            setSelectedParty(null);
+            setSelectedAccount(null);
+            setAdjustedBills([]);
+            setBills([]);
+            setAmount('');
+            setChequeDate(new Date());
+            setRefNo('');
+            setModeType(null);
         }
     };
 

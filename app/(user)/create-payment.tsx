@@ -172,6 +172,7 @@ const CreatePayment = () => {
         setChequeDate(new Date());
         setRefNo('');
         setModeType(null);
+
       }
 
     } catch (error) {
