@@ -311,9 +311,9 @@ const CreateSalesInvoice = () => {
       setItems(response.data.items);
       setNextSerial(response.data.nextSerial);
       const gstTaxCode = response.data.items.map((item: any) => item.GSTTaxCode);
-      // console.log("GST Tax Code:", gstTaxCode)
+      console.log("GST Tax Code:", gstTaxCode)
       setGstTaxCode(gstTaxCode);
-      // console.log("Response:", response.data.items)
+      console.log("Response:", response.data)
     } catch (error) {
       console.error('Error fetching items:', error);
       throw error;
