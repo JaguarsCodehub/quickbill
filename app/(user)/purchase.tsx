@@ -8,7 +8,6 @@ import { Icon } from 'lucide-react-native';
 import GridBackground from '@/components/GridBackground';
 import RippleLoader from '@/components/RippleLoader';
 
-// Define TypeScript interfaces
 interface PurchaseData {
   PurchaseID: number;
   DocNo: string;
@@ -30,8 +29,6 @@ interface ChartData {
 interface PerformanceViewProps {
   purchaseData: PurchaseData[];
 }
-
-// First, add this interface for the modal state
 interface SelectedTransaction extends PurchaseData {
   // Add any additional fields you want to show in the modal
 }
@@ -41,12 +38,11 @@ const TransactionList: React.FC<{ transactions: PurchaseData[] }> = ({ transacti
   const [selectedTransaction, setSelectedTransaction] = React.useState<SelectedTransaction | null>(null);
   const [modalVisible, setModalVisible] = React.useState(false);
 
-  // Function to truncate PartyName
+
   const truncateName = (name: string, length: number) => {
     return name.length > length ? `${name.substring(0, length)}...` : name;
   };
 
-  // Get the transactions to display
   const displayedTransactions = showAll ? transactions : transactions.slice(0, 5);
 
   const handleTransactionPress = (transaction: PurchaseData) => {

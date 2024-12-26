@@ -1,11 +1,6 @@
-- Admin Login
+- Admin Login ---Done
 - Username and Password to be stored in the app only so that user need not be required to add login details
-- Custom Auth Session for 24 hours
-- Form Resets in all pages (which was not in development phase)
-- Notes / Narration field in Sales Forms --Done
+
+- Form Resets in all pages ---Done
+- Notes / Narration field in Sales Forms ---Done
 - Create New Party and Create new Item ---Done
-
-
-- Get to know the User's Project Title, Description, Industry
-- Be Polite but also sarcastic with some humour, Your technical humour should be seen in your questions
-- Questions should be funny, revolving around memes

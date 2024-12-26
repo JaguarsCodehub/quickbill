@@ -28,6 +28,7 @@ const UserForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ userId?: string; password?: string }>({});
+  const [role, setRole] = useState<string>('')
 
   const handleYearChange = async (selectedYear: string) => {
     setYear(selectedYear);
@@ -67,37 +68,43 @@ const UserForm: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(
-        `https://quickbill-backlend.vercel.app/login`,
-        { username, password }
-      );
+      // Dynamically determine the endpoint based on the selected role
+      const endpoint =
+        role === "Admin"
+          ? "https://quickbill-backlend.vercel.app/admin-login"
+          : "https://quickbill-backlend.vercel.app/login";
+
+      console.log("Role:", role)
+
+      const response = await axios.post(endpoint, { username, password });
 
       setLoading(false);
       if (response.status === 200) {
         const { CompanyID, CompanyName, Tag5, UserID } = response.data;
         await AsyncStorage.multiSet([
-          ['CompanyID', CompanyID.toString()],
-          ['CompanyName', CompanyName],
-          ['Tag5', Tag5],
-          ['UserID', UserID.toString()],
-          ['SelectedYear', year],
+          ["CompanyID", CompanyID.toString()],
+          ["CompanyName", CompanyName],
+          ["Tag5", Tag5],
+          ["UserID", UserID.toString()],
+          ["SelectedYear", year],
         ]);
-        console.log('Data was added to AsyncStorage');
-        console.log('Selected Year:', year);
-        // showToastWithGravityAndOffset('Welcome !');
-        setUsername('');
-        setPassword('');
-        Alert.alert('Login Successful', `Welcome, ${response.data.Tag1}`);
+        console.log("Data was added to AsyncStorage");
+        console.log("Selected Year:", year);
 
-        router.push('/(user)/dashboard' as never);
+        setUsername("");
+        setPassword("");
+        Alert.alert("Login Successful", `Welcome, ${response.data.Tag1}`);
+
+        router.push('/(user)/dashboard');
       } else {
-        throw new Error(response.data.msg || 'Login failed');
+        throw new Error(response.data.msg || "Login failed");
       }
     } catch (error) {
       setLoading(false);
-      Alert.alert('Login Failed', 'An unexpected error occurred. Please try again.');
+      Alert.alert("Login Failed", "An unexpected error occurred. Please try again.");
     }
   };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -153,6 +160,29 @@ const UserForm: React.FC = () => {
             {errors.password && (
               <Text style={styles.errorText}>{errors.password}</Text>
             )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Select Role</Text>
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={role}
+                onValueChange={setRole}
+                style={styles.picker}
+              >
+                {/* <Picker.Item label='Select your ' value='' style={{ fontFamily: 'MontserratRegular' }} /> */}
+                <Picker.Item
+                  label='Admin'
+                  value='Admin'
+                  style={{ fontFamily: 'MontserratRegular' }}
+                />
+                <Picker.Item
+                  label='User'
+                  value='User'
+                  style={{ fontFamily: 'MontserratRegular' }}
+                />
+              </Picker>
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
