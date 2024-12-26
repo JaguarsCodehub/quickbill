@@ -1,6 +1,12 @@
 - Admin Login ---Done
+- Select Role PickerItem
 - Username and Password to be stored in the app only so that user need not be required to add login details
 
 - Form Resets in all pages ---Done
 - Notes / Narration field in Sales Forms ---Done
 - Create New Party and Create new Item ---Done
+
+Sale report
+Purchase report
+Ledger report
+Stock report
