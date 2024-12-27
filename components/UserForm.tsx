@@ -41,7 +41,7 @@ const UserForm: React.FC = () => {
 
   const validate = () => {
     let valid = true;
-    const newErrors: { userId?: string; password?: string } = {};
+    const newErrors: { userId?: string; password?: string; role?: string } = {};
 
     if (!username) {
       newErrors.userId = 'User ID is required';
@@ -57,6 +57,14 @@ const UserForm: React.FC = () => {
     } else if (password.length < 3) {
       newErrors.password = 'Password must be at least 3 characters long';
       valid = false;
+    }
+
+    if (!role) {
+      newErrors.role = 'Role is Required'
+      valid = false
+    } else if (role === '') {
+      newErrors.role = 'Please select A role first'
+      valid = false
     }
 
     setErrors(newErrors);
@@ -170,7 +178,7 @@ const UserForm: React.FC = () => {
                 onValueChange={setRole}
                 style={styles.picker}
               >
-                {/* <Picker.Item label='Select your ' value='' style={{ fontFamily: 'MontserratRegular' }} /> */}
+                <Picker.Item label='Select your ' value='' style={{ fontFamily: 'MontserratRegular' }} />
                 <Picker.Item
                   label='Admin'
                   value='Admin'
