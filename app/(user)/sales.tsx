@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { View, ScrollView, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,6 +7,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { Icon } from 'lucide-react-native';
 import GridBackground from '@/components/GridBackground';
 import RippleLoader from '@/components/RippleLoader';
+import WebView from "react-native-webview";
+import * as Print from "expo-print";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import axios from 'axios';
 
 // Define TypeScript interfaces
 interface SalesData {
@@ -17,6 +22,7 @@ interface SalesData {
     NetAmt: number;
     TaxAmt: number;
     PartyName: string;
+    PartyCode: string;
     Status?: 'Completed' | 'Pending';
 }
 
@@ -40,6 +46,7 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
     const [showAll, setShowAll] = React.useState(false);
     const [selectedTransaction, setSelectedTransaction] = React.useState<SelectedTransaction | null>(null);
     const [modalVisible, setModalVisible] = React.useState(false);
+    const [invoiceData, setInvoiceData] = useState<any>(null);
 
     // Function to truncate PartyName
     const truncateName = (name: string, length: number) => {
@@ -49,13 +56,106 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
     // Get the transactions to display
     const displayedTransactions = showAll ? transactions : transactions.slice(0, 5);
 
-    const handleTransactionPress = (transaction: SalesData) => {
+    const handleTransactionPress = async (transaction: SalesData) => {
+
+        try {
+
+            const userId = await AsyncStorage.getItem('UserID');
+            const prefix = await AsyncStorage.getItem('SelectedYear');
+            // Make the API call to the /sales-invoice endpoint
+            const response = await axios.get('http://192.168.1.9:3000/api/sales-invoice', {
+                headers: {
+                    UserID: userId, // Pass UserID
+                    DocNo: transaction.DocNo,
+                    SRL: transaction.DocNo, // Replace with actual value
+                    Type: 'SAL', // Replace with actual value
+                    Prefix: prefix, // Replace with actual value
+                    PartyCode: transaction.PartyCode, // Replace with actual value
+                },
+            });
+            setInvoiceData(response.data[0]); // Set the fetched invoice data
+            // console.log("Sales Invoice Data:", response.data)
+
+        } catch (error) {
+            console.error('Error fetching invoice data:', error);
+        }
+
         setSelectedTransaction(transaction);
         setModalVisible(true);
     };
 
+    console.log("Invoice Data from state:", invoiceData)
+
     const TransactionDetailsModal = () => {
+
+        const webViewRef = useRef(null);
         const isCompleted = selectedTransaction?.Status === 'Completed';
+        const generateHTMLContent = () => {
+            return `
+              <html>
+                <head>
+                  <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1 { text-align: center; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                    th { background-color: #f4f4f4; }
+                    .header { text-align: center; margin-bottom: 20px; }
+                    .total { text-align: right; font-weight: bold; margin-top: 20px; }
+                  </style>
+                </head>
+                <body>
+                  <div class="header">
+                    <h1>RAVIVA INFOTECH PVT LTD</h1>
+                    <p>SHOP NO.16, SAI VIHAR CHWAL, DEVIPADA MAIN ROAD, MUMBAI 400066</p>
+                    <p>Mobile: 7045599660, Email: ravivainfotech@gmail.com</p>
+                  </div>
+                  <h2>Invoice Details</h2>
+                  <p><strong>Invoice No:</strong> ${selectedTransaction?.DocNo}</p>
+                  <p><strong>Invoice Date:</strong> ${selectedTransaction?.DocDate}</p>
+                  <p><strong>Party Name:</strong> ${selectedTransaction?.PartyName}</p>
+                  <p><strong>Party Name:</strong> ${invoiceData?.ItemName}</p>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Sr No</th>
+                        <th>Name</th>
+                        <th>HSN</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                  </table>
+                  <p class="total">Total Amount: ₹${selectedTransaction?.BillAmt.toFixed(2)}</p>
+                </body>
+              </html>
+            `;
+        };
+
+        const printPDF = async () => {
+            try {
+
+
+
+                const htmlContent = generateHTMLContent();
+
+                // Generate the PDF using expo-print
+                const { uri } = await Print.printToFileAsync({ html: htmlContent });
+
+                // Save to FileSystem and Share
+                const pdfUri = `${FileSystem.documentDirectory}invoice.pdf`;
+                await FileSystem.moveAsync({ from: uri, to: pdfUri });
+
+                if (await Sharing.isAvailableAsync()) {
+                    await Sharing.shareAsync(pdfUri);
+                } else {
+                    console.log("Sharing is not available on this device");
+                }
+            } catch (error) {
+                console.error("Error generating PDF:", error);
+            }
+        };
 
         return (
             <Modal
@@ -130,6 +230,10 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
                                 value={selectedTransaction?.PartyName || '-'}
                             />
                             <InfoRow
+                                label='Item Name'
+                                value={invoiceData?.ItemName || '-'}
+                            />
+                            <InfoRow
                                 label='Document No'
                                 value={selectedTransaction?.DocNo || '-'}
                             />
@@ -175,9 +279,7 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.modalActionBtn, styles.primaryButton]}
-                                onPress={() => {
-                                    /* Handle print */
-                                }}
+                                onPress={printPDF}
                             >
                                 <Ionicons
                                     name='print-outline'
@@ -186,6 +288,12 @@ const TransactionList: React.FC<{ transactions: SalesData[] }> = ({ transactions
                                     style={styles.buttonIcon}
                                 />
                                 <Text style={styles.primaryButtonText}>Print Invoice</Text>
+                                <WebView
+                                    ref={webViewRef}
+                                    originWhitelist={["*"]}
+                                    source={{ html: generateHTMLContent() }}
+                                    style={{ display: "none" }} // Hide WebView
+                                />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -414,6 +522,7 @@ export default function SalesScreen() {
             }
 
             const data: SalesData[] = await response.json();
+            // console.log("All Data:", data)
             const totalAmount = data.reduce((sum, invoice) => sum + (invoice.BillAmt || 0), 0);
 
             setSalesData({
@@ -477,64 +586,11 @@ export default function SalesScreen() {
                         Check your sales performance and manage your sales with
                         ease.
                     </Text>
-                    {/* <TouchableOpacity style={{
-                        width: 40,
-                        height: 40,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginHorizontal: 8,
-                        borderRadius: 20,
-                        backgroundColor: '#000',
-                    }}>
-                        <Ionicons name="add" size={24} color={COLORS.background} />
-                    </TouchableOpacity> */}
+
                 </View>
             </View>
 
             <PerformanceView salesData={salesData.recentTransactions} />
-
-            {/* <View
-          style={{
-            margin: 10,
-            padding: 20,
-            backgroundColor: COLORS.surface,
-            borderRadius: 16,
-            elevation: 2,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-          }}
-        >
-          <View style={{ gap: 10 }}>
-            <Text style={{ fontSize: 20, fontWeight: '600' }}>New Invoice</Text>
-            <Text style={{ fontSize: 16, color: COLORS.textSecondary }}>
-              Create a new invoice for your customer.
-            </Text>
-            <View
-              style={{
-                backgroundColor: '#000',
-                padding: 12,
-                borderRadius: 8,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <Text
-                style={{
-                  color: '#fff',
-                  fontWeight: '600',
-                  textAlign: 'center',
-                  fontSize: 16,
-                }}
-              >
-                Create Invoice
-              </Text>
-              <Ionicons name='add' size={24} color='#fff' />
-            </View>
-          </View>
-        </View> */}
             <TransactionList transactions={salesData.recentTransactions} />
             <QuickActionsGrid />
         </ScrollView>
