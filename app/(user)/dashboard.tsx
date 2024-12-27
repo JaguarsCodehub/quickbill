@@ -316,7 +316,7 @@ const Dashboard = () => {
               }}
             >
               <Text style={styles.periodText}>{selectedPeriod}</Text>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => { }}>
                 <Text style={styles.viewBills}>View Bills</Text>
               </TouchableOpacity>
             </View>
@@ -377,7 +377,7 @@ const Dashboard = () => {
                   <Text style={styles.centerLabelAmount}>
                     {formatCurrency(
                       salesVsPurchases.totalSales +
-                        salesVsPurchases.totalPurchases
+                      salesVsPurchases.totalPurchases
                     )}
                   </Text>
                 </View>
@@ -441,27 +441,27 @@ const Dashboard = () => {
           <Text style={styles.quickActionsHeader}>Quick Actions</Text>
           <View style={styles.quickActionsList}>
             <QuickAction
-              title='E-Invoice'
+              title='Sales Report'
               icon='receipt-outline'
-              onPress={() => {}}
+              onPress={() => { }}
               color={COLORS.primary}
             />
             <QuickAction
-              title='Print Preview'
+              title='Purchase Report'
               icon='print-outline'
-              onPress={() => {}}
+              onPress={() => { }}
               color={COLORS.primary}
             />
             <QuickAction
-              title='E-way Bill'
+              title='Ledger Report'
               icon='car-outline'
-              onPress={() => {}}
+              onPress={() => { }}
               color={COLORS.primary}
             />
             <QuickAction
-              title='Export Data'
+              title='Stock Report'
               icon='download-outline'
-              onPress={() => {}}
+              onPress={() => { }}
               color={COLORS.primary}
             />
           </View>
