@@ -27,7 +27,7 @@ const UserForm: React.FC = () => {
   const [year, setYear] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ userId?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ userId?: string; password?: string; role?: string }>({});
   const [role, setRole] = useState<string>('')
 
   const handleYearChange = async (selectedYear: string) => {
@@ -109,7 +109,7 @@ const UserForm: React.FC = () => {
       }
     } catch (error) {
       setLoading(false);
-      Alert.alert("Login Failed", "An unexpected error occurred. Please try again.");
+      Alert.alert("Login Failed", "Authentication Error. Please check your credentials again.");
     }
   };
 
@@ -178,7 +178,7 @@ const UserForm: React.FC = () => {
                 onValueChange={setRole}
                 style={styles.picker}
               >
-                <Picker.Item label='Select your ' value='' style={{ fontFamily: 'MontserratRegular' }} />
+                <Picker.Item label='Select your Role' value='' style={{ fontFamily: 'MontserratRegular' }} />
                 <Picker.Item
                   label='Admin'
                   value='Admin'
@@ -190,7 +190,11 @@ const UserForm: React.FC = () => {
                   style={{ fontFamily: 'MontserratRegular' }}
                 />
               </Picker>
+
             </View>
+            {errors.role && (
+              <Text style={styles.errorText}>{errors.role}</Text>
+            )}
           </View>
 
           <View style={styles.inputGroup}>

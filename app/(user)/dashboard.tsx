@@ -151,8 +151,8 @@ const ActionButton = ({ title, icon, onPress }: { title: string; icon: string; o
 const Dashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('This Year');
   const [salesVsPurchases, setSalesVsPurchases] = useState({
-    totalSales: 0,
-    totalPurchases: 0
+    sales: 0,
+    purchases: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -202,8 +202,8 @@ const Dashboard = () => {
         });
         // Set default values in case of error
         setSalesVsPurchases({
-          totalSales: 0,
-          totalPurchases: 0
+          sales: 0,
+          purchases: 0
         });
       } finally {
         setLoading(false);
@@ -326,14 +326,14 @@ const Dashboard = () => {
             <View style={styles.statItem}>
               <Text style={styles.statLabel}>Sales</Text>
               <Text style={styles.statAmount}>
-                {formatCurrency(salesVsPurchases.totalSales)}
+                {formatCurrency(salesVsPurchases.sales)}
               </Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Text style={styles.statLabel}>Purchases</Text>
               <Text style={styles.statAmount}>
-                {formatCurrency(salesVsPurchases.totalPurchases)}
+                {formatCurrency(salesVsPurchases.purchases)}
               </Text>
             </View>
           </View>
@@ -342,22 +342,22 @@ const Dashboard = () => {
             <PieChart
               data={[
                 {
-                  value: salesVsPurchases.totalSales,
+                  value: salesVsPurchases.sales,
                   color: COLORS.primary,
                   text: `${(
-                    (salesVsPurchases.totalSales /
-                      (salesVsPurchases.totalSales +
-                        salesVsPurchases.totalPurchases)) *
+                    (salesVsPurchases.sales /
+                      (salesVsPurchases.sales +
+                        salesVsPurchases.purchases)) *
                     100
                   ).toFixed(0)}%`,
                 },
                 {
-                  value: salesVsPurchases.totalPurchases,
+                  value: salesVsPurchases.purchases,
                   color: COLORS.secondary,
                   text: `${(
-                    (salesVsPurchases.totalPurchases /
-                      (salesVsPurchases.totalSales +
-                        salesVsPurchases.totalPurchases)) *
+                    (salesVsPurchases.purchases /
+                      (salesVsPurchases.sales +
+                        salesVsPurchases.purchases)) *
                     100
                   ).toFixed(0)}%`,
                 },
@@ -376,8 +376,8 @@ const Dashboard = () => {
                   <Text style={styles.centerLabelText}>Total</Text>
                   <Text style={styles.centerLabelAmount}>
                     {formatCurrency(
-                      salesVsPurchases.totalSales +
-                      salesVsPurchases.totalPurchases
+                      salesVsPurchases.sales +
+                      salesVsPurchases.purchases
                     )}
                   </Text>
                 </View>
@@ -395,7 +395,7 @@ const Dashboard = () => {
                 />
                 <Text style={styles.legendText}>Sales</Text>
                 <Text style={styles.legendAmount}>
-                  {formatCurrency(salesVsPurchases.totalSales)}
+                  {formatCurrency(salesVsPurchases.sales)}
                 </Text>
               </View>
               <View style={styles.legendRow}>
@@ -407,7 +407,7 @@ const Dashboard = () => {
                 />
                 <Text style={styles.legendText}>Purchases</Text>
                 <Text style={styles.legendAmount}>
-                  {formatCurrency(salesVsPurchases.totalPurchases)}
+                  {formatCurrency(salesVsPurchases.purchases)}
                 </Text>
               </View>
             </View>

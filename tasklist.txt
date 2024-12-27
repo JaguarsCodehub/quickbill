@@ -1,7 +1,3 @@
 Tasks:
-
-- Select Role PickerItem
-Sale report
-Purchase report
-Ledger report
-Stock report
+ 
+- Add Print to Sales and Purchase
