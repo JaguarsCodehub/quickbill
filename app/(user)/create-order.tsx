@@ -204,6 +204,9 @@ const CreateOrder = () => {
   const [discountAmount, setDiscountAmount] = useState<string>('0');
   const [itemNotes, setItemNotes] = useState<string>('');
 
+
+  const [editedHSNCode, setEditedHSNCode] = useState<string>('');
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -532,6 +535,7 @@ const CreateOrder = () => {
   const handleItemSelect = (item: Item) => {
     setSelectedItem(item);
     setRate(item.SalRate.toString());
+    setEditedHSNCode(item.HSNCode || '');
     setIsItemSelectModalVisible(false);
     setIsItemDetailsModalVisible(true); // Open item details modal
   };
@@ -541,6 +545,7 @@ const CreateOrder = () => {
 
     const newItem: OrderItem = {
       ...selectedItem,
+      HSNCode: editedHSNCode,
       Qty: parseFloat(quantity),
       Rate: parseFloat(rate),
       Value: parseFloat(value),
@@ -559,6 +564,17 @@ const CreateOrder = () => {
 
     setOrderItems([...orderItems, newItem]);
     setIsItemDetailsModalVisible(false);
+    setCustomers([])
+
+    // Reset all fields
+    setSelectedItem(null);
+    setQuantity('1');
+    setRate('');
+    setValue('');
+    setDiscountPercentage('0');
+    setDiscountAmount('0');
+    setItemNotes('');
+    setEditedHSNCode('');
 
 
   };
@@ -852,22 +868,12 @@ const CreateOrder = () => {
 
                   <View style={styles.detailSection}>
                     <Text style={styles.itemDetailLabel}>HSN Code</Text>
-                    <Text style={[styles.detailValue, styles.hsnCode]}>{selectedItem.HSNCode || 'N/A'}</Text>
-                  </View>
-                  <View style={styles.detailSection}>
-                    <Text style={styles.itemDetailLabel}>Stock</Text>
-                    <Text style={styles.stockValue}>0 Pcs</Text>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <Text style={styles.itemDetailLabel}>Rate</Text>
                     <TextInput
-                      style={styles.detailInput}
-                      value={rate}
-                      onChangeText={updateRate}
-                      keyboardType="numeric"
-                      placeholder="Enter rate"
-                      placeholderTextColor="#888888"
+                      style={[styles.detailInput, styles.hsnCode]}
+                      value={editedHSNCode}
+                      onChangeText={setEditedHSNCode}
+                      placeholder='Enter HSN Code'
+                      placeholderTextColor='#888888'
                     />
                   </View>
 
@@ -885,6 +891,20 @@ const CreateOrder = () => {
                       placeholderTextColor="#888888"
                     />
                   </View>
+
+                  <View style={styles.detailSection}>
+                    <Text style={styles.itemDetailLabel}>Rate</Text>
+                    <TextInput
+                      style={styles.detailInput}
+                      value={rate}
+                      onChangeText={updateRate}
+                      keyboardType="numeric"
+                      placeholder="Enter rate"
+                      placeholderTextColor="#888888"
+                    />
+                  </View>
+
+
 
                   <View style={styles.detailSection}>
                     <Text style={styles.itemDetailLabel}>Discount</Text>
