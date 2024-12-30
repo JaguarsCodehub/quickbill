@@ -172,7 +172,7 @@ const SearchablePicker = ({
                 setShowDropdown(false);
               }}
             >
-              <Text style={styles.dropdownItemText}>{item[labelKey]} - {item[valueKey]}</Text>
+              <Text style={styles.dropdownItemText}>{item[labelKey]}</Text>
             </TouchableOpacity>
           )}
           style={styles.dropdown}
